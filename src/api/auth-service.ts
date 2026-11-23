@@ -531,7 +531,6 @@ export async function listOrganizations(params: {
 export async function createOrganization(input: {
   name: string;
   slug: string;
-  plan: "Free" | "Pro" | "Enterprise";
   ssoEnabled: boolean;
 }): Promise<OrganizationRecord> {
   assertFeatureEnabled("organization");
@@ -551,7 +550,6 @@ export async function createOrganization(input: {
     id: `org_${Date.now().toString(36)}`,
     name: input.name,
     slug: input.slug,
-    plan: input.plan,
     ssoEnabled: input.ssoEnabled,
     memberCount: 1,
     teamCount: 1,
@@ -591,7 +589,7 @@ export async function createOrganization(input: {
     target: `org/${created.slug}`,
     ipAddress: "127.0.0.1",
     userAgent: navigator.userAgent,
-    metadata: { plan: created.plan },
+    metadata: { ssoEnabled: created.ssoEnabled },
   });
   return created;
 }
@@ -651,7 +649,7 @@ export async function inviteOrganizationMember(input: {
 export async function updateOrganization(
   organizationId: string,
   patch: Partial<
-    Pick<OrganizationRecord, "name" | "slug" | "plan" | "ssoEnabled">
+    Pick<OrganizationRecord, "name" | "slug" | "ssoEnabled">
   >,
 ): Promise<OrganizationRecord> {
   assertFeatureEnabled("organization");
@@ -1097,6 +1095,10 @@ export async function createOAuthClient(input: {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
+  const plainClientSecret =
+    input.type === "oidc-public"
+      ? undefined
+      : `ocs_${Math.random().toString(36).slice(2, 14)}${Math.random().toString(36).slice(2, 14)}`;
   const created: OAuthClientRecord = {
     id: `oa_${Date.now().toString(36)}`,
     clientId: `${slug}_${Math.random().toString(36).slice(2, 8)}`,
@@ -1109,7 +1111,7 @@ export async function createOAuthClient(input: {
     createdAt: new Date().toISOString(),
   };
   writeMockDb({ ...db, oauthClients: [created, ...db.oauthClients] });
-  return created;
+  return plainClientSecret ? { ...created, plainClientSecret } : created;
 }
 
 export async function listSsoProviders(): Promise<SsoProviderRecord[]> {

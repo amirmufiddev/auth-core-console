@@ -18,13 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
@@ -46,7 +39,6 @@ export function CreateOrganizationDialog({
     defaultValues: {
       name: "",
       slug: "",
-      plan: "Pro",
       ssoEnabled: false,
     },
   });
@@ -110,26 +102,6 @@ export function CreateOrganizationDialog({
                 {form.formState.errors.slug.message}
               </p>
             )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>Plan</Label>
-            <Controller
-              control={form.control}
-              name="plan"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Free">Free</SelectItem>
-                    <SelectItem value="Pro">Pro</SelectItem>
-                    <SelectItem value="Enterprise">Enterprise</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
           </div>
 
           <div className="flex items-center justify-between rounded-lg border border-border p-3">

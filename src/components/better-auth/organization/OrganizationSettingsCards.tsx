@@ -27,13 +27,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
@@ -43,7 +36,6 @@ const updateOrgSchema = z.object({
     .string()
     .min(2, "Slug minimal 2 karakter")
     .regex(/^[a-z0-9-]+$/, "Gunakan huruf kecil, angka, dan tanda hubung"),
-  plan: z.enum(["Free", "Pro", "Enterprise"]),
   ssoEnabled: z.boolean(),
 });
 
@@ -64,7 +56,6 @@ export function OrganizationSettingsCards({
     values: {
       name: organization.name,
       slug: organization.slug,
-      plan: organization.plan,
       ssoEnabled: organization.ssoEnabled,
     },
   });
@@ -103,7 +94,7 @@ export function OrganizationSettingsCards({
             Profil & Kebijakan Tenant
           </CardTitle>
           <CardDescription>
-            Perbarui identitas organisasi, paket, dan penegakan SSO.
+            Perbarui identitas organisasi dan penegakan SSO.
           </CardDescription>
         </CardHeader>
         <form
@@ -114,30 +105,9 @@ export function OrganizationSettingsCards({
               <Label htmlFor="ba-org-edit-name">Nama Organisasi</Label>
               <Input id="ba-org-edit-name" {...form.register("name")} />
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="ba-org-edit-slug">Slug</Label>
-                <Input id="ba-org-edit-slug" {...form.register("slug")} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Plan</Label>
-                <Controller
-                  control={form.control}
-                  name="plan"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Free">Free</SelectItem>
-                        <SelectItem value="Pro">Pro</SelectItem>
-                        <SelectItem value="Enterprise">Enterprise</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="ba-org-edit-slug">Slug</Label>
+              <Input id="ba-org-edit-slug" {...form.register("slug")} />
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <Label htmlFor="ba-org-edit-sso">Enforce SAML/OIDC SSO</Label>

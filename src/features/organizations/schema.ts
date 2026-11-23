@@ -12,7 +12,6 @@ export const createOrgSchema = z.object({
     .string()
     .min(2, "Slug minimal 2 karakter")
     .regex(/^[a-z0-9-]+$/, "Gunakan huruf kecil, angka, dan tanda hubung"),
-  plan: z.enum(["Free", "Pro", "Enterprise"]),
   ssoEnabled: z.boolean(),
 });
 

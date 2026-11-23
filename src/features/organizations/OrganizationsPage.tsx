@@ -96,24 +96,6 @@ export function OrganizationsPage({
       ),
     },
     {
-      accessorKey: "plan",
-      header: "Plan",
-      cell: ({ row }) => (
-        <Badge
-          color={
-            row.original.plan === "Enterprise"
-              ? "default"
-              : row.original.plan === "Pro"
-                ? "info"
-                : "secondary"
-          }
-          variant="soft"
-        >
-          {row.original.plan}
-        </Badge>
-      ),
-    },
-    {
       accessorKey: "memberCount",
       header: "Members & Teams",
       cell: ({ row }) => (
@@ -263,8 +245,7 @@ export function OrganizationsPage({
                       Slug:{" "}
                       <span className="font-medium text-foreground">
                         {selectedOrg.slug}
-                      </span>{" "}
-                      · Plan {selectedOrg.plan}
+                      </span>
                     </SheetDescription>
                   </div>
                 </div>

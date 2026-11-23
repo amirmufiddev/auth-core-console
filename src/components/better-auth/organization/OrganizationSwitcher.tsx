@@ -8,7 +8,6 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
 import { CreateOrganizationDialog } from "@/components/better-auth/organization/CreateOrganizationDialog";
 import { OrganizationLogo } from "@/components/better-auth/organization/OrganizationLogo";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -116,13 +115,6 @@ export function OrganizationSwitcher({
                 <span className="truncate text-xs font-medium">{org.name}</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <Badge
-                  color="secondary"
-                  variant="soft"
-                  className="px-1.5 py-0 text-[10px]"
-                >
-                  {org.plan}
-                </Badge>
                 {activeOrgId === org.id && (
                   <Check className="h-3.5 w-3.5 text-primary" />
                 )}

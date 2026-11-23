@@ -98,7 +98,11 @@ export function ApiKeysPage({
   const isSsoEnabled = useAuthConfigStore((s) => s.isFeatureEnabled("sso"));
 
   const [createKeyOpen, setCreateKeyOpen] = useState(false);
-  const [revealedSecret, setRevealedSecret] = useState<string | null>(null);
+  const [revealedSecret, setRevealedSecret] = useState<{
+    title: string;
+    value: string;
+    toastLabel: string;
+  } | null>(null);
   const [createClientOpen, setCreateClientOpen] = useState(false);
   const [createSsoOpen, setCreateSsoOpen] = useState(false);
 
@@ -178,7 +182,11 @@ export function ApiKeysPage({
       void queryClient.invalidateQueries({ queryKey: ["api-keys"] });
       setCreateKeyOpen(false);
       keyForm.reset();
-      setRevealedSecret(res.plainSecret);
+      setRevealedSecret({
+        title: "Simpan API Key Anda Sekarang",
+        value: res.plainSecret,
+        toastLabel: "API Key disalin ke clipboard.",
+      });
       toast.success("API Key berhasil diterbitkan.");
     },
   });
@@ -208,10 +216,17 @@ export function ApiKeysPage({
         scopes: vals.scopesText.split(/\s+/).filter(Boolean),
         pkceRequired: vals.pkceRequired,
       }),
-    onSuccess: () => {
+    onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: ["oauth-clients"] });
       setCreateClientOpen(false);
       oauthForm.reset();
+      if (created.plainClientSecret) {
+        setRevealedSecret({
+          title: "Simpan Client Secret Anda Sekarang",
+          value: created.plainClientSecret,
+          toastLabel: "Client Secret disalin ke clipboard.",
+        });
+      }
       toast.success("OAuth / MCP Client berhasil didaftarkan.");
     },
   });
@@ -718,7 +733,7 @@ export function ApiKeysPage({
         </DialogContent>
       </Dialog>
 
-      {/* Reveal One-time API Key Secret */}
+      {/* Reveal One-time API Key / OAuth Client Secret */}
       <Dialog
         open={Boolean(revealedSecret)}
         onOpenChange={(open) => !open && setRevealedSecret(null)}
@@ -727,16 +742,16 @@ export function ApiKeysPage({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-success" />
-              Simpan API Key Anda Sekarang
+              {revealedSecret?.title ?? "Simpan Secret Anda Sekarang"}
             </DialogTitle>
             <DialogDescription>
-              Demi keamanan, Auth Core hanya menyimpan hash dari key ini.
+              Demi keamanan, Auth Core hanya menyimpan hash dari secret ini.
             </DialogDescription>
           </DialogHeader>
           <Alert color="warning">
             <AlertTitle className="text-sm">Secret Sekali Tampil</AlertTitle>
             <AlertDescription className="mt-1 tabular-nums text-xs break-all">
-              {revealedSecret}
+              {revealedSecret?.value}
             </AlertDescription>
           </Alert>
           <DialogFooter>
@@ -745,8 +760,8 @@ export function ApiKeysPage({
               color="primary"
               onClick={async () => {
                 if (revealedSecret) {
-                  await navigator.clipboard.writeText(revealedSecret);
-                  toast.success("API Key disalin ke clipboard.");
+                  await navigator.clipboard.writeText(revealedSecret.value);
+                  toast.success(revealedSecret.toastLabel);
                 }
                 setRevealedSecret(null);
               }}

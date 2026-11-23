@@ -65,7 +65,6 @@ export interface OrganizationRecord {
   id: string;
   name: string;
   slug: string;
-  plan: "Free" | "Pro" | "Enterprise";
   ssoEnabled: boolean;
   memberCount: number;
   teamCount: number;
@@ -101,6 +100,7 @@ export interface OAuthClientRecord {
   pkceRequired: boolean;
   active: boolean;
   createdAt: string;
+  plainClientSecret?: string;
 }
 
 export interface SsoProviderRecord {
@@ -794,7 +794,6 @@ function buildInitialOrganizations(): OrganizationRecord[] {
       id: "org_01",
       name: "Auth Core HQ",
       slug: "authcore-hq",
-      plan: "Enterprise",
       ssoEnabled: true,
       memberCount: 7,
       teamCount: 3,
@@ -871,7 +870,6 @@ function buildInitialOrganizations(): OrganizationRecord[] {
       id: "org_02",
       name: "Galonin Logistics",
       slug: "galonin-logistics",
-      plan: "Pro",
       ssoEnabled: true,
       memberCount: 7,
       teamCount: 2,
@@ -933,7 +931,6 @@ function buildInitialOrganizations(): OrganizationRecord[] {
       id: "org_03",
       name: "Nusantara Cloud",
       slug: "nusantara-cloud",
-      plan: "Enterprise",
       ssoEnabled: true,
       memberCount: 7,
       teamCount: 2,
@@ -978,7 +975,6 @@ function buildInitialOrganizations(): OrganizationRecord[] {
       id: "org_04",
       name: "Karsa FinTech",
       slug: "karsa-fintech",
-      plan: "Pro",
       ssoEnabled: false,
       memberCount: 7,
       teamCount: 2,
