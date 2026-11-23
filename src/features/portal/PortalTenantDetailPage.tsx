@@ -140,6 +140,18 @@ export function PortalTenantDetailPage({
     enabled: activeTab === "oauth-clients",
   });
 
+  const oauthQuotaQuery = useQuery({
+    queryKey: ["portal-tenant-oauth-quota", tenantId],
+    queryFn: () =>
+      listTenantOAuthClients(tenantId, {
+        page: 0,
+        pageSize: 1,
+      }),
+    enabled:
+      activeTab === "oauth-clients" &&
+      tenantQuery.data?.tierId === FREE_TIER_ID,
+  });
+
   const billingQuery = useQuery({
     queryKey: ["portal-tenant-billing", tenantId, billingPaging],
     queryFn: () =>
@@ -206,6 +218,9 @@ export function PortalTenantDetailPage({
       void queryClient.invalidateQueries({
         queryKey: ["portal-tenant-oauth", tenantId],
       });
+      void queryClient.invalidateQueries({
+        queryKey: ["portal-tenant-oauth-quota", tenantId],
+      });
       setCreateClientOpen(false);
       oauthForm.reset({
         name: "",
@@ -239,6 +254,9 @@ export function PortalTenantDetailPage({
       void queryClient.invalidateQueries({
         queryKey: ["portal-tenant-oauth", tenantId],
       });
+      void queryClient.invalidateQueries({
+        queryKey: ["portal-tenant-oauth-quota", tenantId],
+      });
       setDeleteClientTarget(null);
       toast.success("OAuth client berhasil dihapus.");
     },
@@ -263,8 +281,12 @@ export function PortalTenantDetailPage({
             <button
               type="button"
               onClick={async () => {
-                await navigator.clipboard.writeText(row.original.clientId);
-                toast.success("Client ID disalin.");
+                try {
+                  await navigator.clipboard.writeText(row.original.clientId);
+                  toast.success("Client ID disalin.");
+                } catch {
+                  toast.error("Gagal menyalin Client ID ke clipboard.");
+                }
               }}
               className="text-muted-foreground transition-colors hover:text-foreground"
               aria-label="Salin Client ID"
@@ -438,7 +460,11 @@ export function PortalTenantDetailPage({
   const tenant = tenantQuery.data;
   const isFreeTier = tenant.tierId === FREE_TIER_ID;
   const oauthTotal = oauthQuery.data?.total ?? 0;
-  const quotaReached = isFreeTier && oauthTotal >= FREE_TIER_MAX_OAUTH_CLIENTS;
+  const unfilteredOAuthTotal = isFreeTier
+    ? (oauthQuotaQuery.data?.total ?? (oauthPaging.search ? 0 : oauthTotal))
+    : oauthTotal;
+  const quotaReached =
+    isFreeTier && unfilteredOAuthTotal >= FREE_TIER_MAX_OAUTH_CLIENTS;
 
   return (
     <div className="space-y-6">
@@ -601,7 +627,7 @@ export function PortalTenantDetailPage({
               </AlertTitle>
               <AlertDescription className="text-xs">
                 Tier Free mengizinkan maksimal {FREE_TIER_MAX_OAUTH_CLIENTS}{" "}
-                OAuth client per tenant (saat ini: {oauthTotal}/
+                OAuth client per tenant (saat ini: {unfilteredOAuthTotal}/
                 {FREE_TIER_MAX_OAUTH_CLIENTS}). Hubungi operator untuk upgrade
                 ke Basic/Business jika membutuhkan multi-client.
               </AlertDescription>
@@ -924,12 +950,20 @@ export function PortalTenantDetailPage({
               color="primary"
               onClick={async () => {
                 if (revealedSecret) {
-                  await navigator.clipboard.writeText(
-                    revealedSecret.plainClientSecret,
-                  );
-                  toast.success("Client secret disalin ke clipboard.");
+                  try {
+                    await navigator.clipboard.writeText(
+                      revealedSecret.plainClientSecret,
+                    );
+                    toast.success("Client secret disalin ke clipboard.");
+                    setRevealedSecret(null);
+                  } catch {
+                    toast.error(
+                      "Gagal menyalin secret ke clipboard. Salin secret secara manual sebelum menutup.",
+                    );
+                  }
+                } else {
+                  setRevealedSecret(null);
                 }
-                setRevealedSecret(null);
               }}
             >
               <Copy className="mr-2 h-4 w-4" />

@@ -40,6 +40,7 @@ import {
   TenantStatusBadge,
   TenantTierBadge,
 } from "@/features/portal/TenantBadges";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -357,6 +358,15 @@ export function AdminTenantsPage({
           Buat Tenant
         </Button>
       </div>
+
+      {tenantsQuery.isError && (
+        <Alert color="destructive" variant="soft">
+          <AlertTitle className="text-sm">Gagal Memuat Daftar Tenant</AlertTitle>
+          <AlertDescription className="text-xs">
+            {(tenantsQuery.error as Error)?.message ?? "Gagal memuat data"}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>

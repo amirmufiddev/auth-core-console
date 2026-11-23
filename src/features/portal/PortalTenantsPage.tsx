@@ -11,7 +11,7 @@ import {
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
   type TenantRecord,
@@ -247,30 +247,24 @@ export function PortalTenantsPage({
             <Globe className="h-4 w-4 text-primary" />
             Daftar Tenant Milik Anda
           </CardTitle>
-          <Controller
-            control={form.control}
-            name="name"
-            render={() => (
-              <Select
-                value={searchParams.status}
-                onValueChange={(val) =>
-                  onUpdateSearch({
-                    status: val as PortalTenantsSearchParams["status"],
-                    page: 0,
-                  })
-                }
-              >
-                <SelectTrigger className="h-9 w-40" size="sm">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
+          <Select
+            value={searchParams.status}
+            onValueChange={(val) =>
+              onUpdateSearch({
+                status: val as PortalTenantsSearchParams["status"],
+                page: 0,
+              })
+            }
+          >
+            <SelectTrigger className="h-9 w-40" size="sm">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+            </SelectContent>
+          </Select>
         </CardHeader>
         <CardContent className="p-0">
           <DataTable

@@ -30,6 +30,7 @@ import {
   BillingRecordStatusBadge,
   TenantTierBadge,
 } from "@/features/portal/TenantBadges";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -170,6 +171,13 @@ export function AdminBillingPage({
     (sum, r) => sum + (r.status === "void" ? 0 : r.amount),
     0,
   );
+  const currencies = new Set(records.map((r) => r.currency).filter(Boolean));
+  const pageAmountDisplay =
+    records.length === 0
+      ? formatCurrency(0, "IDR")
+      : currencies.size === 1
+        ? formatCurrency(pageAmountSum, Array.from(currencies)[0])
+        : `Campuran (${Array.from(currencies).join("/")})`;
   const settledCount = records.filter(
     (r) => r.status === "paid" || r.status === "active",
   ).length;
@@ -276,6 +284,17 @@ export function AdminBillingPage({
         </Button>
       </div>
 
+      {billingQuery.isError && (
+        <Alert color="destructive" variant="soft">
+          <AlertTitle className="text-sm">
+            Gagal Memuat Riwayat Billing
+          </AlertTitle>
+          <AlertDescription className="text-xs">
+            {(billingQuery.error as Error)?.message ?? "Gagal memuat data"}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
@@ -295,7 +314,7 @@ export function AdminBillingPage({
               <Wallet className="h-4 w-4 text-info" />
             </div>
             <div className="mt-2 text-2xl font-bold text-default-900">
-              {formatCurrency(pageAmountSum, "IDR")}
+              {pageAmountDisplay}
             </div>
           </CardContent>
         </Card>
