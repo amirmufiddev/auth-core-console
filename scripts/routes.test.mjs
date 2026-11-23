@@ -33,29 +33,40 @@ function extractSection(source, startMarker, endMarker) {
   return source.slice(startIdx, endIdx);
 }
 
-function collectHrefsWithShared(slice, appHrefs) {
-  const direct = Array.from(slice.matchAll(/href:\s*"([^"]+)"/g)).map(
-    (m) => m[1],
+function extractItemGroups(menusSource) {
+  const beforeConfig = extractSection(
+    menusSource,
+    "import {",
+    "export const menusConfig",
   );
-  if (
-    slice.includes("child: applicationItems") ||
-    slice.includes("...applicationItems")
-  ) {
-    return [...direct, ...appHrefs];
+  const groups = {};
+  for (const match of beforeConfig.matchAll(
+    /const\s+(\w+)\s*:\s*MenuItemProps\[\]\s*=\s*\[([\s\S]*?)\n\];/g,
+  )) {
+    const [, name, body] = match;
+    groups[name] = Array.from(body.matchAll(/href:\s*"([^"]+)"/g)).map(
+      (m) => m[1],
+    );
   }
-  return direct;
+  return groups;
+}
+
+function collectHrefsWithShared(slice, itemGroups) {
+  const hrefs = [];
+  const tokenRegex = /href:\s*"([^"]+)"|(?:child:\s*|\.\.\.)(\w+)/g;
+  for (const match of slice.matchAll(tokenRegex)) {
+    if (match[1]) {
+      hrefs.push(match[1]);
+    } else if (match[2] && itemGroups[match[2]]) {
+      hrefs.push(...itemGroups[match[2]]);
+    }
+  }
+  return hrefs;
 }
 
 test("menusConfig.mainNav, sidebarNav.modern, dan sidebarNav.classic sinkron", () => {
   const menusSource = readUtf8("src/config/menus.ts");
-  const appSlice = extractSection(
-    menusSource,
-    "const applicationItems",
-    "export const menusConfig",
-  );
-  const appHrefs = Array.from(appSlice.matchAll(/href:\s*"([^"]+)"/g)).map(
-    (m) => m[1],
-  );
+  const itemGroups = extractItemGroups(menusSource);
 
   const runtimeConfigSlice = extractSection(
     menusSource,
@@ -65,20 +76,20 @@ test("menusConfig.mainNav, sidebarNav.modern, dan sidebarNav.classic sinkron", (
 
   const mainNavHrefs = collectHrefsWithShared(
     extractSection(runtimeConfigSlice, "mainNav:", "sidebarNav:"),
-    appHrefs,
+    itemGroups,
   );
   const modernHrefs = collectHrefsWithShared(
     extractSection(runtimeConfigSlice, "modern:", "classic:"),
-    appHrefs,
+    itemGroups,
   );
   const classicHrefs = collectHrefsWithShared(
     extractSection(runtimeConfigSlice, "classic:", null),
-    appHrefs,
+    itemGroups,
   );
 
   assert.ok(
-    mainNavHrefs.length >= 9,
-    "Minimal 9 route harus terdaftar di menu",
+    mainNavHrefs.length >= 12,
+    "Minimal 12 route harus terdaftar di menu",
   );
   assert.deepEqual(modernHrefs, mainNavHrefs);
   assert.deepEqual(classicHrefs, mainNavHrefs);
@@ -93,6 +104,9 @@ test("menusConfig.mainNav, sidebarNav.modern, dan sidebarNav.classic sinkron", (
     "/audit-logs",
     "/auth-features",
     "/account",
+    "/admin-tenants",
+    "/admin-billing",
+    "/tenants",
   ]) {
     assert.ok(
       mainNavHrefs.includes(required),
@@ -108,19 +122,34 @@ test("setiap href di menus.ts memiliki file route di src/routes/_authenticated/"
   );
   const uniqueHrefs = Array.from(new Set(allHrefs));
 
-  assert.ok(uniqueHrefs.length >= 9);
+  assert.ok(uniqueHrefs.length >= 12);
   for (const href of uniqueHrefs) {
     const slug = href.replace(/^\//, "");
-    const routeFile = path.join(
+    const flatRouteFile = path.join(
       ROOT,
       "src/routes/_authenticated",
       `${slug}.tsx`,
     );
+    const indexRouteFile = path.join(
+      ROOT,
+      "src/routes/_authenticated",
+      slug,
+      "index.tsx",
+    );
     assert.ok(
-      fs.existsSync(routeFile),
-      `File route tidak ditemukan untuk menu ${href}: ${routeFile}`,
+      fs.existsSync(flatRouteFile) || fs.existsSync(indexRouteFile),
+      `File route tidak ditemukan untuk menu ${href}: ${flatRouteFile} atau ${indexRouteFile}`,
     );
   }
+
+  const tenantDetailRouteFile = path.join(
+    ROOT,
+    "src/routes/_authenticated/tenants/$tenantId.tsx",
+  );
+  assert.ok(
+    fs.existsSync(tenantDetailRouteFile),
+    `File route detail tenant tidak ditemukan: ${tenantDetailRouteFile}`,
+  );
 });
 
 test("tidak ada import atau direktif Next.js terlarang di src/", () => {

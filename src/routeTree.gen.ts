@@ -17,6 +17,8 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthVerify2faRouteImport } from './routes/_auth/verify-2fa'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin-billing'
+import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin-tenants'
 import { Route as AuthenticatedApiKeysRouteImport } from './routes/_authenticated/api-keys'
 import { Route as AuthenticatedAuditLogsRouteImport } from './routes/_authenticated/audit-logs'
 import { Route as AuthenticatedAuthFeaturesRouteImport } from './routes/_authenticated/auth-features'
@@ -25,6 +27,8 @@ import { Route as AuthenticatedOrganizationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
 import { Route as AuthenticatedSessionsRouteImport } from './routes/_authenticated/sessions'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants/index'
+import { Route as AuthenticatedTenantsTenantIdRouteImport } from './routes/_authenticated/tenants/$tenantId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +68,18 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminBillingRoute =
+  AuthenticatedAdminBillingRouteImport.update({
+    id: '/admin-billing',
+    path: '/admin-billing',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminTenantsRoute =
+  AuthenticatedAdminTenantsRouteImport.update({
+    id: '/admin-tenants',
+    path: '/admin-tenants',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedApiKeysRoute = AuthenticatedApiKeysRouteImport.update({
   id: '/api-keys',
   path: '/api-keys',
@@ -106,6 +122,18 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedTenantsIndexRoute =
+  AuthenticatedTenantsIndexRouteImport.update({
+    id: '/tenants/',
+    path: '/tenants/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedTenantsTenantIdRoute =
+  AuthenticatedTenantsTenantIdRouteImport.update({
+    id: '/tenants/$tenantId',
+    path: '/tenants/$tenantId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -114,6 +142,8 @@ export interface FileRoutesByFullPath {
   '/register': typeof AuthRegisterRoute
   '/verify-2fa': typeof AuthVerify2faRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/admin-billing': typeof AuthenticatedAdminBillingRoute
+  '/admin-tenants': typeof AuthenticatedAdminTenantsRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
   '/audit-logs': typeof AuthenticatedAuditLogsRoute
   '/auth-features': typeof AuthenticatedAuthFeaturesRoute
@@ -122,6 +152,8 @@ export interface FileRoutesByFullPath {
   '/roles': typeof AuthenticatedRolesRoute
   '/sessions': typeof AuthenticatedSessionsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
+  '/tenants/': typeof AuthenticatedTenantsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -130,6 +162,8 @@ export interface FileRoutesByTo {
   '/register': typeof AuthRegisterRoute
   '/verify-2fa': typeof AuthVerify2faRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/admin-billing': typeof AuthenticatedAdminBillingRoute
+  '/admin-tenants': typeof AuthenticatedAdminTenantsRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
   '/audit-logs': typeof AuthenticatedAuditLogsRoute
   '/auth-features': typeof AuthenticatedAuthFeaturesRoute
@@ -138,6 +172,8 @@ export interface FileRoutesByTo {
   '/roles': typeof AuthenticatedRolesRoute
   '/sessions': typeof AuthenticatedSessionsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
+  '/tenants': typeof AuthenticatedTenantsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -149,6 +185,8 @@ export interface FileRoutesById {
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/verify-2fa': typeof AuthVerify2faRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/admin-billing': typeof AuthenticatedAdminBillingRoute
+  '/_authenticated/admin-tenants': typeof AuthenticatedAdminTenantsRoute
   '/_authenticated/api-keys': typeof AuthenticatedApiKeysRoute
   '/_authenticated/audit-logs': typeof AuthenticatedAuditLogsRoute
   '/_authenticated/auth-features': typeof AuthenticatedAuthFeaturesRoute
@@ -157,6 +195,8 @@ export interface FileRoutesById {
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/sessions': typeof AuthenticatedSessionsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_authenticated/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
+  '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,6 +207,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/verify-2fa'
     | '/account'
+    | '/admin-billing'
+    | '/admin-tenants'
     | '/api-keys'
     | '/audit-logs'
     | '/auth-features'
@@ -175,6 +217,8 @@ export interface FileRouteTypes {
     | '/roles'
     | '/sessions'
     | '/users'
+    | '/tenants/$tenantId'
+    | '/tenants/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -183,6 +227,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/verify-2fa'
     | '/account'
+    | '/admin-billing'
+    | '/admin-tenants'
     | '/api-keys'
     | '/audit-logs'
     | '/auth-features'
@@ -191,6 +237,8 @@ export interface FileRouteTypes {
     | '/roles'
     | '/sessions'
     | '/users'
+    | '/tenants/$tenantId'
+    | '/tenants'
   id:
     | '__root__'
     | '/'
@@ -201,6 +249,8 @@ export interface FileRouteTypes {
     | '/_auth/register'
     | '/_auth/verify-2fa'
     | '/_authenticated/account'
+    | '/_authenticated/admin-billing'
+    | '/_authenticated/admin-tenants'
     | '/_authenticated/api-keys'
     | '/_authenticated/audit-logs'
     | '/_authenticated/auth-features'
@@ -209,6 +259,8 @@ export interface FileRouteTypes {
     | '/_authenticated/roles'
     | '/_authenticated/sessions'
     | '/_authenticated/users'
+    | '/_authenticated/tenants/$tenantId'
+    | '/_authenticated/tenants/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,6 +327,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin-billing': {
+      id: '/_authenticated/admin-billing'
+      path: '/admin-billing'
+      fullPath: '/admin-billing'
+      preLoaderRoute: typeof AuthenticatedAdminBillingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin-tenants': {
+      id: '/_authenticated/admin-tenants'
+      path: '/admin-tenants'
+      fullPath: '/admin-tenants'
+      preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/api-keys': {
       id: '/_authenticated/api-keys'
       path: '/api-keys'
@@ -331,6 +397,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/tenants/': {
+      id: '/_authenticated/tenants/'
+      path: '/tenants'
+      fullPath: '/tenants/'
+      preLoaderRoute: typeof AuthenticatedTenantsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tenants/$tenantId': {
+      id: '/_authenticated/tenants/$tenantId'
+      path: '/tenants/$tenantId'
+      fullPath: '/tenants/$tenantId'
+      preLoaderRoute: typeof AuthenticatedTenantsTenantIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -352,6 +432,8 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
+  AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRoute
   AuthenticatedApiKeysRoute: typeof AuthenticatedApiKeysRoute
   AuthenticatedAuditLogsRoute: typeof AuthenticatedAuditLogsRoute
   AuthenticatedAuthFeaturesRoute: typeof AuthenticatedAuthFeaturesRoute
@@ -360,10 +442,14 @@ interface AuthenticatedRouteChildren {
   AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
   AuthenticatedSessionsRoute: typeof AuthenticatedSessionsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedTenantsTenantIdRoute: typeof AuthenticatedTenantsTenantIdRoute
+  AuthenticatedTenantsIndexRoute: typeof AuthenticatedTenantsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
+  AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRoute,
   AuthenticatedApiKeysRoute: AuthenticatedApiKeysRoute,
   AuthenticatedAuditLogsRoute: AuthenticatedAuditLogsRoute,
   AuthenticatedAuthFeaturesRoute: AuthenticatedAuthFeaturesRoute,
@@ -372,6 +458,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedRolesRoute: AuthenticatedRolesRoute,
   AuthenticatedSessionsRoute: AuthenticatedSessionsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedTenantsTenantIdRoute: AuthenticatedTenantsTenantIdRoute,
+  AuthenticatedTenantsIndexRoute: AuthenticatedTenantsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

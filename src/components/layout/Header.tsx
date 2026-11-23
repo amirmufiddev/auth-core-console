@@ -27,6 +27,9 @@ const ROUTE_TITLES: Record<string, string> = {
   "/audit-logs": "Audit Logs",
   "/auth-features": "Auth Features",
   "/account": "Account Settings",
+  "/admin-tenants": "Tenants (Operator)",
+  "/admin-billing": "Billing Ledger",
+  "/tenants": "Tenant Portal",
 };
 
 export function Header() {
@@ -53,7 +56,9 @@ export function Header() {
   const setMobileSidebarOpen = useLayoutStore((s) => s.setMobileSidebarOpen);
 
   const isExternalApi = isExternalBackendConfigured();
-  const currentLabel = ROUTE_TITLES[pathname] ?? "Console";
+  const currentLabel =
+    ROUTE_TITLES[pathname] ??
+    (pathname.startsWith("/tenants/") ? "Detail Tenant" : "Console");
 
   if (navbarType === "hidden") {
     return null;

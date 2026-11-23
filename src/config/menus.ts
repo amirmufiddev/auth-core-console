@@ -1,7 +1,10 @@
 import {
   Activity,
   Building2,
+  CreditCard,
+  Globe,
   KeyRound,
+  Layers,
   LayoutDashboard,
   type LucideIcon,
   ScrollText,
@@ -72,6 +75,27 @@ const applicationItems: MenuItemProps[] = [
   },
 ];
 
+const multiTenantItems: MenuItemProps[] = [
+  {
+    title: "Tenants (Operator)",
+    href: "/admin-tenants",
+    icon: Layers,
+    badge: "Operator",
+  },
+  {
+    title: "Billing Ledger",
+    href: "/admin-billing",
+    icon: CreditCard,
+    badge: "Operator",
+  },
+  {
+    title: "Tenant Portal",
+    href: "/tenants",
+    icon: Globe,
+    badge: "Portal",
+  },
+];
+
 export const menusConfig: {
   mainNav: MenuItemProps[];
   sidebarNav: {
@@ -96,6 +120,11 @@ export const menusConfig: {
       icon: ShieldCheck,
       child: applicationItems,
     },
+    {
+      title: "Multi-Tenant & Billing",
+      icon: Layers,
+      child: multiTenantItems,
+    },
   ],
   sidebarNav: {
     modern: [
@@ -115,6 +144,11 @@ export const menusConfig: {
         icon: ShieldCheck,
         child: applicationItems,
       },
+      {
+        title: "Multi-Tenant & Billing",
+        icon: Layers,
+        child: multiTenantItems,
+      },
     ],
     classic: [
       {
@@ -133,6 +167,12 @@ export const menusConfig: {
         icon: ShieldCheck,
       },
       ...applicationItems,
+      {
+        isHeader: true,
+        title: "Multi-Tenant & Billing",
+        icon: Layers,
+      },
+      ...multiTenantItems,
     ],
   },
 };
