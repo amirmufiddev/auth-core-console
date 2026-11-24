@@ -64,6 +64,24 @@ export interface PortalOAuthClientRecord {
   plainClientSecret?: string;
 }
 
+export interface PortalTenantUserRecord {
+  id: string;
+  tenantId: string | null;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: string | null;
+  role: string | null;
+  banned: boolean;
+  banReason: string | null;
+  username: string | null;
+  phoneNumber: string | null;
+  twoFactorEnabled: boolean;
+  lastLoginMethod: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PortalBillingSummary {
   tenantId: string;
   tierId: string;
@@ -211,6 +229,7 @@ interface MockMultiTenantDb {
   tenants: TenantRecord[];
   billingRecords: BillingRecord[];
   oauthClients: PortalOAuthClientRecord[];
+  tenantUsers?: PortalTenantUserRecord[];
 }
 
 function createInitialMockDb(): MockMultiTenantDb {
@@ -297,6 +316,59 @@ function createInitialMockDb(): MockMultiTenantDb {
         pkceRequired: true,
         active: true,
         createdAt: iso(-20),
+      },
+    ],
+    tenantUsers: [
+      {
+        id: "usr_ten_acme_01",
+        tenantId: "ten_acme_01",
+        name: "Budi Santoso",
+        email: "budi@acme.example.com",
+        emailVerified: true,
+        image: null,
+        role: "admin",
+        banned: false,
+        banReason: null,
+        username: "budi.s",
+        phoneNumber: "+6281234567890",
+        twoFactorEnabled: true,
+        lastLoginMethod: "email",
+        createdAt: iso(-18),
+        updatedAt: iso(-1),
+      },
+      {
+        id: "usr_ten_acme_02",
+        tenantId: "ten_acme_01",
+        name: "Siti Rahmawati",
+        email: "siti@acme.example.com",
+        emailVerified: true,
+        image: null,
+        role: "member",
+        banned: false,
+        banReason: null,
+        username: "siti.r",
+        phoneNumber: null,
+        twoFactorEnabled: false,
+        lastLoginMethod: "google",
+        createdAt: iso(-10),
+        updatedAt: iso(-2),
+      },
+      {
+        id: "usr_ten_nusantara_01",
+        tenantId: "ten_nusantara_02",
+        name: "Andi Wijaya",
+        email: "andi@nusantara.example.id",
+        emailVerified: false,
+        image: null,
+        role: "member",
+        banned: false,
+        banReason: null,
+        username: "andi.w",
+        phoneNumber: null,
+        twoFactorEnabled: false,
+        lastLoginMethod: "email",
+        createdAt: iso(-5),
+        updatedAt: iso(-5),
       },
     ],
   };
@@ -616,6 +688,64 @@ export async function getMyTenantBilling(
     billingStatus: tenant.billingStatus,
     ...paged,
   };
+}
+
+export async function listTenantUsers(
+  tenantId: string,
+  params: { page?: number; pageSize?: number; search?: string } = {},
+): Promise<PaginatedResult<PortalTenantUserRecord>> {
+  if (isExternalBackendConfigured()) {
+    return apiRequest<PaginatedResult<PortalTenantUserRecord>>(
+      `/api/portal/tenants/${encodeURIComponent(tenantId)}/users${buildQuery({
+        page: params.page ?? 0,
+        pageSize: params.pageSize ?? 10,
+        search: params.search,
+      })}`,
+    );
+  }
+
+  const db = readMockTenantDb();
+  const seedUsers = db.tenantUsers ?? createInitialMockDb().tenantUsers ?? [];
+  let list = seedUsers.filter((u) => u.tenantId === tenantId);
+  if (params.search) {
+    const q = params.search.toLowerCase();
+    list = list.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        (u.username?.toLowerCase().includes(q) ?? false),
+    );
+  }
+  return paginateMock(list, params.page, params.pageSize);
+}
+
+export async function adminListTenantUsers(
+  tenantId: string,
+  params: { page?: number; pageSize?: number; search?: string } = {},
+): Promise<PaginatedResult<PortalTenantUserRecord>> {
+  if (isExternalBackendConfigured()) {
+    return apiRequest<PaginatedResult<PortalTenantUserRecord>>(
+      `/api/admin/tenants/${encodeURIComponent(tenantId)}/users${buildQuery({
+        page: params.page ?? 0,
+        pageSize: params.pageSize ?? 10,
+        search: params.search,
+      })}`,
+    );
+  }
+
+  const db = readMockTenantDb();
+  const seedUsers = db.tenantUsers ?? createInitialMockDb().tenantUsers ?? [];
+  let list = seedUsers.filter((u) => u.tenantId === tenantId);
+  if (params.search) {
+    const q = params.search.toLowerCase();
+    list = list.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        (u.username?.toLowerCase().includes(q) ?? false),
+    );
+  }
+  return paginateMock(list, params.page, params.pageSize);
 }
 
 // ============================================================================

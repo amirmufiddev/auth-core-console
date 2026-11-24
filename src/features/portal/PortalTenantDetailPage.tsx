@@ -13,6 +13,7 @@ import {
   Plus,
   Settings,
   Trash2,
+  Users,
 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ import {
   TenantStatusBadge,
   TenantTierBadge,
 } from "@/features/portal/TenantBadges";
+import { PortalTenantUsersTab } from "@/features/portal/PortalTenantUsersTab";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -98,7 +100,7 @@ export function PortalTenantDetailPage({
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<
-    "settings" | "oauth-clients" | "billing"
+    "settings" | "oauth-clients" | "users" | "billing"
   >("settings");
   const [oauthPaging, setOauthPaging] = useState({
     page: 0,
@@ -493,7 +495,9 @@ export function PortalTenantDetailPage({
       <Tabs
         value={activeTab}
         onValueChange={(val) =>
-          setActiveTab(val as "settings" | "oauth-clients" | "billing")
+          setActiveTab(
+            val as "settings" | "oauth-clients" | "users" | "billing",
+          )
         }
       >
         <TabsList>
@@ -504,6 +508,10 @@ export function PortalTenantDetailPage({
           <TabsTrigger value="oauth-clients">
             <KeyRound className="mr-1.5 h-3.5 w-3.5" />
             OAuth 2.1 / MCP Clients
+          </TabsTrigger>
+          <TabsTrigger value="users">
+            <Users className="mr-1.5 h-3.5 w-3.5" />
+            Users
           </TabsTrigger>
           <TabsTrigger value="billing">
             <CreditCard className="mr-1.5 h-3.5 w-3.5" />
@@ -679,7 +687,12 @@ export function PortalTenantDetailPage({
           </Card>
         </TabsContent>
 
-        {/* TAB 3: BILLING SUMMARY */}
+        {/* TAB 3: TENANT USERS */}
+        <TabsContent value="users" className="pt-4">
+          <PortalTenantUsersTab tenantId={tenantId} tenantSlug={tenant.slug} />
+        </TabsContent>
+
+        {/* TAB 4: BILLING SUMMARY */}
         <TabsContent value="billing" className="space-y-4 pt-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Card>
