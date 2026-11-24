@@ -1,13 +1,19 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Check,
   CheckSquare,
+  Copy,
   KeyRound,
+  Layers,
   Lock,
+  Pencil,
   Plus,
   Save,
+  Search,
   ShieldCheck,
   Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -23,6 +29,7 @@ import {
   updateOrganizationPermission,
   updateOrganizationRole,
   updateOrganizationRoleTemplate,
+  type CatalogPermission,
   type CatalogResource,
   type OrganizationRoleRecord,
   type OrganizationRoleTemplateRecord,
@@ -557,31 +564,44 @@ function CatalogWorkspace({
   });
   const permissions = catalogQuery.data?.permissions ?? [];
   const resources = catalogQuery.data?.resources ?? [];
-  const [selectedId, setSelectedId] = useState("");
-  const [actionLabel, setActionLabel] = useState("");
-  const [resourceLabel, setResourceLabel] = useState("");
+
+  const [search, setSearch] = useState("");
+  const [resourceFilter, setResourceFilter] = useState("all");
+  const [collapsed, setCollapsed] = useState<string[]>([]);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const [editing, setEditing] = useState<{
+    permission: CatalogPermission;
+    resourceDisplayName: string;
+    resourceDescription: string;
+    actionDisplayName: string;
+    actionDescription: string;
+  } | null>(null);
+
+  const [createMode, setCreateMode] = useState<"existing" | "new">("existing");
   const [form, setForm] = useState({
     resource: "",
     action: "",
     resourceDisplayName: "",
     actionDisplayName: "",
+    actionDescription: "",
   });
 
-  const selected =
-    permissions.find((permission) => permission.id === selectedId) ??
-    permissions[0] ??
-    null;
-  const selectedResource = resources.find(
-    (resource) => resource.resource === selected?.resource,
-  );
-
   useEffect(() => {
-    if (!selected) return;
-    if (!selectedId) setSelectedId(selected.id);
-    setActionLabel(selected.displayName);
-    setResourceLabel(selectedResource?.displayName ?? selected.resource);
-  }, [selected, selectedId, selectedResource]);
+    if (!createOpen) return;
+    if (resources.length === 0) {
+      setCreateMode("new");
+      return;
+    }
+    if (createMode === "existing" && !form.resource && resources[0]) {
+      setForm((prev) => ({
+        ...prev,
+        resource: resources[0].resource,
+        resourceDisplayName: resources[0].displayName,
+      }));
+    }
+  }, [createOpen, createMode, form.resource, resources]);
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ["org-catalog", tenantId] });
@@ -589,14 +609,17 @@ function CatalogWorkspace({
 
   const saveMutation = useMutation({
     mutationFn: () => {
-      if (!selected) throw new Error("Pilih permission.");
-      return updateOrganizationPermission(tenantId, selected.id, {
-        actionDisplayName: actionLabel.trim(),
-        resourceDisplayName: resourceLabel.trim(),
+      if (!editing) throw new Error("Pilih permission.");
+      return updateOrganizationPermission(tenantId, editing.permission.id, {
+        actionDisplayName: editing.actionDisplayName.trim(),
+        actionDescription: editing.actionDescription.trim() || undefined,
+        resourceDisplayName: editing.resourceDisplayName.trim(),
+        resourceDescription: editing.resourceDescription.trim() || undefined,
       });
     },
     onSuccess: () => {
-      toast.success("Label permission berhasil disimpan.");
+      toast.success("Permission berhasil diperbarui.");
+      setEditing(null);
       refresh();
     },
     onError: (err) => toast.error(errorMessage(err, "Gagal menyimpan permission.")),
@@ -605,21 +628,22 @@ function CatalogWorkspace({
   const createMutation = useMutation({
     mutationFn: () =>
       createOrganizationPermission(tenantId, {
-        resource: form.resource.trim(),
-        action: form.action.trim(),
+        resource: form.resource.trim().toLowerCase(),
+        action: form.action.trim().toLowerCase(),
         resourceDisplayName: form.resourceDisplayName.trim(),
         actionDisplayName: form.actionDisplayName.trim(),
+        actionDescription: form.actionDescription.trim() || undefined,
       }),
-    onSuccess: (created) => {
+    onSuccess: () => {
       toast.success(
         "Permission ditambahkan. Restart API agar Better Auth mengenal resource baru.",
       );
-      setSelectedId(created.id);
       setForm({
         resource: "",
         action: "",
         resourceDisplayName: "",
         actionDisplayName: "",
+        actionDescription: "",
       });
       onCreateOpenChange(false);
       refresh();
@@ -631,150 +655,740 @@ function CatalogWorkspace({
     mutationFn: (id: string) => deleteOrganizationPermission(tenantId, id),
     onSuccess: () => {
       toast.success("Permission berhasil dihapus.");
-      setSelectedId("");
       setDeleteId(null);
       refresh();
     },
     onError: (err) => toast.error(errorMessage(err, "Gagal menghapus permission.")),
   });
 
+  const resourceMap = new Map(
+    resources.map((item) => [item.resource, item]),
+  );
+
+  const groupedResources = (() => {
+    const groups = new Map<
+      string,
+      {
+        resource: string;
+        displayName: string;
+        description: string;
+        items: Array<{
+          permission: CatalogPermission;
+          actionDescription: string;
+        }>;
+      }
+    >();
+
+    for (const res of resources) {
+      groups.set(res.resource, {
+        resource: res.resource,
+        displayName: res.displayName,
+        description: res.description ?? "",
+        items: [],
+      });
+    }
+
+    for (const permission of permissions) {
+      const meta = resourceMap.get(permission.resource);
+      const existing = groups.get(permission.resource) ?? {
+        resource: permission.resource,
+        displayName: meta?.displayName ?? permission.resource,
+        description: meta?.description ?? "",
+        items: [],
+      };
+      existing.items.push({
+        permission,
+        actionDescription: meta?.actions[permission.action]?.description ?? "",
+      });
+      groups.set(permission.resource, existing);
+    }
+
+    return Array.from(groups.values());
+  })();
+
+  const query = search.trim().toLowerCase();
+  const visibleGroups = groupedResources
+    .filter(
+      (group) => resourceFilter === "all" || group.resource === resourceFilter,
+    )
+    .map((group) => {
+      if (!query) return group;
+      const resourceMatches =
+        group.resource.toLowerCase().includes(query) ||
+        group.displayName.toLowerCase().includes(query) ||
+        group.description.toLowerCase().includes(query);
+      if (resourceMatches) return group;
+      return {
+        ...group,
+        items: group.items.filter(
+          ({ permission, actionDescription }) =>
+            permission.code.toLowerCase().includes(query) ||
+            permission.displayName.toLowerCase().includes(query) ||
+            permission.action.toLowerCase().includes(query) ||
+            actionDescription.toLowerCase().includes(query),
+        ),
+      };
+    })
+    .filter((group) => group.items.length > 0 || (!query && resourceFilter !== "all"));
+
+  const visiblePermissionCount = visibleGroups.reduce(
+    (sum, group) => sum + group.items.length,
+    0,
+  );
+  const openGroupValues = visibleGroups
+    .map((group) => group.resource)
+    .filter((res) => Boolean(query) || !collapsed.includes(res));
+  const allExpanded =
+    visibleGroups.length > 0 && openGroupValues.length === visibleGroups.length;
+
+  const toggleAllGroups = () => {
+    if (allExpanded) {
+      setCollapsed(visibleGroups.map((group) => group.resource));
+    } else {
+      setCollapsed([]);
+    }
+  };
+
+  const openCreateForResource = (resourceKey: string, displayName: string) => {
+    setCreateMode("existing");
+    setForm({
+      resource: resourceKey,
+      action: "",
+      resourceDisplayName: displayName,
+      actionDisplayName: "",
+      actionDescription: "",
+    });
+    onCreateOpenChange(true);
+  };
+
+  const openEditDialog = (
+    permission: CatalogPermission,
+    actionDescription: string,
+  ) => {
+    const meta = resourceMap.get(permission.resource);
+    setEditing({
+      permission,
+      resourceDisplayName: meta?.displayName ?? permission.resource,
+      resourceDescription: meta?.description ?? "",
+      actionDisplayName: permission.displayName,
+      actionDescription,
+    });
+  };
+
+  const copyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      toast.success(`Kode "${code}" disalin.`);
+      window.setTimeout(() => {
+        setCopiedCode((prev) => (prev === code ? null : prev));
+      }, 1500);
+    } catch {
+      toast.error("Gagal menyalin kode permission.");
+    }
+  };
+
   const deleteTarget = permissions.find((item) => item.id === deleteId) ?? null;
+  const previewCode =
+    form.resource.trim() && form.action.trim()
+      ? `${form.resource.trim().toLowerCase()}:${form.action.trim().toLowerCase()}`
+      : null;
+  const canCreate =
+    Boolean(form.resource.trim()) &&
+    Boolean(form.action.trim()) &&
+    Boolean(form.resourceDisplayName.trim()) &&
+    Boolean(form.actionDisplayName.trim());
 
   return (
-    <>
+    <div className="space-y-5">
       <QueryError title="Gagal Memuat Katalog" error={catalogQuery.error} />
-      <SplitWorkspace
-        title={`Katalog Permission (${permissions.length})`}
-        description="Resource dan action yang boleh dipakai template serta role."
-        empty="Belum ada permission."
-        items={permissions.map((permission) => ({
-          id: permission.id,
-          title: permission.displayName,
-          description: selectedResourceDescription(
-            resources,
-            permission.resource,
-          ),
-          meta: permission.code,
-          countLabel: permission.resource,
-        }))}
-        selectedId={selected?.id ?? ""}
-        onSelect={setSelectedId}
-        onDelete={readOnly ? undefined : setDeleteId}
-        detail={
-          selected ? (
-            <>
-              <CardHeader className="mb-0 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <KeyRound className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg font-semibold">
-                      {selected.displayName}
-                    </CardTitle>
+
+      <Card>
+        <CardContent className="pt-5">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Cari permission, kode (mis. member:create), atau resource..."
+                  className="pl-9 pr-8"
+                />
+                {search ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    aria-label="Hapus pencarian"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                ) : null}
+              </div>
+
+              <Select value={resourceFilter} onValueChange={setResourceFilter}>
+                <SelectTrigger className="w-full sm:w-56">
+                  <SelectValue placeholder="Semua Resource" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    Semua Resource ({groupedResources.length})
+                  </SelectItem>
+                  {groupedResources.map((group) => (
+                    <SelectItem key={group.resource} value={group.resource}>
+                      {group.displayName} ({group.items.length})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 lg:justify-end">
+              <div className="flex items-center gap-2">
+                <Badge color="secondary" variant="soft">
+                  {visibleGroups.length} resource
+                </Badge>
+                <Badge color="default" variant="soft">
+                  {visiblePermissionCount} permission
+                </Badge>
+              </div>
+              {visibleGroups.length > 1 && !query ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  color="secondary"
+                  onClick={toggleAllGroups}
+                >
+                  {allExpanded ? "Tutup Semua" : "Buka Semua"}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {catalogQuery.isLoading ? (
+        <Card>
+          <CardContent className="py-12 text-center text-sm text-muted-foreground">
+            Memuat katalog permission...
+          </CardContent>
+        </Card>
+      ) : permissions.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <KeyRound className="h-8 w-8 text-muted-foreground/60" />
+            <div>
+              <p className="text-sm font-medium text-default-900">
+                Belum ada permission di katalog
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Tambahkan resource dan action agar bisa dipilih di template dan
+                role organisasi.
+              </p>
+            </div>
+            {readOnly ? null : (
+              <Button
+                type="button"
+                size="sm"
+                color="primary"
+                onClick={() => onCreateOpenChange(true)}
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Tambah Permission
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : visibleGroups.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <Search className="h-8 w-8 text-muted-foreground/60" />
+            <div>
+              <p className="text-sm font-medium text-default-900">
+                Permission tidak ditemukan
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Coba ubah kata kunci pencarian atau pilih filter resource lain.
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              color="secondary"
+              onClick={() => {
+                setSearch("");
+                setResourceFilter("all");
+              }}
+            >
+              Reset Filter
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Accordion
+          type="multiple"
+          value={openGroupValues}
+          onValueChange={(openValues) => {
+            if (query) return;
+            setCollapsed(
+              visibleGroups
+                .map((group) => group.resource)
+                .filter((res) => !openValues.includes(res)),
+            );
+          }}
+          className="space-y-3"
+        >
+          {visibleGroups.map((group) => (
+            <AccordionItem
+              key={group.resource}
+              value={group.resource}
+              className="overflow-hidden rounded-lg border border-border bg-card px-4"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <AccordionTrigger className="flex-1 py-4 hover:no-underline">
+                  <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pr-3 text-left">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                        <Layers className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-semibold text-default-900">
+                            {group.displayName}
+                          </span>
+                          <code className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                            {group.resource}
+                          </code>
+                        </div>
+                        <p className="mt-0.5 text-xs font-normal text-muted-foreground">
+                          {group.description ||
+                            "Resource permission organisasi"}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      color="secondary"
+                      variant="soft"
+                      className="shrink-0 text-xs"
+                    >
+                      {group.items.length} action
+                    </Badge>
                   </div>
-                  <CardDescription>
-                    Kode:{" "}
-                    <span className="text-xs font-medium">{selected.code}</span>
-                  </CardDescription>
-                </div>
+                </AccordionTrigger>
                 {readOnly ? null : (
                   <Button
-                    color="primary"
-                    disabled={saveMutation.isPending}
-                    onClick={() => saveMutation.mutate()}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    color="secondary"
+                    className="shrink-0"
+                    onClick={() =>
+                      openCreateForResource(group.resource, group.displayName)
+                    }
                   >
-                    <Save className="mr-2 h-4 w-4" />
-                    {saveMutation.isPending ? "Menyimpan..." : "Simpan Label"}
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    Action
                   </Button>
                 )}
-              </CardHeader>
-              <CardContent className="space-y-4 pt-5">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="perm-resource-label">Nama resource</Label>
-                    <Input
-                      id="perm-resource-label"
-                      value={resourceLabel}
-                      disabled={readOnly}
-                      onChange={(event) => setResourceLabel(event.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="perm-action-label">Nama action</Label>
-                    <Input
-                      id="perm-action-label"
-                      value={actionLabel}
-                      disabled={readOnly}
-                      onChange={(event) => setActionLabel(event.target.value)}
-                    />
-                  </div>
+              </div>
+              <AccordionContent>
+                <div className="grid grid-cols-1 gap-3 border-t border-border pt-4 md:grid-cols-2 xl:grid-cols-3">
+                  {group.items.map(({ permission, actionDescription }) => (
+                    <div
+                      key={permission.id}
+                      className="flex flex-col justify-between gap-3 rounded-lg border border-border bg-background p-3.5 transition-colors hover:border-primary/40"
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-semibold text-default-900">
+                              {permission.displayName}
+                            </div>
+                          </div>
+                          {readOnly ? null : (
+                            <div className="flex shrink-0 items-center gap-1">
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                color="secondary"
+                                className="h-7 w-7"
+                                onClick={() =>
+                                  openEditDialog(permission, actionDescription)
+                                }
+                                aria-label={`Edit ${permission.code}`}
+                                title="Edit label & deskripsi"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                color="destructive"
+                                className="h-7 w-7"
+                                onClick={() => setDeleteId(permission.id)}
+                                aria-label={`Hapus ${permission.code}`}
+                                title="Hapus permission"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                        {actionDescription ? (
+                          <p className="line-clamp-2 text-xs text-muted-foreground">
+                            {actionDescription}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-2.5">
+                        <code className="truncate rounded bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                          {permission.code}
+                        </code>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          color="secondary"
+                          className="h-6 w-6 shrink-0"
+                          onClick={() => void copyCode(permission.code)}
+                          aria-label={`Salin kode ${permission.code}`}
+                          title="Salin kode"
+                        >
+                          {copiedCode === permission.code ? (
+                            <Check className="h-3.5 w-3.5 text-success" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </>
-          ) : null
-        }
-      />
-      <Dialog open={createOpen} onOpenChange={onCreateOpenChange}>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      )}
+
+      <Dialog
+        open={Boolean(editing)}
+        onOpenChange={(open) => !open && setEditing(null)}
+      >
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-primary" />
+              Edit Permission
+            </DialogTitle>
+            <DialogDescription>
+              Perbarui label yang tampil di matriks role dan template.
+            </DialogDescription>
+          </DialogHeader>
+          {editing ? (
+            <form
+              className="space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                saveMutation.mutate();
+              }}
+            >
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">Kode Permission</span>
+                <code className="font-semibold text-default-900">
+                  {editing.permission.code}
+                </code>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-perm-resource-label">Nama Resource</Label>
+                  <Input
+                    id="edit-perm-resource-label"
+                    value={editing.resourceDisplayName}
+                    onChange={(event) =>
+                      setEditing({
+                        ...editing,
+                        resourceDisplayName: event.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-perm-action-label">Nama Action</Label>
+                  <Input
+                    id="edit-perm-action-label"
+                    value={editing.actionDisplayName}
+                    onChange={(event) =>
+                      setEditing({
+                        ...editing,
+                        actionDisplayName: event.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-perm-resource-desc">
+                  Deskripsi Resource{" "}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    (opsional)
+                  </span>
+                </Label>
+                <Input
+                  id="edit-perm-resource-desc"
+                  placeholder="Keterangan singkat tentang resource ini"
+                  value={editing.resourceDescription}
+                  onChange={(event) =>
+                    setEditing({
+                      ...editing,
+                      resourceDescription: event.target.value,
+                    })
+                  }
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Nama & deskripsi resource berlaku untuk semua action di{" "}
+                  <code>{editing.permission.resource}</code>.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-perm-action-desc">
+                  Deskripsi Action{" "}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    (opsional)
+                  </span>
+                </Label>
+                <Input
+                  id="edit-perm-action-desc"
+                  placeholder="Keterangan singkat hak akses action ini"
+                  value={editing.actionDescription}
+                  onChange={(event) =>
+                    setEditing({
+                      ...editing,
+                      actionDescription: event.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  color="secondary"
+                  onClick={() => setEditing(null)}
+                >
+                  Batal
+                </Button>
+                <Button
+                  type="submit"
+                  color="primary"
+                  disabled={
+                    saveMutation.isPending ||
+                    !editing.resourceDisplayName.trim() ||
+                    !editing.actionDisplayName.trim()
+                  }
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {saveMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={createOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setForm({
+              resource: "",
+              action: "",
+              resourceDisplayName: "",
+              actionDisplayName: "",
+              actionDescription: "",
+            });
+          }
+          onCreateOpenChange(open);
+        }}
+      >
         <DialogContent size="md">
           <DialogHeader>
             <DialogTitle>Tambah Permission</DialogTitle>
             <DialogDescription>
-              Resource dan action memakai huruf kecil, angka, dan strip.
+              Pilih resource yang sudah ada atau buat resource baru. Kode
+              memakai huruf kecil, angka, dan strip.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (canCreate) createMutation.mutate();
+            }}
+          >
+            {resources.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/40 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateMode("existing");
+                    const first = resources[0];
+                    if (first) {
+                      setForm((prev) => ({
+                        ...prev,
+                        resource: first.resource,
+                        resourceDisplayName: first.displayName,
+                      }));
+                    }
+                  }}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    createMode === "existing"
+                      ? "bg-background text-default-900 shadow-xs"
+                      : "text-muted-foreground hover:text-default-900",
+                  )}
+                >
+                  Resource yang Ada
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateMode("new");
+                    setForm((prev) => ({
+                      ...prev,
+                      resource: "",
+                      resourceDisplayName: "",
+                    }));
+                  }}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    createMode === "new"
+                      ? "bg-background text-default-900 shadow-xs"
+                      : "text-muted-foreground hover:text-default-900",
+                  )}
+                >
+                  Resource Baru
+                </button>
+              </div>
+            ) : null}
+
+            {createMode === "existing" && resources.length > 0 ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="existing-perm-resource">Resource</Label>
+                <Select
+                  value={form.resource}
+                  onValueChange={(value) => {
+                    const matched = resourceMap.get(value);
+                    setForm((prev) => ({
+                      ...prev,
+                      resource: value,
+                      resourceDisplayName: matched?.displayName ?? value,
+                    }));
+                  }}
+                >
+                  <SelectTrigger id="existing-perm-resource">
+                    <SelectValue placeholder="Pilih resource" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resources.map((res) => (
+                      <SelectItem key={res.resource} value={res.resource}>
+                        {res.displayName} ({res.resource})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <NameField
+                  id="new-perm-resource"
+                  label="Kode Resource"
+                  placeholder="report"
+                  value={form.resource}
+                  onChange={(resource) => setForm({ ...form, resource })}
+                />
+                <NameField
+                  id="new-perm-resource-name"
+                  label="Nama Resource"
+                  placeholder="Laporan"
+                  value={form.resourceDisplayName}
+                  onChange={(resourceDisplayName) =>
+                    setForm({ ...form, resourceDisplayName })
+                  }
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <NameField
+                id="new-perm-action"
+                label="Kode Action"
+                placeholder="export"
+                value={form.action}
+                onChange={(action) => setForm({ ...form, action })}
+              />
+              <NameField
+                id="new-perm-action-name"
+                label="Nama Action"
+                placeholder="Ekspor laporan"
+                value={form.actionDisplayName}
+                onChange={(actionDisplayName) =>
+                  setForm({ ...form, actionDisplayName })
+                }
+              />
+            </div>
+
             <NameField
-              id="new-perm-resource"
-              label="Resource"
-              placeholder="report"
-              value={form.resource}
-              onChange={(resource) => setForm({ ...form, resource })}
-            />
-            <NameField
-              id="new-perm-resource-name"
-              label="Nama resource"
-              placeholder="Laporan"
-              value={form.resourceDisplayName}
-              onChange={(resourceDisplayName) =>
-                setForm({ ...form, resourceDisplayName })
+              id="new-perm-action-desc"
+              label="Deskripsi Action (opsional)"
+              placeholder="Mengizinkan ekspor laporan ke CSV atau PDF"
+              value={form.actionDescription}
+              onChange={(actionDescription) =>
+                setForm({ ...form, actionDescription })
               }
             />
-            <NameField
-              id="new-perm-action"
-              label="Action"
-              placeholder="export"
-              value={form.action}
-              onChange={(action) => setForm({ ...form, action })}
-            />
-            <NameField
-              id="new-perm-action-name"
-              label="Nama action"
-              placeholder="Ekspor laporan"
-              value={form.actionDisplayName}
-              onChange={(actionDisplayName) =>
-                setForm({ ...form, actionDisplayName })
-              }
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              color="secondary"
-              onClick={() => onCreateOpenChange(false)}
-            >
-              Batal
-            </Button>
-            <Button
-              type="button"
-              color="primary"
-              disabled={createMutation.isPending}
-              onClick={() => createMutation.mutate()}
-            >
-              Tambah Permission
-            </Button>
-          </DialogFooter>
+
+            {previewCode ? (
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
+                <span className="text-muted-foreground">Pratinjau Kode</span>
+                <code className="font-semibold text-primary">
+                  {previewCode}
+                </code>
+              </div>
+            ) : null}
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                color="secondary"
+                onClick={() => onCreateOpenChange(false)}
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                color="primary"
+                disabled={createMutation.isPending || !canCreate}
+              >
+                {createMutation.isPending
+                  ? "Menambahkan..."
+                  : "Tambah Permission"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
+
       <ConfirmDelete
         open={Boolean(deleteTarget)}
         title={`Hapus permission "${deleteTarget?.code}"?`}
@@ -782,7 +1396,7 @@ function CatalogWorkspace({
         onCancel={() => setDeleteId(null)}
         onConfirm={() => deleteId && deleteMutation.mutate(deleteId)}
       />
-    </>
+    </div>
   );
 }
 
@@ -795,16 +1409,6 @@ function QueryError({ title, error }: { title: string; error: unknown }) {
         {error instanceof Error ? error.message : "Terjadi kesalahan saat memuat data."}
       </AlertDescription>
     </Alert>
-  );
-}
-
-function selectedResourceDescription(
-  resources: CatalogResource[],
-  resource: string,
-): string {
-  return (
-    resources.find((item) => item.resource === resource)?.description ??
-    "Permission katalog organisasi."
   );
 }
 
