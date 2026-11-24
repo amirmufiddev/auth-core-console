@@ -83,6 +83,12 @@ const multiTenantItems: MenuItemProps[] = [
     badge: "Operator",
   },
   {
+    title: "Feature & Tier Matrix",
+    href: "/admin-tiers",
+    icon: SlidersHorizontal,
+    badge: "Operator",
+  },
+  {
     title: "Billing Ledger",
     href: "/admin-billing",
     icon: CreditCard,

@@ -70,7 +70,12 @@ export type BetterAuthFeatureId =
   | "creem"
   | "chargebee";
 
-export type FeatureSettingFieldType = "text" | "number" | "boolean" | "select";
+export type FeatureSettingFieldType =
+  | "text"
+  | "number"
+  | "boolean"
+  | "select"
+  | "secret";
 
 export interface FeatureSettingField {
   key: string;

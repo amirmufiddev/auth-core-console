@@ -13,6 +13,7 @@ import {
   Lock,
   Plus,
   Settings,
+  SlidersHorizontal,
   Trash2,
   Users,
 } from "lucide-react";
@@ -47,6 +48,7 @@ import {
   TenantStatusBadge,
   TenantTierBadge,
 } from "@/features/portal/TenantBadges";
+import { PortalTenantFeaturesTab } from "@/features/portal/PortalTenantFeaturesTab";
 import { PortalTenantOrgsTab } from "@/features/portal/PortalTenantOrgsTab";
 import { PortalTenantUsersTab } from "@/features/portal/PortalTenantUsersTab";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -102,7 +104,12 @@ export function PortalTenantDetailPage({
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<
-    "settings" | "oauth-clients" | "users" | "organizations" | "billing"
+    | "settings"
+    | "features"
+    | "oauth-clients"
+    | "users"
+    | "organizations"
+    | "billing"
   >("settings");
   const [oauthPaging, setOauthPaging] = useState({
     page: 0,
@@ -500,6 +507,7 @@ export function PortalTenantDetailPage({
           setActiveTab(
             val as
               | "settings"
+              | "features"
               | "oauth-clients"
               | "users"
               | "organizations"
@@ -511,6 +519,10 @@ export function PortalTenantDetailPage({
           <TabsTrigger value="settings">
             <Settings className="mr-1.5 h-3.5 w-3.5" />
             Pengaturan Tenant
+          </TabsTrigger>
+          <TabsTrigger value="features">
+            <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+            IAM Features
           </TabsTrigger>
           <TabsTrigger value="oauth-clients">
             <KeyRound className="mr-1.5 h-3.5 w-3.5" />
@@ -637,7 +649,12 @@ export function PortalTenantDetailPage({
           </div>
         </TabsContent>
 
-        {/* TAB 2: OAUTH CLIENTS */}
+        {/* TAB 2: IAM FEATURES */}
+        <TabsContent value="features" className="pt-4">
+          <PortalTenantFeaturesTab tenantId={tenantId} tierId={tenant.tierId} />
+        </TabsContent>
+
+        {/* TAB 3: OAUTH CLIENTS */}
         <TabsContent value="oauth-clients" className="space-y-4 pt-4">
           {isFreeTier && (
             <Alert color="info" variant="soft">

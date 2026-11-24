@@ -132,14 +132,36 @@ export function AuthFeaturesPage({
 
   const openConfigureSheet = (feature: BetterAuthFeatureDefinition) => {
     setConfiguringFeature(feature);
-    setDraftSettings({
-      ...(features[feature.id]?.settings ?? feature.defaultSettings),
-    });
+    const currentSettings =
+      features[feature.id]?.settings ?? feature.defaultSettings;
+    const nextDraft: Record<string, string | number | boolean> = {
+      ...currentSettings,
+    };
+    for (const field of feature.settingsSchema) {
+      if (field.type === "secret") {
+        nextDraft[field.key] = "";
+      }
+    }
+    setDraftSettings(nextDraft);
   };
 
   const saveFeatureSettings = () => {
     if (!configuringFeature) return;
-    updateFeatureSettings(configuringFeature.id, draftSettings);
+    const existingSettings =
+      features[configuringFeature.id]?.settings ??
+      configuringFeature.defaultSettings;
+    const mergedSettings: Record<string, string | number | boolean> = {
+      ...draftSettings,
+    };
+    for (const field of configuringFeature.settingsSchema) {
+      if (field.type === "secret") {
+        const incoming = String(draftSettings[field.key] ?? "");
+        if (incoming.trim().length === 0) {
+          mergedSettings[field.key] = existingSettings[field.key] ?? "";
+        }
+      }
+    }
+    updateFeatureSettings(configuringFeature.id, mergedSettings);
     toast.success(`Parameter ${configuringFeature.name} diperbarui.`);
     setConfiguringFeature(null);
   };
@@ -378,6 +400,29 @@ export function AuthFeaturesPage({
                   </div>
                 ) : null}
 
+                {feature.settingsSchema.some((s) => s.type === "secret") ? (
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <span className="text-muted-foreground">Platform Secrets:</span>
+                    {feature.settingsSchema
+                      .filter((s) => s.type === "secret")
+                      .map((s) => {
+                        const configured = Boolean(
+                          runtime?.settings?.[s.key],
+                        );
+                        return (
+                          <Badge
+                            key={s.key}
+                            color={configured ? "success" : "secondary"}
+                            variant="soft"
+                            className="text-[10px]"
+                          >
+                            {s.key}: {configured ? "Terkonfigurasi" : "Belum diatur"}
+                          </Badge>
+                        );
+                      })}
+                  </div>
+                ) : null}
+
                 <div className="flex items-center justify-between border-t border-border pt-3">
                   <Badge
                     color="secondary"
@@ -466,6 +511,49 @@ export function AuthFeaturesPage({
                             ))}
                           </SelectContent>
                         </Select>
+                      </div>
+                    );
+                  }
+                  if (field.type === "secret") {
+                    const secretsConfigured = Boolean(
+                      features[configuringFeature.id]?.settings?.[field.key],
+                    );
+                    return (
+                      <div
+                        key={field.key}
+                        className="space-y-1.5 rounded-lg border border-border p-3"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <Label htmlFor={`cfg-${field.key}`}>
+                            {field.label}
+                          </Label>
+                          <Badge
+                            color={secretsConfigured ? "success" : "secondary"}
+                            variant="soft"
+                            className="text-[10px]"
+                          >
+                            {secretsConfigured
+                              ? "Terkonfigurasi"
+                              : "Belum diatur"}
+                          </Badge>
+                        </div>
+                        <Input
+                          id={`cfg-${field.key}`}
+                          type="password"
+                          autoComplete="new-password"
+                          placeholder={
+                            secretsConfigured
+                              ? "•••••••• (kosongkan untuk mempertahankan)"
+                              : "Masukkan secret platform..."
+                          }
+                          value={String(val ?? "")}
+                          onChange={(e) =>
+                            setDraftSettings((prev) => ({
+                              ...prev,
+                              [field.key]: e.target.value,
+                            }))
+                          }
+                        />
                       </div>
                     );
                   }

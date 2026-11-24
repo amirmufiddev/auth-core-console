@@ -20,6 +20,7 @@ import { Route as AuthVerify2faRouteImport } from './routes/_auth/verify-2fa'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin-billing'
 import { Route as AuthenticatedAdminTenantsRouteImport } from './routes/_authenticated/admin-tenants'
+import { Route as AuthenticatedAdminTiersRouteImport } from './routes/_authenticated/admin-tiers'
 import { Route as AuthenticatedApiKeysRouteImport } from './routes/_authenticated/api-keys'
 import { Route as AuthenticatedAuditLogsRouteImport } from './routes/_authenticated/audit-logs'
 import { Route as AuthenticatedAuthFeaturesRouteImport } from './routes/_authenticated/auth-features'
@@ -87,6 +88,11 @@ const AuthenticatedAdminTenantsRoute =
     path: '/admin-tenants',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminTiersRoute = AuthenticatedAdminTiersRouteImport.update({
+  id: '/admin-tiers',
+  path: '/admin-tiers',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedApiKeysRoute = AuthenticatedApiKeysRouteImport.update({
   id: '/api-keys',
   path: '/api-keys',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AuthenticatedAccountRoute
   '/admin-billing': typeof AuthenticatedAdminBillingRoute
   '/admin-tenants': typeof AuthenticatedAdminTenantsRoute
+  '/admin-tiers': typeof AuthenticatedAdminTiersRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
   '/audit-logs': typeof AuthenticatedAuditLogsRoute
   '/auth-features': typeof AuthenticatedAuthFeaturesRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/admin-billing': typeof AuthenticatedAdminBillingRoute
   '/admin-tenants': typeof AuthenticatedAdminTenantsRoute
+  '/admin-tiers': typeof AuthenticatedAdminTiersRoute
   '/api-keys': typeof AuthenticatedApiKeysRoute
   '/audit-logs': typeof AuthenticatedAuditLogsRoute
   '/auth-features': typeof AuthenticatedAuthFeaturesRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin-billing': typeof AuthenticatedAdminBillingRoute
   '/_authenticated/admin-tenants': typeof AuthenticatedAdminTenantsRoute
+  '/_authenticated/admin-tiers': typeof AuthenticatedAdminTiersRoute
   '/_authenticated/api-keys': typeof AuthenticatedApiKeysRoute
   '/_authenticated/audit-logs': typeof AuthenticatedAuditLogsRoute
   '/_authenticated/auth-features': typeof AuthenticatedAuthFeaturesRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin-billing'
     | '/admin-tenants'
+    | '/admin-tiers'
     | '/api-keys'
     | '/audit-logs'
     | '/auth-features'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin-billing'
     | '/admin-tenants'
+    | '/admin-tiers'
     | '/api-keys'
     | '/audit-logs'
     | '/auth-features'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account'
     | '/_authenticated/admin-billing'
     | '/_authenticated/admin-tenants'
+    | '/_authenticated/admin-tiers'
     | '/_authenticated/api-keys'
     | '/_authenticated/audit-logs'
     | '/_authenticated/auth-features'
@@ -371,6 +383,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-tenants'
       fullPath: '/admin-tenants'
       preLoaderRoute: typeof AuthenticatedAdminTenantsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin-tiers': {
+      id: '/_authenticated/admin-tiers'
+      path: '/admin-tiers'
+      fullPath: '/admin-tiers'
+      preLoaderRoute: typeof AuthenticatedAdminTiersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/api-keys': {
@@ -477,6 +496,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRoute
   AuthenticatedAdminTenantsRoute: typeof AuthenticatedAdminTenantsRoute
+  AuthenticatedAdminTiersRoute: typeof AuthenticatedAdminTiersRoute
   AuthenticatedApiKeysRoute: typeof AuthenticatedApiKeysRoute
   AuthenticatedAuditLogsRoute: typeof AuthenticatedAuditLogsRoute
   AuthenticatedAuthFeaturesRoute: typeof AuthenticatedAuthFeaturesRoute
@@ -493,6 +513,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRoute,
   AuthenticatedAdminTenantsRoute: AuthenticatedAdminTenantsRoute,
+  AuthenticatedAdminTiersRoute: AuthenticatedAdminTiersRoute,
   AuthenticatedApiKeysRoute: AuthenticatedApiKeysRoute,
   AuthenticatedAuditLogsRoute: AuthenticatedAuditLogsRoute,
   AuthenticatedAuthFeaturesRoute: AuthenticatedAuthFeaturesRoute,

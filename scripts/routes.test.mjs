@@ -105,6 +105,7 @@ test("menusConfig.mainNav, sidebarNav.modern, dan sidebarNav.classic sinkron", (
     "/auth-features",
     "/account",
     "/admin-tenants",
+    "/admin-tiers",
     "/admin-billing",
     "/tenants",
   ]) {
