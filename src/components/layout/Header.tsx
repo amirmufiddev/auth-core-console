@@ -8,7 +8,8 @@ import { cn, isLocationMatch } from "@/lib/utils";
 import { useLayoutStore } from "@/stores/useLayoutStore";
 import { useThemeStore } from "@/stores/useThemeStore";
 import { SignedIn, UserButton } from "@/components/better-auth";
-import { filterPlatformNavItems } from "@/components/layout/PlatformShell";
+import { filterPlatformNavItems } from "@/lib/filter-platform-nav";
+import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
 import { AppLogo } from "@/components/layout/AppLogo";
 import { Badge } from "@/components/ui/badge";
 import { BreadcrumbItem, Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -34,6 +35,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/platform/tiers": "Feature & Tier Matrix",
   "/platform/billing": "Billing Ledger",
   "/platform/staff": "Staf Platform",
+  "/platform/users": "Users",
   "/platform/roles": "Role Platform",
   "/platform/sessions": "Sesi Staf",
   "/platform/audit": "Audit Platform",
@@ -179,6 +181,10 @@ export function Header() {
             <Radio className="h-3 w-3" />
             {isExternalApi ? "Live Auth Core API" : "Local Hybrid Mode"}
           </Badge>
+
+          <SignedIn>
+            <WorkspaceSwitcher />
+          </SignedIn>
 
           <Button
             type="button"

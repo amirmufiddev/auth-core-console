@@ -57,7 +57,7 @@ describe("console shell", () => {
   });
 
   it("redirects legacy paths from the spec table", () => {
-    expect(redirectLegacyPath({ path: "/users", actor: platform, ownedTenantIds: [] })).toBe("/platform/staff");
+    expect(redirectLegacyPath({ path: "/users", actor: platform, ownedTenantIds: [] })).toBe("/platform/users");
     expect(redirectLegacyPath({ path: "/tenants", actor: platform, ownedTenantIds: [] })).toBe("/platform/tenants");
     expect(redirectLegacyPath({ path: "/tenants/ten_9", actor: platform, ownedTenantIds: [] })).toBe("/tenants/ten_9");
     expect(redirectLegacyPath({ path: "/api-keys", actor: platform, ownedTenantIds: [] })).toBe("/platform");

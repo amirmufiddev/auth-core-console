@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { fetchActorPermissions } from "@/api/actor-permissions";
+import { ensureActorPermissions } from "@/api/actor-permissions";
 import { Can } from "@/components/layout/Can";
 import {
   TenantBillingStatusBadge,
@@ -12,7 +12,7 @@ import { Route as TenantRoute } from "./route";
 export const Route = createFileRoute("/_authenticated/tenants/$tenantId/")({
   beforeLoad: async ({ context }) => {
     if (context.mode === "support") {
-      const { roles } = await fetchActorPermissions();
+      const roles = await ensureActorPermissions(context.queryClient);
       return { supportRoles: roles };
     }
     return {};

@@ -41,6 +41,7 @@ import { Route as AuthenticatedPlatformSessionsRouteImport } from './routes/_aut
 import { Route as AuthenticatedPlatformStaffRouteImport } from './routes/_authenticated/platform/staff'
 import { Route as AuthenticatedPlatformTenantsRouteImport } from './routes/_authenticated/platform/tenants'
 import { Route as AuthenticatedPlatformTiersRouteImport } from './routes/_authenticated/platform/tiers'
+import { Route as AuthenticatedPlatformUsersRouteImport } from './routes/_authenticated/platform/users'
 import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants/index'
 import { Route as AuthenticatedTenantsTenantIdRouteRouteImport } from './routes/_authenticated/tenants/$tenantId/route'
 import { Route as TTenantSlugAcceptInvitationRouteImport } from './routes/t/$tenantSlug/accept-invitation'
@@ -236,6 +237,12 @@ const AuthenticatedPlatformTiersRoute =
     path: '/tiers',
     getParentRoute: () => AuthenticatedPlatformRouteRoute,
   } as any)
+const AuthenticatedPlatformUsersRoute =
+  AuthenticatedPlatformUsersRouteImport.update({
+    id: '/users',
+    path: '/users',
+    getParentRoute: () => AuthenticatedPlatformRouteRoute,
+  } as any)
 const AuthenticatedTenantsIndexRoute =
   AuthenticatedTenantsIndexRouteImport.update({
     id: '/tenants/',
@@ -384,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/platform/staff': typeof AuthenticatedPlatformStaffRoute
   '/platform/tenants': typeof AuthenticatedPlatformTenantsRoute
   '/platform/tiers': typeof AuthenticatedPlatformTiersRoute
+  '/platform/users': typeof AuthenticatedPlatformUsersRoute
   '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRouteWithChildren
   '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
   '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
@@ -433,6 +441,7 @@ export interface FileRoutesByTo {
   '/platform/staff': typeof AuthenticatedPlatformStaffRoute
   '/platform/tenants': typeof AuthenticatedPlatformTenantsRoute
   '/platform/tiers': typeof AuthenticatedPlatformTiersRoute
+  '/platform/users': typeof AuthenticatedPlatformUsersRoute
   '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
   '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
   '/t/$tenantSlug/register': typeof TTenantSlugRegisterRoute
@@ -487,6 +496,7 @@ export interface FileRoutesById {
   '/_authenticated/platform/staff': typeof AuthenticatedPlatformStaffRoute
   '/_authenticated/platform/tenants': typeof AuthenticatedPlatformTenantsRoute
   '/_authenticated/platform/tiers': typeof AuthenticatedPlatformTiersRoute
+  '/_authenticated/platform/users': typeof AuthenticatedPlatformUsersRoute
   '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRouteWithChildren
   '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
   '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/platform/staff'
     | '/platform/tenants'
     | '/platform/tiers'
+    | '/platform/users'
     | '/t/$tenantSlug/accept-invitation'
     | '/t/$tenantSlug/consent'
     | '/t/$tenantSlug/login'
@@ -590,6 +601,7 @@ export interface FileRouteTypes {
     | '/platform/staff'
     | '/platform/tenants'
     | '/platform/tiers'
+    | '/platform/users'
     | '/t/$tenantSlug/consent'
     | '/t/$tenantSlug/login'
     | '/t/$tenantSlug/register'
@@ -643,6 +655,7 @@ export interface FileRouteTypes {
     | '/_authenticated/platform/staff'
     | '/_authenticated/platform/tenants'
     | '/_authenticated/platform/tiers'
+    | '/_authenticated/platform/users'
     | '/t/$tenantSlug/accept-invitation'
     | '/t/$tenantSlug/consent'
     | '/t/$tenantSlug/login'
@@ -902,6 +915,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlatformTiersRouteImport
       parentRoute: typeof AuthenticatedPlatformRouteRoute
     }
+    '/_authenticated/platform/users': {
+      id: '/_authenticated/platform/users'
+      path: '/users'
+      fullPath: '/platform/users'
+      preLoaderRoute: typeof AuthenticatedPlatformUsersRouteImport
+      parentRoute: typeof AuthenticatedPlatformRouteRoute
+    }
     '/_authenticated/tenants/': {
       id: '/_authenticated/tenants/'
       path: '/tenants'
@@ -1092,6 +1112,7 @@ interface AuthenticatedPlatformRouteRouteChildren {
   AuthenticatedPlatformStaffRoute: typeof AuthenticatedPlatformStaffRoute
   AuthenticatedPlatformTenantsRoute: typeof AuthenticatedPlatformTenantsRoute
   AuthenticatedPlatformTiersRoute: typeof AuthenticatedPlatformTiersRoute
+  AuthenticatedPlatformUsersRoute: typeof AuthenticatedPlatformUsersRoute
   AuthenticatedPlatformIndexRoute: typeof AuthenticatedPlatformIndexRoute
 }
 
@@ -1107,6 +1128,7 @@ const AuthenticatedPlatformRouteRouteChildren: AuthenticatedPlatformRouteRouteCh
     AuthenticatedPlatformStaffRoute: AuthenticatedPlatformStaffRoute,
     AuthenticatedPlatformTenantsRoute: AuthenticatedPlatformTenantsRoute,
     AuthenticatedPlatformTiersRoute: AuthenticatedPlatformTiersRoute,
+    AuthenticatedPlatformUsersRoute: AuthenticatedPlatformUsersRoute,
     AuthenticatedPlatformIndexRoute: AuthenticatedPlatformIndexRoute,
   }
 

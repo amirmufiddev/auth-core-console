@@ -94,9 +94,18 @@ import { toast } from "sonner";
 interface UsersPageProps {
   searchParams: UsersSearchParams;
   onUpdateSearch: (patch: Partial<UsersSearchParams>) => void;
+  listScope?: "platform" | "all";
+  pageTitle?: string;
+  pageDescription?: string;
 }
 
-export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
+export function UsersPage({
+  searchParams,
+  onUpdateSearch,
+  listScope = "platform",
+  pageTitle = "Users Management",
+  pageDescription = "Modul administrasi akun pengguna berbasis modul Admin Auth Core.",
+}: UsersPageProps) {
   const queryClient = useQueryClient();
   const isAdminEnabled = useAuthConfigStore((s) => s.isFeatureEnabled("admin"));
   const impersonateUser = useAuthStore((s) => s.impersonateUser);
@@ -113,8 +122,10 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
     ? [{ id: searchParams.sortBy, desc: searchParams.sortDir === "desc" }]
     : [];
 
+  const usersListScope = listScope === "all" ? "all" : "platform";
+
   const usersQuery = useQuery({
-    queryKey: ["users", searchParams],
+    queryKey: ["users", usersListScope, searchParams],
     queryFn: () =>
       listUsers({
         page: searchParams.page,
@@ -124,6 +135,7 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
         status: searchParams.status,
         sortBy: searchParams.sortBy,
         sortDir: searchParams.sortDir,
+        scope: usersListScope,
       }),
     enabled: isAdminEnabled,
   });
@@ -239,11 +251,9 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-default-900">
-            Users Management
+            {pageTitle}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Modul administrasi akun pengguna berbasis modul Admin Auth Core.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{pageDescription}</p>
         </div>
         <FeatureDisabledCard featureId="admin" />
       </div>
@@ -289,16 +299,32 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
     {
       accessorKey: "role",
       header: "Role",
-      cell: ({ row }) => (
-        <Badge
-          color={row.original.role.includes("admin") ? "default" : "secondary"}
-          variant="soft"
-          className="font-semiboldums text-xs"
-        >
-          {row.original.role}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        const role = row.original.role || "—";
+        return (
+          <Badge
+            color={role.includes("admin") ? "default" : "secondary"}
+            variant="soft"
+            className="font-semiboldums text-xs"
+          >
+            {role}
+          </Badge>
+        );
+      },
     },
+    ...(listScope === "all"
+      ? [
+          {
+            id: "tenantId",
+            header: "Tenant",
+            cell: ({ row }: { row: { original: AuthUserRecord } }) => (
+              <span className="font-mono text-xs text-muted-foreground">
+                {row.original.tenantId ?? "platform"}
+              </span>
+            ),
+          } satisfies ColumnDef<AuthUserRecord>,
+        ]
+      : []),
     {
       accessorKey: "banned",
       header: "Status",
@@ -447,7 +473,7 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-default-900">
-            Users Management
+            {pageTitle}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Kelola akun pengguna, role RBAC, 2FA, ban/unban, dan impersonation.

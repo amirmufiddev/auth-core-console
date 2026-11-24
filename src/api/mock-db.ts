@@ -2,6 +2,7 @@ import { type RoleRecord } from "@/lib/rbac";
 
 export interface AuthUserRecord {
   id: string;
+  tenantId?: string | null;
   name: string;
   email: string;
   username?: string;

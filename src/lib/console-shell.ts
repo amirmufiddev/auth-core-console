@@ -82,7 +82,7 @@ export function resolveTenantMode(input: {
 
 const PLATFORM_EXACT: Record<string, string> = {
   "/dashboard": "/platform",
-  "/users": "/platform/staff",
+  "/users": "/platform/users",
   "/roles": "/platform/roles",
   "/sessions": "/platform/sessions",
   "/audit-logs": "/platform/audit",

@@ -27,7 +27,13 @@ function StaffRouteComponent() {
   };
 
   return (
-    <UsersPage searchParams={search} onUpdateSearch={handleUpdateSearch} />
+    <UsersPage
+      searchParams={search}
+      onUpdateSearch={handleUpdateSearch}
+      listScope="platform"
+      pageTitle="Staf Platform"
+      pageDescription="Akun operator dengan tenant_id kosong (hanya platform)."
+    />
   );
 }
 

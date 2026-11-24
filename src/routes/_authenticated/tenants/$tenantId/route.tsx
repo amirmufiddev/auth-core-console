@@ -9,13 +9,13 @@ import {
 } from "@/components/layout/ShellState";
 
 export const Route = createFileRoute("/_authenticated/tenants/$tenantId")({
-  beforeLoad: async ({ params }) => {
+  beforeLoad: async ({ params, context }) => {
     const user = useAuthStore.getState().user;
     const actor = {
       role: user?.role ?? null,
       tenantId: null,
     };
-    return loadTenantShell(params.tenantId, actor);
+    return loadTenantShell(params.tenantId, actor, context.queryClient);
   },
   component: function TenantShellRoute() {
     const { mode, tenant } = Route.useRouteContext();

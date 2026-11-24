@@ -1,18 +1,18 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
-import { fetchActorPermissions } from "@/api/actor-permissions";
+import { ensureActorPermissions } from "@/api/actor-permissions";
 import { resolveAuthenticatedHome } from "@/lib/console-home";
 import { isPlatformActor, toConsoleActor } from "@/lib/console-shell";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { PlatformShell } from "@/components/layout/PlatformShell";
 
 export const Route = createFileRoute("/_authenticated/platform")({
-  beforeLoad: async () => {
+  beforeLoad: async ({ context }) => {
     const user = useAuthStore.getState().user;
     const actor = toConsoleActor(user);
     if (!user || !isPlatformActor(actor)) {
       throw redirect({ href: await resolveAuthenticatedHome() });
     }
-    const { roles } = await fetchActorPermissions();
+    const roles = await ensureActorPermissions(context.queryClient);
     return { roles };
   },
   component: function PlatformRoute() {

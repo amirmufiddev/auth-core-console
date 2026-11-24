@@ -2,6 +2,7 @@ import {
   Activity,
   Building2,
   CreditCard,
+  Globe,
   KeyRound,
   LayoutDashboard,
   type LucideIcon,
@@ -49,9 +50,15 @@ export const platformNav: MenuItemProps[] = [
     permission: { resource: "organization", action: "read" },
   },
   {
+    title: "Users",
+    href: "/platform/users",
+    icon: Users,
+    permission: { resource: "user", action: "read" },
+  },
+  {
     title: "Staf Platform",
     href: "/platform/staff",
-    icon: Users,
+    icon: UserCog,
     permission: { resource: "user", action: "read" },
   },
   {
@@ -104,6 +111,14 @@ export const menusConfig: {
     classic: platformNav,
   },
 };
+
+export const ownerPortalNav: MenuItemProps[] = [
+  {
+    title: "Tenant Saya",
+    href: "/tenants",
+    icon: Globe,
+  },
+];
 
 export function tenantNav(tenantId: string): MenuItemProps[] {
   return [

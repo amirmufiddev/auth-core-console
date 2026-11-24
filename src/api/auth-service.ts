@@ -31,6 +31,7 @@ export interface ListUsersParams {
   status?: "all" | "active" | "banned" | "unverified";
   sortBy?: string;
   sortDir?: "asc" | "desc";
+  scope?: "platform" | "all";
 }
 
 export interface DashboardMetrics {
@@ -119,12 +120,17 @@ export async function listUsers(
         status: params.status,
         sortBy: params.sortBy,
         sortDir: params.sortDir,
+        userScope: params.scope,
       })}`,
     );
   }
 
   const db = readMockDb();
   let list = [...db.users];
+
+  if (params.scope !== "all") {
+    list = list.filter((u) => u.tenantId == null || u.tenantId === undefined);
+  }
 
   if (params.search) {
     const q = params.search.toLowerCase();

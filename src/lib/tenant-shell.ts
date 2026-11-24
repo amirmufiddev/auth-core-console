@@ -1,4 +1,8 @@
-import { fetchActorPermissions } from "@/api/actor-permissions";
+import type { QueryClient } from "@tanstack/react-query";
+import {
+  ensureActorPermissions,
+  fetchActorPermissions,
+} from "@/api/actor-permissions";
 import { ApiRequestError, isExternalBackendConfigured } from "@/api/client";
 import {
   adminGetTenant,
@@ -20,12 +24,15 @@ function isTenantNotFoundError(err: unknown): boolean {
 export async function loadTenantShell(
   tenantId: string,
   actor: ConsoleActor,
+  queryClient?: QueryClient,
 ): Promise<{ mode: TenantShellMode; tenant: TenantRecord | null }> {
   const isPlatform = isPlatformActor(actor);
   let canReadTenants = false;
 
   if (isPlatform) {
-    const { roles } = await fetchActorPermissions();
+    const roles = queryClient
+      ? await ensureActorPermissions(queryClient)
+      : (await fetchActorPermissions()).roles;
     canReadTenants = canPlatform(roles, "organization", "read");
   }
 

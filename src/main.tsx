@@ -10,8 +10,18 @@ import { routeTree } from "./routeTree.gen";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 15,
-      retry: 1,
+      staleTime: 1000 * 30,
+      retry: (failureCount, error) => {
+        if (
+          error &&
+          typeof error === "object" &&
+          "status" in error &&
+          (error as { status: number }).status === 429
+        ) {
+          return false;
+        }
+        return failureCount < 1;
+      },
     },
   },
 });

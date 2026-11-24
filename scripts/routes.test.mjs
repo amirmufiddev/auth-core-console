@@ -62,6 +62,7 @@ test("platformNav terdaftar dan sinkron dengan menusConfig", () => {
     "/platform/tenants",
     "/platform/tiers",
     "/platform/billing",
+    "/platform/users",
     "/platform/staff",
     "/platform/roles",
     "/platform/sessions",
@@ -236,6 +237,7 @@ const platformRoutes = [
   "src/routes/_authenticated/platform/tenants.tsx",
   "src/routes/_authenticated/platform/tiers.tsx",
   "src/routes/_authenticated/platform/billing.tsx",
+  "src/routes/_authenticated/platform/users.tsx",
   "src/routes/_authenticated/platform/staff.tsx",
   "src/routes/_authenticated/platform/roles.tsx",
   "src/routes/_authenticated/platform/sessions.tsx",
@@ -253,8 +255,9 @@ test("file route platform shell terdaftar", () => {
   }
 });
 
-test("Header tidak merender OrganizationSwitcher", () => {
+test("Header memakai WorkspaceSwitcher tanpa OrganizationSwitcher", () => {
   const headerSource = readUtf8("src/components/layout/Header.tsx");
+  assert.match(headerSource, /WorkspaceSwitcher/);
   assert.doesNotMatch(headerSource, /<OrganizationSwitcher/);
 });
 
