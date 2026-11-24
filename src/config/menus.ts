@@ -1,5 +1,6 @@
 import {
   Activity,
+  AppWindow,
   Building2,
   CreditCard,
   Globe,
@@ -7,6 +8,7 @@ import {
   LayoutDashboard,
   type LucideIcon,
   ScrollText,
+  Settings,
   ShieldCheck,
   SlidersHorizontal,
   UserCog,
@@ -50,13 +52,13 @@ export const platformNav: MenuItemProps[] = [
     permission: { resource: "organization", action: "read" },
   },
   {
-    title: "Users",
+    title: "Direktori akun",
     href: "/platform/users",
     icon: Users,
     permission: { resource: "user", action: "read" },
   },
   {
-    title: "Staf Platform",
+    title: "Staf platform",
     href: "/platform/staff",
     icon: UserCog,
     permission: { resource: "user", action: "read" },
@@ -130,20 +132,20 @@ export function tenantNav(tenantId: string): MenuItemProps[] {
     {
       title: "Pengaturan",
       href: `/tenants/${tenantId}/settings`,
-      icon: SlidersHorizontal,
+      icon: Settings,
     },
     {
-      title: "IAM Features",
+      title: "Fitur IAM",
       href: `/tenants/${tenantId}/features`,
       icon: SlidersHorizontal,
     },
     {
-      title: "OAuth 2.1 / MCP",
+      title: "Aplikasi terhubung",
       href: `/tenants/${tenantId}/oauth-clients`,
-      icon: KeyRound,
+      icon: AppWindow,
     },
     {
-      title: "API Keys",
+      title: "API key",
       href: `/tenants/${tenantId}/api-keys`,
       icon: KeyRound,
     },

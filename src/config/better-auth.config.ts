@@ -814,7 +814,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     pluginKey: "organization",
     clientPluginKey: "organizationClient",
     description:
-      "Multi-tenant organisasi, role per org, teams, dan undangan member.",
+      "Workspace di dalam tenant: peran anggota, tim, dan undangan.",
     defaultEnabled: readEnvBool("VITE_FEATURE_ORGANIZATION", true),
     endpoints: [
       "/api/auth/organization/create",

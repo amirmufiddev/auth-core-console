@@ -31,8 +31,8 @@ function UsersRouteComponent() {
       searchParams={search}
       onUpdateSearch={handleUpdateSearch}
       listScope="all"
-      pageTitle="Users"
-      pageDescription="Seluruh akun platform dan tenant dalam satu direktori."
+      pageTitle="Direktori akun"
+      pageDescription="Semua akun operator dan pengguna tenant. Cari orang di sini, lalu masuk sebagai mereka bila peran Anda mengizinkan. Daftar yang hanya berisi staf ada di menu Staf platform."
     />
   );
 }

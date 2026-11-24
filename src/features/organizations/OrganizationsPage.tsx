@@ -59,10 +59,11 @@ export function OrganizationsPage({
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-default-900">
-            Organizations & Multi-Tenancy
+            Organisasi
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manajemen tenant, anggota, sub-tim, dan undangan tenant.
+            Workspace di dalam tenant ini. Anggota, tim, dan undangan hidup di
+            sini, terpisah dari batas tenant.
           </p>
         </div>
         <FeatureDisabledCard featureId="organization" />
@@ -88,7 +89,7 @@ export function OrganizationsPage({
             <div className="font-semibold text-default-900">
               {row.original.name}
             </div>
-            <div className="font-semiboldums text-xs text-muted-foreground">
+            <div className="font-mono text-xs text-muted-foreground">
               {row.original.slug}
             </div>
           </div>
@@ -136,7 +137,7 @@ export function OrganizationsPage({
             onClick={() => setSelectedOrg(row.original)}
           >
             <Eye className="mr-1.5 h-3.5 w-3.5" />
-            Kelola Tenant
+            Kelola organisasi
           </Button>
         </div>
       ),
@@ -148,10 +149,11 @@ export function OrganizationsPage({
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-default-900">
-            Organizations & Multi-Tenancy
+            Organisasi
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Kelola tenant organisasi, sub-tim, peran member, dan undangan email.
+            Workspace milik pengguna tenant ini. Kelola anggota, tim, dan
+            undangan email.
           </p>
         </div>
         <Button color="primary" onClick={() => setCreateOpen(true)}>
@@ -175,7 +177,7 @@ export function OrganizationsPage({
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>SSO Enabled Tenants</span>
+              <span>Organisasi dengan SSO</span>
               <ShieldCheck className="h-4 w-4 text-success" />
             </div>
             <div className="mt-2 text-2xl font-bold text-default-900">
@@ -199,7 +201,7 @@ export function OrganizationsPage({
       <Card>
         <CardHeader className="mb-0">
           <CardTitle className="text-base font-semibold">
-            Daftar Tenant Organisasi
+            Daftar organisasi
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">

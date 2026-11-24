@@ -181,7 +181,7 @@ export function PortalTenantsPage({
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-default-900">
-            Portal Pelanggan — Tenant Saya
+            Tenant saya
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Buat dan kelola tenant aplikasi, OAuth 2.1 / MCP client, dan

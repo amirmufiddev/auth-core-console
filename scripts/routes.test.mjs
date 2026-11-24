@@ -115,7 +115,7 @@ test("tenantNav memasang sembilan menu di bawah id tenant", () => {
 });
 
 test("matriks role platform menyembunyikan apiKey, oauthClient, dan sso", () => {
-  const source = readUtf8("src/lib/rbac.ts");
+  const source = readUtf8("src/config/platform-permissions.ts");
   for (const resource of ["apiKey", "oauthClient", "sso"]) {
     const block = source.slice(source.indexOf(`resource: "${resource}"`));
     assert.match(block, /shownInPlatformMatrix:\s*false/);

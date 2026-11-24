@@ -473,37 +473,50 @@ export function TenantLoginPage({
         <div className="space-y-4">
           <Alert color="success" variant="soft">
             <CheckCircle2 className="h-4 w-4" />
-            <AlertTitle className="text-sm">Sesi Tenant Aktif</AlertTitle>
+            <AlertTitle className="text-sm">Anda sudah masuk</AlertTitle>
             <AlertDescription className="text-xs">
-              Anda masuk sebagai{" "}
               <span className="font-semibold">
                 {activeSession.user.name || activeSession.user.email}
               </span>{" "}
-              ({activeSession.user.email}) pada tenant{" "}
+              ({activeSession.user.email}) di tenant{" "}
               <span className="font-mono font-semibold">{tenantSlug}</span>.
+              Lanjutkan di aplikasi yang mengarahkan Anda ke halaman ini.
+              Workspace dan undangan diatur dari aplikasi itu.
             </AlertDescription>
           </Alert>
 
-          <div className="space-y-1.5 rounded-xl border border-border/60 bg-muted/40 p-3 text-xs">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground">User ID</span>
-              <span className="font-mono text-foreground">
-                {activeSession.user.id}
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground">Tenant ID</span>
-              <span className="font-mono text-foreground">
-                {activeSession.user.tenantId ?? "-"}
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground">Active Organization</span>
-              <span className="font-mono text-foreground">
-                {activeSession.session?.activeOrganizationId ?? "Belum dipilih"}
-              </span>
+          <div className="rounded-xl border border-border/60 bg-muted/40 p-3 text-xs">
+            <div className="text-muted-foreground">Workspace aktif</div>
+            <div className="mt-1 text-foreground">
+              {activeSession.session?.activeOrganizationId ? (
+                <span className="font-mono">
+                  {activeSession.session.activeOrganizationId}
+                </span>
+              ) : (
+                "Belum ada. Pemilik workspace membuat organisasi dari aplikasi yang terhubung ke tenant ini."
+              )}
             </div>
           </div>
+
+          <details className="rounded-xl border border-border/60 px-3 py-2 text-xs">
+            <summary className="cursor-pointer text-muted-foreground">
+              Pengenal untuk integrasi
+            </summary>
+            <div className="mt-2 space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">User ID</span>
+                <span className="font-mono text-foreground">
+                  {activeSession.user.id}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">Tenant ID</span>
+                <span className="font-mono text-foreground">
+                  {activeSession.user.tenantId ?? "-"}
+                </span>
+              </div>
+            </div>
+          </details>
 
           <Button
             type="button"

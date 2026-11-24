@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { PlatformHomePage } from "@/features/dashboard/PlatformHomePage";
+import { Route as PlatformRoute } from "./route";
 
 export const Route = createFileRoute("/_authenticated/platform/")({
-  component: DashboardPage,
+  component: function PlatformIndexRoute() {
+    const { roles } = PlatformRoute.useRouteContext();
+    return <PlatformHomePage roles={roles} />;
+  },
 });

@@ -353,7 +353,7 @@ export function AdminTenantsPage({
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-default-900">
-            Operator Tenants Management
+            Direktori tenant
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Kelola tenant multi-tenant, upgrade/downgrade tier, dan kontrol

@@ -1,6 +1,18 @@
 <!doctype html>
 <html lang="id">
   <head>
+    <script>
+      if (location.hostname === "127.0.0.1") {
+        location.replace(
+          location.protocol +
+            "//localhost" +
+            (location.port ? ":" + location.port : "") +
+            location.pathname +
+            location.search +
+            location.hash,
+        );
+      }
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Auth Core — Identity & Access Management Console</title>

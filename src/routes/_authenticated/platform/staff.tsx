@@ -31,8 +31,8 @@ function StaffRouteComponent() {
       searchParams={search}
       onUpdateSearch={handleUpdateSearch}
       listScope="platform"
-      pageTitle="Staf Platform"
-      pageDescription="Akun operator dengan tenant_id kosong (hanya platform)."
+      pageTitle="Staf platform"
+      pageDescription="Akun operator Auth Core. Pengguna aplikasi pelanggan tidak muncul di daftar ini."
     />
   );
 }

@@ -68,10 +68,10 @@ export function PortalTenantUsersTab({
     },
     {
       accessorKey: "role",
-      header: "Role",
+      header: "Peran",
       cell: ({ row }) => (
         <Badge color="secondary" variant="soft" className="text-xs">
-          {row.original.role || "member"}
+          {row.original.role || "Pengguna tenant"}
         </Badge>
       ),
     },
