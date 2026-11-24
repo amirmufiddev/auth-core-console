@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useMatches, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Menu, Moon, Radio, Search, Settings, Sun } from "lucide-react";
 import { menusConfig } from "@/config/menus";
 import { isExternalBackendConfigured } from "@/api/client";
+import type { ActorRoleGrant } from "@/lib/console-shell";
 import { cn, isLocationMatch } from "@/lib/utils";
 import { useLayoutStore } from "@/stores/useLayoutStore";
 import { useThemeStore } from "@/stores/useThemeStore";
-import {
-  OrganizationSwitcher,
-  SignedIn,
-  UserButton,
-} from "@/components/better-auth";
+import { SignedIn, UserButton } from "@/components/better-auth";
+import { filterPlatformNavItems } from "@/components/layout/PlatformShell";
 import { AppLogo } from "@/components/layout/AppLogo";
 import { Badge } from "@/components/ui/badge";
 import { BreadcrumbItem, Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -31,7 +29,27 @@ const ROUTE_TITLES: Record<string, string> = {
   "/admin-tiers": "Feature & Tier Matrix",
   "/admin-billing": "Billing Ledger",
   "/tenants": "Tenant Portal",
+  "/platform": "Overview",
+  "/platform/tenants": "Tenants",
+  "/platform/tiers": "Feature & Tier Matrix",
+  "/platform/billing": "Billing Ledger",
+  "/platform/staff": "Staf Platform",
+  "/platform/roles": "Role Platform",
+  "/platform/sessions": "Sesi Staf",
+  "/platform/audit": "Audit Platform",
+  "/platform/auth-features": "Auth Features",
+  "/platform/account": "Akun",
 };
+
+function platformRolesFromMatches(
+  matches: ReturnType<typeof useMatches>,
+): ActorRoleGrant[] | undefined {
+  const platformMatch = matches.find(
+    (match) => match.routeId === "/_authenticated/platform",
+  );
+  const context = platformMatch?.context as { roles?: ActorRoleGrant[] } | undefined;
+  return context?.roles;
+}
 
 export function Header() {
   const navigate = useNavigate();
@@ -39,10 +57,17 @@ export function Header() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
+  const matches = useMatches();
+  const isPlatformShell = pathname.startsWith("/platform");
+  const platformRoles = isPlatformShell
+    ? platformRolesFromMatches(matches)
+    : undefined;
 
-  const quickNavItems = menusConfig.mainNav.flatMap((group) =>
-    (group.child ?? []).filter((item) => Boolean(item.href)),
-  );
+  const quickNavItems = isPlatformShell
+    ? (platformRoles ? filterPlatformNavItems(platformRoles) : []).filter(
+        (item) => Boolean(item.href),
+      )
+    : [];
   const filteredNavItems = searchQuery.trim()
     ? quickNavItems.filter((item) =>
         item.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
@@ -57,6 +82,13 @@ export function Header() {
   const setMobileSidebarOpen = useLayoutStore((s) => s.setMobileSidebarOpen);
 
   const isExternalApi = isExternalBackendConfigured();
+  const homeCrumb = isPlatformShell ? "/platform" : "/dashboard";
+  const settingsHref = isPlatformShell ? "/platform/account" : "/account";
+  const horizontalNavItems = isPlatformShell
+    ? quickNavItems
+    : menusConfig.mainNav.flatMap((group) =>
+        (group.child ?? []).filter((item) => Boolean(item.href)),
+      );
   const currentLabel =
     ROUTE_TITLES[pathname] ??
     (pathname.startsWith("/tenants/") ? "Detail Tenant" : "Console");
@@ -90,13 +122,16 @@ export function Header() {
           </Button>
 
           {navStyle === "horizontal" && (
-            <Link to="/dashboard" className="hidden items-center gap-2 lg:flex">
+            <Link
+              to={homeCrumb}
+              className="hidden items-center gap-2 lg:flex"
+            >
               <AppLogo showText size="sm" />
             </Link>
           )}
 
           <Breadcrumbs size="sm">
-            <BreadcrumbItem href="/dashboard">Auth Core</BreadcrumbItem>
+            <BreadcrumbItem href={homeCrumb}>Auth Core</BreadcrumbItem>
             <BreadcrumbItem isCurrent>{currentLabel}</BreadcrumbItem>
           </Breadcrumbs>
         </div>
@@ -145,10 +180,6 @@ export function Header() {
             {isExternalApi ? "Live Auth Core API" : "Local Hybrid Mode"}
           </Badge>
 
-          <SignedIn>
-            <OrganizationSwitcher />
-          </SignedIn>
-
           <Button
             type="button"
             variant="ghost"
@@ -174,7 +205,7 @@ export function Header() {
             asChild
             aria-label="Pengaturan Tema & Akun"
           >
-            <Link to="/account" search={{ tab: "preferences" }}>
+            <Link to={settingsHref} search={{ tab: "preferences" }}>
               <Settings className="h-4 w-4" />
             </Link>
           </Button>
@@ -187,28 +218,26 @@ export function Header() {
 
       {navStyle === "horizontal" && (
         <div className="hidden border-t border-border bg-card px-6 py-2 lg:flex lg:items-center lg:gap-1">
-          {menusConfig.mainNav.flatMap((group) =>
-            (group.child ?? []).map((item) => {
-              if (!item.href) return null;
-              const Icon = item.icon;
-              const active = isLocationMatch(item.href, pathname);
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                    active
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                      : "text-sidebar-foreground hover:bg-accent/70 hover:text-accent-foreground",
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{item.title}</span>
-                </Link>
-              );
-            }),
-          )}
+          {horizontalNavItems.map((item) => {
+            if (!item.href) return null;
+            const Icon = item.icon;
+            const active = isLocationMatch(item.href, pathname);
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  active
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                    : "text-sidebar-foreground hover:bg-accent/70 hover:text-accent-foreground",
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span>{item.title}</span>
+              </Link>
+            );
+          })}
         </div>
       )}
     </header>

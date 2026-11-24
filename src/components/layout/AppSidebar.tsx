@@ -24,20 +24,16 @@ import {
 function SidebarMenuContent({
   collapsed,
   onNavigate,
+  items,
 }: {
   collapsed: boolean;
   onNavigate?: () => void;
+  items: MenuItemProps[];
 }) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const navStyle = useLayoutStore((s) => s.navStyle);
   const features = useAuthConfigStore((s) => s.features);
-
-  const items: MenuItemProps[] =
-    navStyle === "classic"
-      ? menusConfig.sidebarNav.classic
-      : menusConfig.sidebarNav.modern;
 
   const renderLeafLink = (item: MenuItemProps) => {
     if (!item.href) return null;
@@ -149,7 +145,13 @@ function SidebarMenuContent({
   );
 }
 
-export function AppSidebar() {
+export function AppSidebar({
+  items,
+  logoHref = "/dashboard",
+}: {
+  items?: MenuItemProps[];
+  logoHref?: string;
+} = {}) {
   const sidebarCollapsed = useLayoutStore((s) => s.sidebarCollapsed);
   const toggleSidebarCollapsed = useLayoutStore(
     (s) => s.toggleSidebarCollapsed,
@@ -159,6 +161,11 @@ export function AppSidebar() {
   const navStyle = useLayoutStore((s) => s.navStyle);
   const sidebarType = useLayoutStore((s) => s.sidebarType);
   const isCollapsed = sidebarCollapsed || sidebarType === "popover";
+  const sidebarItems =
+    items ??
+    (navStyle === "classic"
+      ? menusConfig.sidebarNav.classic
+      : menusConfig.sidebarNav.modern);
 
   if (navStyle === "horizontal") {
     return (
@@ -173,6 +180,7 @@ export function AppSidebar() {
             <SidebarMenuContent
               collapsed={false}
               onNavigate={() => setMobileSidebarOpen(false)}
+              items={sidebarItems}
             />
           </ScrollArea>
         </SheetContent>
@@ -194,7 +202,7 @@ export function AppSidebar() {
             isCollapsed ? "justify-center" : "justify-between",
           )}
         >
-          <Link to="/dashboard" className="flex items-center gap-2.5">
+          <Link to={logoHref} className="flex items-center gap-2.5">
             <AppLogo
               showText={!isCollapsed}
               subtitle="Centralized IAM System"
@@ -218,7 +226,7 @@ export function AppSidebar() {
         </div>
 
         <ScrollArea className="min-h-0 flex-1">
-          <SidebarMenuContent collapsed={isCollapsed} />
+          <SidebarMenuContent collapsed={isCollapsed} items={sidebarItems} />
         </ScrollArea>
 
         {isCollapsed && (
@@ -249,6 +257,7 @@ export function AppSidebar() {
             <SidebarMenuContent
               collapsed={false}
               onNavigate={() => setMobileSidebarOpen(false)}
+              items={sidebarItems}
             />
           </ScrollArea>
         </SheetContent>

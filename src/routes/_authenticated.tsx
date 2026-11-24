@@ -1,7 +1,6 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { isExternalBackendConfigured } from "@/api/client";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
@@ -9,7 +8,6 @@ import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
 function AuthenticatedLayout() {
   return (
     <div className="flex min-h-screen bg-page-bg text-foreground">
-      <AppSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Header />
         <main className="flex-1 p-4 sm:p-6">

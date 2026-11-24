@@ -230,6 +230,34 @@ test("katalog fitur Better Auth tidak memiliki duplikasi ID dan semua dependency
   }
 });
 
+const platformRoutes = [
+  "src/routes/_authenticated/platform/route.tsx",
+  "src/routes/_authenticated/platform/index.tsx",
+  "src/routes/_authenticated/platform/tenants.tsx",
+  "src/routes/_authenticated/platform/tiers.tsx",
+  "src/routes/_authenticated/platform/billing.tsx",
+  "src/routes/_authenticated/platform/staff.tsx",
+  "src/routes/_authenticated/platform/roles.tsx",
+  "src/routes/_authenticated/platform/sessions.tsx",
+  "src/routes/_authenticated/platform/audit.tsx",
+  "src/routes/_authenticated/platform/auth-features.tsx",
+  "src/routes/_authenticated/platform/account.tsx",
+];
+
+test("file route platform shell terdaftar", () => {
+  for (const route of platformRoutes) {
+    assert.ok(
+      fs.existsSync(path.join(ROOT, route)),
+      `File route platform tidak ditemukan: ${route}`,
+    );
+  }
+});
+
+test("Header tidak merender OrganizationSwitcher", () => {
+  const headerSource = readUtf8("src/components/layout/Header.tsx");
+  assert.doesNotMatch(headerSource, /<OrganizationSwitcher/);
+});
+
 test("komponen better-auth mandiri tidak memakai package better-auth-ui eksternal", () => {
   const pkgJson = JSON.parse(readUtf8("package.json"));
   const allDeps = {
