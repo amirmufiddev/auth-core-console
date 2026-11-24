@@ -3,6 +3,7 @@ import { Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { isExternalBackendConfigured } from "@/api/client";
 import { type MagicLinkValues, magicLinkSchema } from "@/features/auth/schema";
+import { resolvePostAuthRedirect } from "@/lib/console-home";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export function MagicLinkForm({
-  redirectTo = "/dashboard",
+  redirectTo,
 }: {
   redirectTo?: string;
 }) {
@@ -37,7 +38,7 @@ export function MagicLinkForm({
             return;
           }
           toast.success("Magic link diverifikasi. Berhasil masuk.");
-          navigate(redirectTo);
+          navigate(await resolvePostAuthRedirect(redirectTo));
         } catch (err) {
           toast.error(err instanceof Error ? err.message : "Magic link gagal.");
         }

@@ -24,6 +24,7 @@ export interface AuthSessionUser {
   email: string;
   username?: string;
   role: string;
+  tenantId: string | null;
   emailVerified: boolean;
   twoFactorEnabled: boolean;
   organizationName?: string;
@@ -98,6 +99,7 @@ function toSessionUser(record: AuthUserRecord): AuthSessionUser {
     email: record.email,
     username: record.username,
     role: record.role,
+    tenantId: null,
     emailVerified: record.emailVerified,
     twoFactorEnabled: record.twoFactorEnabled,
     organizationName: record.organizationName,
@@ -266,6 +268,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
         email: rawUser.email,
         username: rawUser.username,
         role: rawUser.role ?? "user",
+        tenantId: null,
         emailVerified: Boolean(rawUser.emailVerified),
         twoFactorEnabled: Boolean(rawUser.twoFactorEnabled),
         avatarUrl: rawUser.image ?? undefined,
@@ -345,6 +348,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
                 name: identifier,
                 email: identifier,
                 role: "user",
+                tenantId: null,
                 emailVerified: true,
                 twoFactorEnabled: true,
                 linkedProviders: ["email"],
@@ -470,7 +474,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
       if (isExternalBackendConfigured()) {
         const safeRedirect = redirectTo
           ? sanitizeRelativeRedirect(redirectTo)
-          : "/dashboard";
+          : "/";
         const res = await authClient.signIn.magicLink({
           email,
           callbackURL: `${window.location.origin}${safeRedirect}`,
@@ -602,7 +606,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
       if (isExternalBackendConfigured()) {
         const safeRedirect = redirectTo
           ? sanitizeRelativeRedirect(redirectTo)
-          : "/dashboard";
+          : "/";
         const res = await authClient.signIn.social({
           provider: provider as Parameters<
             typeof authClient.signIn.social
@@ -656,6 +660,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
         name: "Guest Session",
         email: `guest-${Date.now().toString(36)}@guest.authcore.local`,
         role: "user",
+        tenantId: null,
         emailVerified: false,
         twoFactorEnabled: false,
         organizationName: "Guest Sandbox",
@@ -693,6 +698,7 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
         email,
         username,
         role: "user",
+        tenantId: null,
         emailVerified: false,
         twoFactorEnabled: false,
         organizationName: "Auth Core HQ",

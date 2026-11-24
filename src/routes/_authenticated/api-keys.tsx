@@ -1,29 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ApiKeysPage } from "@/features/api-keys/ApiKeysPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
 import {
-  type ApiKeysSearchParams,
-  apiKeysSearchSchema,
-} from "@/features/api-keys/schema";
-
-function ApiKeysRouteComponent() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-
-  const handleUpdateSearch = (patch: Partial<ApiKeysSearchParams>) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        ...patch,
-      }),
-    });
-  };
-
-  return (
-    <ApiKeysPage searchParams={search} onUpdateSearch={handleUpdateSearch} />
-  );
-}
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/api-keys")({
-  validateSearch: apiKeysSearchSchema,
-  component: ApiKeysRouteComponent,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/api-keys",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });

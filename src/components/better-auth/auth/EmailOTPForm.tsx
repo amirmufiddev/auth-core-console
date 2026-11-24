@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, Check, Mail } from "lucide-react";
 import { isExternalBackendConfigured } from "@/api/client";
 import { authClient } from "@/lib/auth-client";
+import { resolvePostAuthRedirect } from "@/lib/console-home";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthStage } from "@/components/auth/AuthStageContext";
 import { AuthMascot } from "@/components/auth/AuthMascot";
@@ -24,7 +25,7 @@ export interface EmailOTPFormProps {
 }
 
 export function EmailOTPForm({
-  redirectTo = "/dashboard",
+  redirectTo,
   onStepChange,
 }: EmailOTPFormProps) {
   const { features, navigate } = useAuthUI();
@@ -134,8 +135,8 @@ export function EmailOTPForm({
         setStep("verified");
         setIsVerifying(false);
         toast.success("Verifikasi OTP berhasil. Selamat datang!");
-        window.setTimeout(() => {
-          navigate(redirectTo);
+        window.setTimeout(async () => {
+          navigate(await resolvePostAuthRedirect(redirectTo));
         }, 650);
         return;
       }
@@ -152,7 +153,7 @@ export function EmailOTPForm({
             otp,
           });
           toast.success("Verifikasi OTP berhasil. Selamat datang!");
-          navigate(redirectTo);
+          navigate(await resolvePostAuthRedirect(redirectTo));
         } catch (err) {
           setStep("verify");
           setErrorMsg(

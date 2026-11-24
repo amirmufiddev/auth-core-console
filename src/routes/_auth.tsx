@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { CheckCircle2, Moon, Sun } from "lucide-react";
 import { BETTER_AUTH_FEATURES } from "@/config/better-auth.config";
+import { resolveAuthenticatedHome } from "@/lib/console-home";
 import { resolveTenantFromHostname } from "@/lib/tenant-context";
 import { cn } from "@/lib/utils";
 import { useAuthConfigStore } from "@/stores/useAuthConfigStore";
@@ -150,7 +151,7 @@ function AuthLayoutComponent() {
 }
 
 export const Route = createFileRoute("/_auth")({
-  beforeLoad: ({ location }) => {
+  beforeLoad: async ({ location }) => {
     if (
       location.pathname === "/consent" ||
       location.pathname.startsWith("/auth/accept-invitation") ||
@@ -161,7 +162,7 @@ export const Route = createFileRoute("/_auth")({
     }
     const user = useAuthStore.getState().user;
     if (user) {
-      throw redirect({ to: "/dashboard" });
+      throw redirect({ href: await resolveAuthenticatedHome() });
     }
   },
   component: AuthLayoutComponent,

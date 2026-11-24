@@ -17,6 +17,15 @@ export interface ConsoleMenuItem {
 
 export type TenantShellMode = "owner" | "support" | "denied" | "not_found";
 
+export function toConsoleActor(
+  user: { role: string; tenantId?: string | null } | null,
+): ConsoleActor {
+  return {
+    role: user?.role ?? null,
+    tenantId: user?.tenantId ?? null,
+  };
+}
+
 export function roleSlugs(role: string | null): string[] {
   return (role ?? "")
     .split(",")

@@ -1,7 +1,7 @@
 import { AuthView } from "@/components/better-auth";
 
 export function LoginPage({
-  redirectTo = "/dashboard",
+  redirectTo,
 }: {
   redirectTo?: string;
 }) {

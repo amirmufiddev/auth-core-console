@@ -1,29 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { UsersPage } from "@/features/users/UsersPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
 import {
-  type UsersSearchParams,
-  usersSearchSchema,
-} from "@/features/users/schema";
-
-function UsersRouteComponent() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-
-  const handleUpdateSearch = (patch: Partial<UsersSearchParams>) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        ...patch,
-      }),
-    });
-  };
-
-  return (
-    <UsersPage searchParams={search} onUpdateSearch={handleUpdateSearch} />
-  );
-}
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/users")({
-  validateSearch: usersSearchSchema,
-  component: UsersRouteComponent,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/users",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });

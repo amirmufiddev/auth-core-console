@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { resolvePostAuthRedirect } from "@/lib/console-home";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthStage } from "@/components/auth/AuthStageContext";
 import { AuthMascot } from "@/components/auth/AuthMascot";
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export function TwoFactorForm({
-  redirectTo = "/dashboard",
+  redirectTo,
 }: {
   redirectTo?: string;
 }) {
@@ -48,7 +49,7 @@ export function TwoFactorForm({
         try {
           await verifyTwoFactor(code);
           toast.success("Verifikasi 2FA berhasil.");
-          navigate(redirectTo);
+          navigate(await resolvePostAuthRedirect(redirectTo));
         } catch (err) {
           setVerified(false);
           setIsSubmitting(false);

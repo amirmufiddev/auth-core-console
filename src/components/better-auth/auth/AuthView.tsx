@@ -36,7 +36,7 @@ export interface AuthViewProps {
 
 export function AuthView({
   view = "SIGN_IN",
-  redirectTo = "/dashboard",
+  redirectTo,
   className,
 }: AuthViewProps) {
   const { features, basePaths, localization } = useAuthUI();
@@ -44,11 +44,10 @@ export function AuthView({
   const pending2FA = useAuthStore((s) => s.pending2FA);
   const [otpFocusedMode, setOtpFocusedMode] = useState(false);
 
-  const safeRedirect = redirectTo
+  const safeRedirect = redirectTo?.trim()
     ? sanitizeRelativeRedirect(redirectTo)
-    : "/dashboard";
-  const redirectSearch =
-    safeRedirect !== "/dashboard" ? { redirect: safeRedirect } : undefined;
+    : undefined;
+  const redirectSearch = safeRedirect ? { redirect: safeRedirect } : undefined;
 
   const emailEnabled = Boolean(features.emailAndPassword?.enabled);
   const magicLinkEnabled = Boolean(features.magicLink?.enabled);

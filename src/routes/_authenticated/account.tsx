@@ -1,40 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
-import { AccountView, type AccountViewTab } from "@/components/better-auth";
-
-const accountSearchSchema = z.object({
-  tab: z
-    .enum(["profile", "security", "sessions", "api-keys", "preferences"])
-    .catch("profile"),
-});
-
-function AccountRouteComponent() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-
-  const handleTabChange = (tab: AccountViewTab) => {
-    void navigate({
-      search: { tab },
-    });
-  };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-default-900">
-          Account & Security Settings
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Kelola profil pribadi, kata sandi, 2FA, passkeys, provider OAuth, sesi
-          aktif, dan API keys Anda.
-        </p>
-      </div>
-      <AccountView activeTab={search.tab} onTabChange={handleTabChange} />
-    </div>
-  );
-}
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
+import {
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/account")({
-  validateSearch: accountSearchSchema,
-  component: AccountRouteComponent,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/account",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });

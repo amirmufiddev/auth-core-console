@@ -1,32 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { OrganizationsPage } from "@/features/organizations/OrganizationsPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
 import {
-  type OrganizationsSearchParams,
-  organizationsSearchSchema,
-} from "@/features/organizations/schema";
-
-function OrganizationsRouteComponent() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-
-  const handleUpdateSearch = (patch: Partial<OrganizationsSearchParams>) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        ...patch,
-      }),
-    });
-  };
-
-  return (
-    <OrganizationsPage
-      searchParams={search}
-      onUpdateSearch={handleUpdateSearch}
-    />
-  );
-}
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/organizations")({
-  validateSearch: organizationsSearchSchema,
-  component: OrganizationsRouteComponent,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/organizations",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });

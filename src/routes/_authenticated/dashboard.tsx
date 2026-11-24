@@ -1,6 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { DashboardPage } from "@/features/dashboard/DashboardPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
+import {
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  component: DashboardPage,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/dashboard",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });

@@ -1,32 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminTenantsPage } from "@/features/admin-tenants/AdminTenantsPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
 import {
-  type AdminTenantsSearchParams,
-  adminTenantsSearchSchema,
-} from "@/features/admin-tenants/schema";
-
-function AdminTenantsRouteComponent() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-
-  const handleUpdateSearch = (patch: Partial<AdminTenantsSearchParams>) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        ...patch,
-      }),
-    });
-  };
-
-  return (
-    <AdminTenantsPage
-      searchParams={search}
-      onUpdateSearch={handleUpdateSearch}
-    />
-  );
-}
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/admin-tenants")({
-  validateSearch: adminTenantsSearchSchema,
-  component: AdminTenantsRouteComponent,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/admin-tenants",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });

@@ -1,6 +1,7 @@
 import { Icon } from "@iconify/react";
 import { Sparkles, UserCheck, Wallet } from "lucide-react";
 import { type BetterAuthFeatureId } from "@/config/better-auth.config";
+import { resolvePostAuthRedirect } from "@/lib/console-home";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
 import { Button } from "@/components/ui/button";
@@ -88,7 +89,7 @@ export const SOCIAL_PROVIDER_CATALOG: Array<{
 ];
 
 export function ProviderButtons({
-  redirectTo = "/dashboard",
+  redirectTo,
 }: {
   redirectTo?: string;
 }) {
@@ -116,7 +117,7 @@ export function ProviderButtons({
     try {
       await signInWithSocial(provider, id, redirectTo);
       toast.success(`Berhasil masuk via ${provider}.`);
-      navigate(redirectTo);
+      navigate(await resolvePostAuthRedirect(redirectTo));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "OAuth sign-in gagal.");
     }
@@ -174,7 +175,7 @@ export function ProviderButtons({
           onClick={async () => {
             await signInAnonymous();
             toast.success("Masuk sebagai tamu (Anonymous).");
-            navigate(redirectTo);
+            navigate(await resolvePostAuthRedirect(redirectTo));
           }}
         >
           <UserCheck className="mr-2 h-4 w-4" />

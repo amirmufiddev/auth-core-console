@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { type RegisterValues, registerSchema } from "@/features/auth/schema";
+import { resolvePostAuthRedirect } from "@/lib/console-home";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export function SignUpForm({
-  redirectTo = "/dashboard",
+  redirectTo,
 }: {
   redirectTo?: string;
 }) {
@@ -28,7 +29,7 @@ export function SignUpForm({
     try {
       await signUp(vals);
       toast.success("Akun berhasil dibuat!");
-      navigate(redirectTo);
+      navigate(await resolvePostAuthRedirect(redirectTo));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Registrasi gagal.");
     }

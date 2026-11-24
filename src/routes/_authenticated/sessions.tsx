@@ -1,29 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { SessionsPage } from "@/features/sessions/SessionsPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
 import {
-  type SessionsSearchParams,
-  sessionsSearchSchema,
-} from "@/features/audit-logs/schema";
-
-function SessionsRouteComponent() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-
-  const handleUpdateSearch = (patch: Partial<SessionsSearchParams>) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        ...patch,
-      }),
-    });
-  };
-
-  return (
-    <SessionsPage searchParams={search} onUpdateSearch={handleUpdateSearch} />
-  );
-}
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/sessions")({
-  validateSearch: sessionsSearchSchema,
-  component: SessionsRouteComponent,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/sessions",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });

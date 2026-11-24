@@ -299,6 +299,26 @@ test("PortalTenantDetailPage tidak lagi memakai TabsTrigger", () => {
   );
 });
 
+test("route lama mendelegasikan ke redirectLegacyPath", () => {
+  for (const file of [
+    "src/routes/_authenticated/dashboard.tsx",
+    "src/routes/_authenticated/users.tsx",
+    "src/routes/_authenticated/admin-tenants.tsx",
+    "src/routes/_authenticated/account.tsx",
+  ]) {
+    const source = readUtf8(file);
+    assert.match(source, /redirectLegacyPath/);
+    assert.doesNotMatch(
+      source,
+      /<DashboardPage|<UsersPage|<AdminTenantsPage|<AccountView/,
+    );
+  }
+  assert.match(
+    readUtf8("src/lib/console-home.ts"),
+    /export async function resolveAuthenticatedHome/,
+  );
+});
+
 test("komponen better-auth mandiri tidak memakai package better-auth-ui eksternal", () => {
   const pkgJson = JSON.parse(readUtf8("package.json"));
   const allDeps = {

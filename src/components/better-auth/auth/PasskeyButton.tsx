@@ -1,11 +1,12 @@
 import { Fingerprint } from "lucide-react";
+import { resolvePostAuthRedirect } from "@/lib/console-home";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export function PasskeyButton({
-  redirectTo = "/dashboard",
+  redirectTo,
 }: {
   redirectTo?: string;
 }) {
@@ -24,7 +25,7 @@ export function PasskeyButton({
         try {
           await signInWithPasskey();
           toast.success("Login Passkey WebAuthn berhasil.");
-          navigate(redirectTo);
+          navigate(await resolvePostAuthRedirect(redirectTo));
         } catch (err) {
           toast.error(err instanceof Error ? err.message : "Passkey gagal.");
         }

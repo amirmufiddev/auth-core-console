@@ -8,6 +8,7 @@ import {
   loginEmailSchema,
 } from "@/features/auth/schema";
 import { isExternalBackendConfigured } from "@/api/client";
+import { resolvePostAuthRedirect } from "@/lib/console-home";
 import { sanitizeRelativeRedirect } from "@/lib/tenant-context";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
@@ -23,7 +24,7 @@ export interface SignInFormProps {
 }
 
 export function SignInForm({
-  redirectTo = "/dashboard",
+  redirectTo,
   showDemoButton = true,
 }: SignInFormProps) {
   const { features, basePaths, navigate } = useAuthUI();
@@ -53,16 +54,16 @@ export function SignInForm({
 
   const safeRedirect = redirectTo
     ? sanitizeRelativeRedirect(redirectTo)
-    : "/dashboard";
+    : undefined;
 
   const handleSuccess = async () => {
     toast.success("Berhasil masuk ke Auth Core.");
-    navigate(safeRedirect);
+    navigate(await resolvePostAuthRedirect(redirectTo));
   };
 
   const navigateToTwoFactor = () => {
     toast.info("Masukkan kode verifikasi 2FA Anda.");
-    if (redirectTo) {
+    if (safeRedirect) {
       navigate(
         `${basePaths.twoFactor}?redirect=${encodeURIComponent(safeRedirect)}`,
       );

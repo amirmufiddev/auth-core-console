@@ -1,32 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminBillingPage } from "@/features/admin-billing/AdminBillingPage";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { listMyTenants } from "@/api/tenant-service";
 import {
-  type AdminBillingSearchParams,
-  adminBillingSearchSchema,
-} from "@/features/admin-billing/schema";
-
-function AdminBillingRouteComponent() {
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
-
-  const handleUpdateSearch = (patch: Partial<AdminBillingSearchParams>) => {
-    void navigate({
-      search: (prev) => ({
-        ...prev,
-        ...patch,
-      }),
-    });
-  };
-
-  return (
-    <AdminBillingPage
-      searchParams={search}
-      onUpdateSearch={handleUpdateSearch}
-    />
-  );
-}
+  isPlatformActor,
+  redirectLegacyPath,
+  toConsoleActor,
+} from "@/lib/console-shell";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export const Route = createFileRoute("/_authenticated/admin-billing")({
-  validateSearch: adminBillingSearchSchema,
-  component: AdminBillingRouteComponent,
+  beforeLoad: async () => {
+    const actor = toConsoleActor(useAuthStore.getState().user);
+    const owned = isPlatformActor(actor)
+      ? []
+      : (await listMyTenants({ page: 0, pageSize: 2 })).items.map(
+          (tenant) => tenant.id,
+        );
+    throw redirect({
+      href: redirectLegacyPath({
+        path: "/admin-billing",
+        actor,
+        ownedTenantIds: owned,
+      }),
+    });
+  },
 });
