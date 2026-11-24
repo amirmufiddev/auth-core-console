@@ -58,6 +58,7 @@ import { Route as AuthenticatedTenantsTenantIdBillingRouteImport } from './route
 import { Route as AuthenticatedTenantsTenantIdFeaturesRouteImport } from './routes/_authenticated/tenants/$tenantId/features'
 import { Route as AuthenticatedTenantsTenantIdOauthClientsRouteImport } from './routes/_authenticated/tenants/$tenantId/oauth-clients'
 import { Route as AuthenticatedTenantsTenantIdOrganizationsRouteImport } from './routes/_authenticated/tenants/$tenantId/organizations'
+import { Route as AuthenticatedTenantsTenantIdRolesRouteImport } from './routes/_authenticated/tenants/$tenantId/roles'
 import { Route as AuthenticatedTenantsTenantIdSettingsRouteImport } from './routes/_authenticated/tenants/$tenantId/settings'
 import { Route as AuthenticatedTenantsTenantIdUsersRouteImport } from './routes/_authenticated/tenants/$tenantId/users'
 import { Route as TTenantSlugAcceptInvitationIndexRouteImport } from './routes/t/$tenantSlug/accept-invitation.index'
@@ -335,6 +336,12 @@ const AuthenticatedTenantsTenantIdOrganizationsRoute =
     path: '/organizations',
     getParentRoute: () => AuthenticatedTenantsTenantIdRouteRoute,
   } as any)
+const AuthenticatedTenantsTenantIdRolesRoute =
+  AuthenticatedTenantsTenantIdRolesRouteImport.update({
+    id: '/roles',
+    path: '/roles',
+    getParentRoute: () => AuthenticatedTenantsTenantIdRouteRoute,
+  } as any)
 const AuthenticatedTenantsTenantIdSettingsRoute =
   AuthenticatedTenantsTenantIdSettingsRouteImport.update({
     id: '/settings',
@@ -406,6 +413,7 @@ export interface FileRoutesByFullPath {
   '/tenants/$tenantId/features': typeof AuthenticatedTenantsTenantIdFeaturesRoute
   '/tenants/$tenantId/oauth-clients': typeof AuthenticatedTenantsTenantIdOauthClientsRoute
   '/tenants/$tenantId/organizations': typeof AuthenticatedTenantsTenantIdOrganizationsRoute
+  '/tenants/$tenantId/roles': typeof AuthenticatedTenantsTenantIdRolesRoute
   '/tenants/$tenantId/settings': typeof AuthenticatedTenantsTenantIdSettingsRoute
   '/tenants/$tenantId/users': typeof AuthenticatedTenantsTenantIdUsersRoute
   '/t/$tenantSlug/accept-invitation/$invitationId': typeof TTenantSlugAcceptInvitationInvitationIdRoute
@@ -455,6 +463,7 @@ export interface FileRoutesByTo {
   '/tenants/$tenantId/features': typeof AuthenticatedTenantsTenantIdFeaturesRoute
   '/tenants/$tenantId/oauth-clients': typeof AuthenticatedTenantsTenantIdOauthClientsRoute
   '/tenants/$tenantId/organizations': typeof AuthenticatedTenantsTenantIdOrganizationsRoute
+  '/tenants/$tenantId/roles': typeof AuthenticatedTenantsTenantIdRolesRoute
   '/tenants/$tenantId/settings': typeof AuthenticatedTenantsTenantIdSettingsRoute
   '/tenants/$tenantId/users': typeof AuthenticatedTenantsTenantIdUsersRoute
   '/t/$tenantSlug/accept-invitation/$invitationId': typeof TTenantSlugAcceptInvitationInvitationIdRoute
@@ -511,6 +520,7 @@ export interface FileRoutesById {
   '/_authenticated/tenants/$tenantId/features': typeof AuthenticatedTenantsTenantIdFeaturesRoute
   '/_authenticated/tenants/$tenantId/oauth-clients': typeof AuthenticatedTenantsTenantIdOauthClientsRoute
   '/_authenticated/tenants/$tenantId/organizations': typeof AuthenticatedTenantsTenantIdOrganizationsRoute
+  '/_authenticated/tenants/$tenantId/roles': typeof AuthenticatedTenantsTenantIdRolesRoute
   '/_authenticated/tenants/$tenantId/settings': typeof AuthenticatedTenantsTenantIdSettingsRoute
   '/_authenticated/tenants/$tenantId/users': typeof AuthenticatedTenantsTenantIdUsersRoute
   '/t/$tenantSlug/accept-invitation/$invitationId': typeof TTenantSlugAcceptInvitationInvitationIdRoute
@@ -566,6 +576,7 @@ export interface FileRouteTypes {
     | '/tenants/$tenantId/features'
     | '/tenants/$tenantId/oauth-clients'
     | '/tenants/$tenantId/organizations'
+    | '/tenants/$tenantId/roles'
     | '/tenants/$tenantId/settings'
     | '/tenants/$tenantId/users'
     | '/t/$tenantSlug/accept-invitation/$invitationId'
@@ -615,6 +626,7 @@ export interface FileRouteTypes {
     | '/tenants/$tenantId/features'
     | '/tenants/$tenantId/oauth-clients'
     | '/tenants/$tenantId/organizations'
+    | '/tenants/$tenantId/roles'
     | '/tenants/$tenantId/settings'
     | '/tenants/$tenantId/users'
     | '/t/$tenantSlug/accept-invitation/$invitationId'
@@ -670,6 +682,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tenants/$tenantId/features'
     | '/_authenticated/tenants/$tenantId/oauth-clients'
     | '/_authenticated/tenants/$tenantId/organizations'
+    | '/_authenticated/tenants/$tenantId/roles'
     | '/_authenticated/tenants/$tenantId/settings'
     | '/_authenticated/tenants/$tenantId/users'
     | '/t/$tenantSlug/accept-invitation/$invitationId'
@@ -1034,6 +1047,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTenantsTenantIdOrganizationsRouteImport
       parentRoute: typeof AuthenticatedTenantsTenantIdRouteRoute
     }
+    '/_authenticated/tenants/$tenantId/roles': {
+      id: '/_authenticated/tenants/$tenantId/roles'
+      path: '/roles'
+      fullPath: '/tenants/$tenantId/roles'
+      preLoaderRoute: typeof AuthenticatedTenantsTenantIdRolesRouteImport
+      parentRoute: typeof AuthenticatedTenantsTenantIdRouteRoute
+    }
     '/_authenticated/tenants/$tenantId/settings': {
       id: '/_authenticated/tenants/$tenantId/settings'
       path: '/settings'
@@ -1144,6 +1164,7 @@ interface AuthenticatedTenantsTenantIdRouteRouteChildren {
   AuthenticatedTenantsTenantIdFeaturesRoute: typeof AuthenticatedTenantsTenantIdFeaturesRoute
   AuthenticatedTenantsTenantIdOauthClientsRoute: typeof AuthenticatedTenantsTenantIdOauthClientsRoute
   AuthenticatedTenantsTenantIdOrganizationsRoute: typeof AuthenticatedTenantsTenantIdOrganizationsRoute
+  AuthenticatedTenantsTenantIdRolesRoute: typeof AuthenticatedTenantsTenantIdRolesRoute
   AuthenticatedTenantsTenantIdSettingsRoute: typeof AuthenticatedTenantsTenantIdSettingsRoute
   AuthenticatedTenantsTenantIdUsersRoute: typeof AuthenticatedTenantsTenantIdUsersRoute
   AuthenticatedTenantsTenantIdIndexRoute: typeof AuthenticatedTenantsTenantIdIndexRoute
@@ -1163,6 +1184,8 @@ const AuthenticatedTenantsTenantIdRouteRouteChildren: AuthenticatedTenantsTenant
       AuthenticatedTenantsTenantIdOauthClientsRoute,
     AuthenticatedTenantsTenantIdOrganizationsRoute:
       AuthenticatedTenantsTenantIdOrganizationsRoute,
+    AuthenticatedTenantsTenantIdRolesRoute:
+      AuthenticatedTenantsTenantIdRolesRoute,
     AuthenticatedTenantsTenantIdSettingsRoute:
       AuthenticatedTenantsTenantIdSettingsRoute,
     AuthenticatedTenantsTenantIdUsersRoute:

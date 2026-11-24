@@ -1,11 +1,12 @@
-import { RBAC_RESOURCE_MODULES } from "@/config/platform-permissions";
-
-export type {
+import type {
   RbacPermissionOption,
   RbacResource,
   RbacResourceModule,
 } from "@/config/platform-permissions";
-export { RBAC_RESOURCE_MODULES } from "@/config/platform-permissions";
+import { RBAC_RESOURCE_MODULES } from "@/config/platform-permissions";
+
+export type { RbacPermissionOption, RbacResource, RbacResourceModule };
+export { RBAC_RESOURCE_MODULES };
 
 export type RolePermissionMatrix = Partial<Record<RbacResource, string[]>>;
 

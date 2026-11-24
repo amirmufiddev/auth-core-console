@@ -91,7 +91,7 @@ test("platformNav terdaftar dan sinkron dengan menusConfig", () => {
   }
 });
 
-test("tenantNav memasang sembilan menu di bawah id tenant", () => {
+test("tenantNav memasang sepuluh menu di bawah id tenant", () => {
   const source = readUtf8("src/config/menus.ts");
   assert.match(source, /export function tenantNav\(tenantId: string\)/);
   for (const suffix of [
@@ -102,6 +102,7 @@ test("tenantNav memasang sembilan menu di bawah id tenant", () => {
     "/api-keys",
     "/users",
     "/organizations",
+    "/roles",
     "/billing",
     "/account",
   ]) {
@@ -271,6 +272,7 @@ const tenantChildRoutes = [
   "src/routes/_authenticated/tenants/$tenantId/api-keys.tsx",
   "src/routes/_authenticated/tenants/$tenantId/users.tsx",
   "src/routes/_authenticated/tenants/$tenantId/organizations.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/roles.tsx",
   "src/routes/_authenticated/tenants/$tenantId/billing.tsx",
   "src/routes/_authenticated/tenants/$tenantId/account.tsx",
 ];

@@ -160,6 +160,11 @@ export function tenantNav(tenantId: string): MenuItemProps[] {
       icon: Building2,
     },
     {
+      title: "Role organisasi",
+      href: `/tenants/${tenantId}/roles`,
+      icon: ShieldCheck,
+    },
+    {
       title: "Billing",
       href: `/tenants/${tenantId}/billing`,
       icon: CreditCard,
