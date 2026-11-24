@@ -293,7 +293,7 @@ export function AdminTenantsPage({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <Can resource="organization" action="update">
+                <Can resource="tenant" action="update">
                   <DropdownMenuItem
                     onClick={() => openChangeTierDialog(tenant)}
                   >
@@ -316,7 +316,7 @@ export function AdminTenantsPage({
                     Lihat Ledger Billing
                   </Link>
                 </DropdownMenuItem>
-                <Can resource="organization" action="update">
+                <Can resource="tenant" action="update">
                   <DropdownMenuSeparator />
                   {isActive ? (
                     <DropdownMenuItem
@@ -360,7 +360,7 @@ export function AdminTenantsPage({
             aktivasi/suspensi.
           </p>
         </div>
-        <Can resource="organization" action="create">
+        <Can resource="tenant" action="create">
           <Button color="primary" onClick={openCreateDialog}>
             <Plus className="mr-2 h-4 w-4" />
             Buat Tenant

@@ -409,7 +409,7 @@ export function UsersPage({
                   <Eye className="mr-2 h-4 w-4" />
                   Detail & Keamanan
                 </DropdownMenuItem>
-                <Can resource="user" action="update">
+                <Can resource="staff" action="update">
                   <DropdownMenuItem onClick={() => openEditModal(u)}>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit User
@@ -427,7 +427,7 @@ export function UsersPage({
                   </DropdownMenuItem>
                 </Can>
                 <DropdownMenuSeparator />
-                <Can resource="user" action="ban">
+                <Can resource="staff" action="ban">
                   {u.banned ? (
                     <DropdownMenuItem
                       onClick={() =>
@@ -450,7 +450,7 @@ export function UsersPage({
                     </DropdownMenuItem>
                   )}
                 </Can>
-                <Can resource="user" action="delete">
+                <Can resource="staff" action="delete">
                   <DropdownMenuItem
                     onClick={() => setDeleteTarget(u)}
                     className="text-destructive focus:text-destructive"
@@ -479,7 +479,7 @@ export function UsersPage({
             Kelola akun pengguna, role RBAC, 2FA, ban/unban, dan impersonation.
           </p>
         </div>
-        <Can resource="user" action="create">
+        <Can resource="staff" action="create">
           <Button color="primary" onClick={openCreateModal}>
             <Plus className="mr-2 h-4 w-4" />
             Tambah User
@@ -686,7 +686,7 @@ export function UsersPage({
                         >
                           Detail
                         </Button>
-                        <Can resource="user" action="update">
+                        <Can resource="staff" action="update">
                           <Button
                             size="sm"
                             variant="soft"

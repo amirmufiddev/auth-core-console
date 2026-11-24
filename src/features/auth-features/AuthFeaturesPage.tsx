@@ -212,7 +212,7 @@ export function AuthFeaturesPage({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Can resource="authConfig" action="configure">
+          <Can resource="authFeature" action="configure">
             <Select
               onValueChange={(val) => {
                 applyPreset(val as ConfigPresetId);
@@ -397,7 +397,7 @@ export function AuthFeaturesPage({
                   </CardDescription>
                 </div>
 
-                <Can resource="authConfig" action="configure">
+                <Can resource="authFeature" action="configure">
                   <Switch
                     aria-label={`Toggle ${feature.name}`}
                     checked={enabled}
@@ -464,7 +464,7 @@ export function AuthFeaturesPage({
                   >
                     {FEATURE_CATEGORY_META[feature.category].label}
                   </Badge>
-                  <Can resource="authConfig" action="configure">
+                  <Can resource="authFeature" action="configure">
                     <Button
                       size="sm"
                       color="primary"
@@ -629,7 +629,7 @@ export function AuthFeaturesPage({
                               Batal Hapus
                             </Button>
                           ) : secretsConfigured ? (
-                            <Can resource="authConfig" action="configure">
+                            <Can resource="authFeature" action="configure">
                               <Button
                                 type="button"
                                 size="sm"
@@ -687,7 +687,7 @@ export function AuthFeaturesPage({
                 >
                   Batal
                 </Button>
-                <Can resource="authConfig" action="configure">
+                <Can resource="authFeature" action="configure">
                   <Button
                     type="button"
                     color="primary"

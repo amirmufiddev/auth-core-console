@@ -20,10 +20,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function PlatformHomePage({ roles }: { roles: ActorRoleGrant[] }) {
-  const canReadTenants = canPlatform(roles, "organization", "read");
+  const canReadTenants = canPlatform(roles, "tenant", "read");
   const canReadUsers = canPlatform(roles, "user", "read");
   const canReadAudit = canPlatform(roles, "auditLog", "read");
-  const canConfigure = canPlatform(roles, "authConfig", "configure");
+  const canConfigure = canPlatform(roles, "authFeature", "configure");
 
   const recentQuery = useQuery({
     queryKey: ["platform-home", "recent"],

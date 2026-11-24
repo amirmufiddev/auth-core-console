@@ -279,7 +279,7 @@ export function AdminBillingPage({
             status billing tenant.
           </p>
         </div>
-        <Can resource="organization" action="update">
+        <Can resource="billing" action="create">
           <Button color="primary" onClick={openCreateDialog}>
             <Plus className="mr-2 h-4 w-4" />
             Catat Billing

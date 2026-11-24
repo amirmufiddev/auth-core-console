@@ -14,8 +14,8 @@ function AuthFeaturesRouteComponent() {
   const navigate = Route.useNavigate();
 
   const allowed =
-    canPlatform(roles, "authConfig", "read") ||
-    canPlatform(roles, "authConfig", "configure");
+    canPlatform(roles, "authFeature", "read") ||
+    canPlatform(roles, "authFeature", "configure");
   if (!allowed) {
     return <UnauthorizedState homeHref="/platform" />;
   }

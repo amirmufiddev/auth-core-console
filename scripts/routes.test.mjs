@@ -120,9 +120,10 @@ test("matriks role platform menyembunyikan apiKey, oauthClient, dan sso", () => 
     const block = source.slice(source.indexOf(`resource: "${resource}"`));
     assert.match(block, /shownInPlatformMatrix:\s*false/);
   }
+  assert.match(source, /title: "Tenants"/);
   assert.match(source, /title: "Staf platform"/);
-  assert.match(source, /title: "Direktori tenant & billing"/);
-  assert.match(source, /title: "Plugin layanan & matriks tier"/);
+  assert.match(source, /title: "Billing Ledger"/);
+  assert.match(source, /title: "Auth Features"/);
 });
 
 test("setiap href non-platform di menus.ts memiliki file route di src/routes/_authenticated/", () => {
@@ -377,9 +378,10 @@ test("tombol tulis platform dan tenant memakai gerbang izin", () => {
     /export function OwnerOnly/,
   );
   assert.match(readUtf8("src/features/users/UsersPage.tsx"), /resource="user"/);
+  assert.match(readUtf8("src/features/users/UsersPage.tsx"), /resource="staff"/);
   assert.match(
     readUtf8("src/features/admin-tenants/AdminTenantsPage.tsx"),
-    /organization/,
+    /resource="tenant"/,
   );
   assert.match(
     readUtf8("src/features/portal/PortalTenantUsersTab.tsx"),

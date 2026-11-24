@@ -224,7 +224,7 @@ export function AdminFeatureTierMatrixPage() {
         <AlertDescription>
           {err instanceof Error
             ? err.message
-            : "Pastikan Anda memiliki izin operator platform (authConfig:configure)."}
+            : "Pastikan Anda memiliki izin operator platform (tier:update)."}
         </AlertDescription>
       </Alert>
     );
@@ -250,7 +250,7 @@ export function AdminFeatureTierMatrixPage() {
           </p>
         </div>
 
-        <Can resource="authConfig" action="configure">
+        <Can resource="tier" action="update">
           <div className="flex flex-wrap items-center gap-2">
             {dirtyTierIds.length > 0 && (
               <Button
@@ -482,7 +482,7 @@ export function AdminFeatureTierMatrixPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Can resource="authConfig" action="configure">
+                            <Can resource="tier" action="update">
                               <Select
                                 value={feature.status}
                                 disabled={updateStatusMutation.isPending}

@@ -33,7 +33,7 @@ export async function loadTenantShell(
     const roles = queryClient
       ? await ensureActorPermissions(queryClient)
       : (await fetchActorPermissions()).roles;
-    canReadTenants = canPlatform(roles, "organization", "read");
+    canReadTenants = canPlatform(roles, "tenant", "read");
   }
 
   let portalStatus: "owner" | "forbidden" | "not_found" = "not_found";

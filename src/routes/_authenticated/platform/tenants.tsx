@@ -13,7 +13,7 @@ function TenantsRouteComponent() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  if (!canPlatform(roles, "organization", "read")) {
+  if (!canPlatform(roles, "tenant", "read")) {
     return <UnauthorizedState homeHref="/platform" />;
   }
 

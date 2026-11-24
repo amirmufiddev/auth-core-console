@@ -7,7 +7,7 @@ import { Route as PlatformRoute } from "./route";
 export const Route = createFileRoute("/_authenticated/platform/tiers")({
   component: function TiersRoute() {
     const { roles } = PlatformRoute.useRouteContext();
-    if (!canPlatform(roles, "authConfig", "configure")) {
+    if (!canPlatform(roles, "tier", "read")) {
       return <UnauthorizedState homeHref="/platform" />;
     }
     return <AdminFeatureTierMatrixPage />;

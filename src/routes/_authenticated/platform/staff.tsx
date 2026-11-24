@@ -13,7 +13,7 @@ function StaffRouteComponent() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  if (!canPlatform(roles, "user", "read")) {
+  if (!canPlatform(roles, "staff", "read")) {
     return <UnauthorizedState homeHref="/platform" />;
   }
 

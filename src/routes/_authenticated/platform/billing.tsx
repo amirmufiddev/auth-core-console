@@ -13,7 +13,7 @@ function BillingRouteComponent() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  if (!canPlatform(roles, "organization", "read")) {
+  if (!canPlatform(roles, "billing", "read")) {
     return <UnauthorizedState homeHref="/platform" />;
   }
 

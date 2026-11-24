@@ -35,7 +35,7 @@ export function filterPlatformNavItems(
   const filtered = filterMenuItems(withoutAuthFeatures, can);
   if (
     authFeaturesItem &&
-    (can("authConfig", "read") || can("authConfig", "configure"))
+    (can("authFeature", "read") || can("authFeature", "configure"))
   ) {
     const accountIdx = filtered.findIndex(
       (item) => item.href === "/platform/account",

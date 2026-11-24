@@ -47,7 +47,7 @@ describe("console shell", () => {
   it("filters menu items by read permission and keeps overview", () => {
     const items = [
       { title: "Overview", href: "/platform" },
-      { title: "Tenants", href: "/platform/tenants", permission: { resource: "organization", action: "read" } },
+      { title: "Tenants", href: "/platform/tenants", permission: { resource: "tenant", action: "read" } },
       { title: "Staf", href: "/platform/staff", permission: { resource: "user", action: "read" } },
     ];
     expect(filterNav(items, (resource) => resource === "user").map((item) => item.href)).toEqual([

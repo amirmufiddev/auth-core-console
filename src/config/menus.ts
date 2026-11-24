@@ -37,19 +37,19 @@ export const platformNav: MenuItemProps[] = [
     title: "Tenants",
     href: "/platform/tenants",
     icon: Building2,
-    permission: { resource: "organization", action: "read" },
+    permission: { resource: "tenant", action: "read" },
   },
   {
     title: "Feature & Tier Matrix",
     href: "/platform/tiers",
     icon: SlidersHorizontal,
-    permission: { resource: "authConfig", action: "configure" },
+    permission: { resource: "tier", action: "read" },
   },
   {
     title: "Billing Ledger",
     href: "/platform/billing",
     icon: CreditCard,
-    permission: { resource: "organization", action: "read" },
+    permission: { resource: "billing", action: "read" },
   },
   {
     title: "Direktori akun",
@@ -61,7 +61,7 @@ export const platformNav: MenuItemProps[] = [
     title: "Staf platform",
     href: "/platform/staff",
     icon: UserCog,
-    permission: { resource: "user", action: "read" },
+    permission: { resource: "staff", action: "read" },
   },
   {
     title: "Role Platform",

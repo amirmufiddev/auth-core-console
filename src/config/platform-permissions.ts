@@ -5,15 +5,19 @@
  */
 
 export type RbacResource =
+  | "tenant"
+  | "tier"
+  | "billing"
   | "user"
+  | "staff"
   | "session"
   | "role"
+  | "authFeature"
+  | "auditLog"
   | "organization"
   | "apiKey"
   | "oauthClient"
-  | "sso"
-  | "authConfig"
-  | "auditLog";
+  | "sso";
 
 export interface RbacPermissionOption {
   action: string;
@@ -31,234 +35,146 @@ export interface RbacResourceModule {
 
 export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
   {
-    resource: "user",
-    title: "Staf platform",
-    description: "Kontrol akun pengguna, ban/unban, dan impersonation sesi.",
+    resource: "tenant",
+    title: "Tenants",
+    description: "Daftar tenant, pembuatan, perubahan tier, dan status.",
     shownInPlatformMatrix: true,
     permissions: [
-      {
-        action: "read",
-        label: "Read Users",
-        description: "Melihat daftar dan profil user",
-      },
-      {
-        action: "create",
-        label: "Create Users",
-        description: "Membuat akun user baru",
-      },
-      {
-        action: "update",
-        label: "Update Users",
-        description: "Mengubah profil, password & verifikasi",
-      },
-      {
-        action: "delete",
-        label: "Delete Users",
-        description: "Menghapus akun user permanen",
-      },
-      {
-        action: "ban",
-        label: "Ban / Unban",
-        description: "Membekukan atau memulihkan akses user",
-      },
-      {
-        action: "impersonate",
-        label: "Impersonate",
-        description: "Masuk sebagai user untuk dukungan teknis",
-      },
+      { action: "read", label: "Lihat tenant", description: "Melihat daftar dan detail tenant" },
+      { action: "create", label: "Buat tenant", description: "Membuat tenant baru" },
+      { action: "update", label: "Ubah tenant", description: "Mengubah data, tier, dan status tenant" },
     ],
   },
   {
-    resource: "session",
-    title: "Sesi staf",
-    description: "Visibilitas dan pencabutan sesi aktif perangkat.",
+    resource: "tier",
+    title: "Feature & Tier Matrix",
+    description: "Katalog fitur dan matriks tier Auth Core.",
     shownInPlatformMatrix: true,
     permissions: [
-      {
-        action: "read",
-        label: "List Sessions",
-        description: "Melihat sesi aktif semua perangkat",
-      },
-      {
-        action: "revoke",
-        label: "Revoke Sessions",
-        description: "Mencabut token sesi secara paksa",
-      },
+      { action: "read", label: "Lihat matriks", description: "Melihat katalog fitur dan tier" },
+      { action: "update", label: "Ubah matriks", description: "Mengubah status fitur dan isi tier" },
+    ],
+  },
+  {
+    resource: "billing",
+    title: "Billing Ledger",
+    description: "Catatan tagihan tenant.",
+    shownInPlatformMatrix: true,
+    permissions: [
+      { action: "read", label: "Lihat billing", description: "Membaca ledger billing" },
+      { action: "create", label: "Catat billing", description: "Menambah entri billing" },
+    ],
+  },
+  {
+    resource: "user",
+    title: "Direktori akun",
+    description: "Pencarian seluruh akun operator dan pengguna tenant.",
+    shownInPlatformMatrix: true,
+    permissions: [
+      { action: "read", label: "Lihat direktori", description: "Melihat seluruh akun" },
+      { action: "impersonate", label: "Impersonate", description: "Masuk sebagai user untuk dukungan" },
+    ],
+  },
+  {
+    resource: "staff",
+    title: "Staf platform",
+    description: "Akun operator Auth Core.",
+    shownInPlatformMatrix: true,
+    permissions: [
+      { action: "read", label: "Lihat staf", description: "Melihat akun staf platform" },
+      { action: "create", label: "Buat staf", description: "Membuat akun staf" },
+      { action: "update", label: "Ubah staf", description: "Mengubah profil staf" },
+      { action: "delete", label: "Hapus staf", description: "Menghapus akun staf" },
+      { action: "ban", label: "Ban / Unban", description: "Membekukan atau memulihkan staf" },
     ],
   },
   {
     resource: "role",
     title: "Role platform",
-    description: "Pengaturan definisi role dan matriks permission RBAC.",
+    description: "Definisi role dan matriks permission platform.",
     shownInPlatformMatrix: true,
     permissions: [
-      {
-        action: "read",
-        label: "Read Roles",
-        description: "Melihat daftar role & hak akses",
-      },
-      {
-        action: "create",
-        label: "Create Roles",
-        description: "Menambahkan role kustom baru",
-      },
-      {
-        action: "update",
-        label: "Update Roles",
-        description: "Mengubah permission pada role",
-      },
-      {
-        action: "delete",
-        label: "Delete Roles",
-        description: "Menghapus role kustom",
-      },
+      { action: "read", label: "Lihat role", description: "Melihat role platform" },
+      { action: "create", label: "Buat role", description: "Menambah role platform" },
+      { action: "update", label: "Ubah role", description: "Mengubah permission role" },
+      { action: "delete", label: "Hapus role", description: "Menghapus role kustom" },
     ],
   },
   {
-    resource: "organization",
-    title: "Direktori tenant & billing",
-    description:
-      "Membuat tenant, mengubah status dan tier, serta membaca ledger tagihan.",
+    resource: "session",
+    title: "Sesi staf",
+    description: "Sesi aktif perangkat staf.",
     shownInPlatformMatrix: true,
     permissions: [
-      {
-        action: "read",
-        label: "Baca tenant",
-        description: "Melihat direktori tenant dan ledger tagihan",
-      },
-      {
-        action: "create",
-        label: "Buat tenant",
-        description: "Membuat tenant baru",
-      },
-      {
-        action: "update",
-        label: "Ubah tenant",
-        description: "Menangguhkan, mengaktifkan, mengganti tier, dan mencatat tagihan",
-      },
-      {
-        action: "delete",
-        label: "Hapus tenant",
-        description: "Menghapus tenant",
-      },
-    ],
-  },
-  {
-    resource: "apiKey",
-    title: "API Keys",
-    description: "Penerbitan, pembatasan rate-limit, dan pencabutan API Key.",
-    shownInPlatformMatrix: false,
-    permissions: [
-      {
-        action: "read",
-        label: "Read Keys",
-        description: "Melihat metadata & prefix API key",
-      },
-      {
-        action: "create",
-        label: "Create Keys",
-        description: "Menerbitkan API key baru",
-      },
-      {
-        action: "update",
-        label: "Toggle Keys",
-        description: "Mengaktifkan/menonaktifkan API key",
-      },
-      {
-        action: "revoke",
-        label: "Revoke Keys",
-        description: "Mencabut API key permanen",
-      },
-    ],
-  },
-  {
-    resource: "oauthClient",
-    title: "OAuth 2.1 / OIDC & MCP",
-    description:
-      "Registrasi aplikasi klien OAuth dan MCP authorization server.",
-    shownInPlatformMatrix: false,
-    permissions: [
-      {
-        action: "read",
-        label: "Read Clients",
-        description: "Melihat OAuth & MCP clients",
-      },
-      {
-        action: "create",
-        label: "Register Clients",
-        description: "Mendaftarkan client ID/secret",
-      },
-      {
-        action: "update",
-        label: "Update Clients",
-        description: "Mengubah redirect URI & scopes",
-      },
-      {
-        action: "delete",
-        label: "Delete Clients",
-        description: "Menghapus client terdaftar",
-      },
-    ],
-  },
-  {
-    resource: "sso",
-    title: "Enterprise SSO & SCIM",
-    description: "Konfigurasi SAML 2.0, OIDC IdP, DNS verification & SCIM.",
-    shownInPlatformMatrix: false,
-    permissions: [
-      {
-        action: "read",
-        label: "Read SSO",
-        description: "Melihat provider SAML/OIDC & SCIM",
-      },
-      {
-        action: "configure",
-        label: "Configure SSO",
-        description: "Menambah/mengubah IdP & mapping SCIM",
-      },
-      {
-        action: "delete",
-        label: "Delete SSO",
-        description: "Menghapus koneksi SSO",
-      },
-    ],
-  },
-  {
-    resource: "authConfig",
-    title: "Plugin layanan & matriks tier",
-    description:
-      "Aktivasi/non-aktivasi plugin dan parameter runtime Auth Core.",
-    shownInPlatformMatrix: true,
-    permissions: [
-      {
-        action: "read",
-        label: "Read Config",
-        description: "Melihat status plugin Auth Core",
-      },
-      {
-        action: "configure",
-        label: "Toggle & Tune",
-        description: "Mengaktifkan/mematikan plugin & parameter",
-      },
+      { action: "read", label: "Lihat sesi", description: "Melihat sesi aktif" },
+      { action: "revoke", label: "Cabut sesi", description: "Mencabut sesi secara paksa" },
     ],
   },
   {
     resource: "auditLog",
     title: "Audit platform",
-    description: "Akses jejak audit autentikasi dan perubahan konfigurasi.",
+    description: "Jejak audit autentikasi dan konfigurasi.",
     shownInPlatformMatrix: true,
     permissions: [
-      {
-        action: "read",
-        label: "Read Audit Logs",
-        description: "Membaca stream event audit keamanan",
-      },
-      {
-        action: "export",
-        label: "Export Logs",
-        description: "Mengekspor log audit ke JSON/CSV",
-      },
+      { action: "read", label: "Baca audit", description: "Membaca event audit" },
+      { action: "export", label: "Ekspor audit", description: "Mengekspor log audit" },
+    ],
+  },
+  {
+    resource: "authFeature",
+    title: "Auth Features",
+    description: "Plugin login dan parameter runtime platform.",
+    shownInPlatformMatrix: true,
+    permissions: [
+      { action: "read", label: "Lihat plugin", description: "Melihat status plugin Auth Core" },
+      { action: "configure", label: "Ubah plugin", description: "Mengubah plugin dan parameternya" },
+    ],
+  },
+  {
+    resource: "organization",
+    title: "Organizations",
+    description: "API organisasi platform yang belum punya menu sendiri.",
+    shownInPlatformMatrix: false,
+    permissions: [
+      { action: "read", label: "Lihat organisasi", description: "Melihat organisasi" },
+      { action: "create", label: "Buat organisasi", description: "Membuat organisasi" },
+      { action: "update", label: "Ubah organisasi", description: "Mengubah organisasi dan undangan" },
+      { action: "delete", label: "Hapus organisasi", description: "Menghapus organisasi" },
+    ],
+  },
+  {
+    resource: "apiKey",
+    title: "API Keys",
+    description: "API key yang dikelola dari endpoint platform.",
+    shownInPlatformMatrix: false,
+    permissions: [
+      { action: "read", label: "Lihat API key", description: "Melihat API key" },
+      { action: "create", label: "Buat API key", description: "Menerbitkan API key" },
+      { action: "update", label: "Ubah API key", description: "Mengaktifkan atau menonaktifkan API key" },
+      { action: "revoke", label: "Cabut API key", description: "Mencabut API key" },
+    ],
+  },
+  {
+    resource: "oauthClient",
+    title: "OAuth clients",
+    description: "OAuth client yang dikelola dari endpoint platform.",
+    shownInPlatformMatrix: false,
+    permissions: [
+      { action: "read", label: "Lihat client", description: "Melihat OAuth client" },
+      { action: "create", label: "Daftarkan client", description: "Mendaftarkan client" },
+      { action: "update", label: "Ubah client", description: "Mengubah client" },
+      { action: "delete", label: "Hapus client", description: "Menghapus client" },
+    ],
+  },
+  {
+    resource: "sso",
+    title: "SSO",
+    description: "Provider SSO yang dikelola dari endpoint platform.",
+    shownInPlatformMatrix: false,
+    permissions: [
+      { action: "read", label: "Lihat SSO", description: "Melihat provider SSO" },
+      { action: "configure", label: "Ubah SSO", description: "Mengubah provider SSO" },
+      { action: "delete", label: "Hapus SSO", description: "Menghapus provider SSO" },
     ],
   },
 ];
-

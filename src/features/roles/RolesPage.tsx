@@ -431,7 +431,7 @@ export function RolesPage() {
 
                     <Accordion
                       type="multiple"
-                      defaultValue={["user", "role", "authConfig"]}
+                      defaultValue={["tenant", "staff", "role"]}
                       className="space-y-3"
                     >
                       {platformMatrixModules.map((mod) => {

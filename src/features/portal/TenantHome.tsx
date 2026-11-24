@@ -84,7 +84,7 @@ export function TenantHome({
       </Card>
 
       {mode === "support" && (
-        <Can resource="organization" action="update">
+        <Can resource="tenant" action="update">
           <PortalTenantSupportActions tenant={tenant} />
         </Can>
       )}
