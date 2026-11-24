@@ -1,24 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AcceptInvitationPage } from "@/features/auth/AcceptInvitationPage";
-import { TenantAcceptInvitationPage } from "@/features/tenant-auth/TenantAuthPages";
-import { resolveTenantFromHostname } from "@/lib/tenant-context";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-function AcceptInvitationRoute() {
-  const tenant = resolveTenantFromHostname();
-
-  if (tenant.mode === "subdomain" && tenant.tenantSlug) {
-    return (
-      <TenantAcceptInvitationPage
-        tenantSlug={tenant.tenantSlug}
-        mode="subdomain"
-        embedded
-      />
-    );
-  }
-
-  return <AcceptInvitationPage />;
+function AcceptInvitationLayoutRoute() {
+  return <Outlet />;
 }
 
 export const Route = createFileRoute("/_auth/auth/accept-invitation")({
-  component: AcceptInvitationRoute,
+  component: AcceptInvitationLayoutRoute,
 });

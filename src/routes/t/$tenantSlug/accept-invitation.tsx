@@ -1,11 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { TenantAcceptInvitationPage } from "@/features/tenant-auth/TenantAuthPages";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-function TenantAcceptInvitationRoute() {
-  const { tenantSlug } = Route.useParams();
-  return <TenantAcceptInvitationPage tenantSlug={tenantSlug} mode="path" />;
+function TenantAcceptInvitationLayoutRoute() {
+  return <Outlet />;
 }
 
 export const Route = createFileRoute("/t/$tenantSlug/accept-invitation")({
-  component: TenantAcceptInvitationRoute,
+  component: TenantAcceptInvitationLayoutRoute,
 });

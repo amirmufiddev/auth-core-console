@@ -28,15 +28,28 @@ function getSecretKeysForFeature(id: BetterAuthFeatureId): Set<string> {
   );
 }
 
+function getNonSecretKeysForFeature(id: BetterAuthFeatureId): Set<string> {
+  const def = BETTER_AUTH_FEATURE_MAP[id];
+  return new Set(
+    (def?.settingsSchema ?? [])
+      .filter((s) => s.type !== "secret")
+      .map((s) => s.key),
+  );
+}
+
 function stripSecretSettings(
   id: BetterAuthFeatureId,
   settings?: Record<string, unknown>,
 ): Record<string, string | number | boolean> {
   const secretKeys = getSecretKeysForFeature(id);
+  const nonSecretKeys = getNonSecretKeysForFeature(id);
   const clean: Record<string, string | number | boolean> = {};
   if (!settings || typeof settings !== "object") return clean;
   for (const [key, value] of Object.entries(settings)) {
-    if (secretKeys.has(key) || SECRET_KEY_PATTERN.test(key)) {
+    if (
+      secretKeys.has(key) ||
+      (!nonSecretKeys.has(key) && SECRET_KEY_PATTERN.test(key))
+    ) {
       continue;
     }
     if (
