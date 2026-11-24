@@ -181,8 +181,21 @@ function TenantConfigState({
   return null;
 }
 
-function navigateAfterAuth(redirectTo?: string) {
+function navigateAfterAuth(redirectTo?: string, oauthRedirectUrl?: string) {
+  if (oauthRedirectUrl) {
+    const safeOAuthUrl = sanitizeOAuthRedirectUrl(oauthRedirectUrl);
+    if (safeOAuthUrl) {
+      window.location.assign(safeOAuthUrl);
+      return;
+    }
+  }
   window.location.assign(sanitizeRelativeRedirect(redirectTo));
+}
+
+function hasSignedOAuthQuery(): boolean {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return Boolean(params.get("sig") && params.get("client_id"));
 }
 
 function renderTenantShell({
@@ -284,7 +297,11 @@ export function TenantLoginPage({
         toast.error(res.error.message || "Email atau kata sandi salah.");
         return;
       }
-      const data = res.data as { twoFactorRedirect?: boolean } | null;
+      const data = res.data as {
+        twoFactorRedirect?: boolean;
+        redirect?: boolean;
+        url?: string;
+      } | null;
       if (data?.twoFactorRedirect) {
         const verifyPath = buildTenantRoutePath(context, "verify-2fa");
         void navigate({
@@ -296,6 +313,10 @@ export function TenantLoginPage({
         return;
       }
       toast.success("Berhasil masuk.");
+      if (data?.url) {
+        navigateAfterAuth(redirectTo, data.url);
+        return;
+      }
       if (redirectTo && redirectTo.trim().length > 0) {
         navigateAfterAuth(redirectTo);
         return;
@@ -346,8 +367,9 @@ export function TenantLoginPage({
         return;
       }
       toast.success("Berhasil masuk dengan OTP.");
-      if (redirectTo && redirectTo.trim().length > 0) {
-        navigateAfterAuth(redirectTo);
+      const data = res.data as { url?: string } | null;
+      if (data?.url || (redirectTo && redirectTo.trim().length > 0)) {
+        navigateAfterAuth(redirectTo, data?.url);
         return;
       }
       await refreshSession();
@@ -399,8 +421,9 @@ export function TenantLoginPage({
         return;
       }
       toast.success("Berhasil masuk dengan Passkey.");
-      if (redirectTo && redirectTo.trim().length > 0) {
-        navigateAfterAuth(redirectTo);
+      const data = (res as { data?: { url?: string } | null })?.data;
+      if (data?.url || (redirectTo && redirectTo.trim().length > 0)) {
+        navigateAfterAuth(redirectTo, data?.url);
         return;
       }
       await refreshSession();
@@ -440,11 +463,13 @@ export function TenantLoginPage({
   const hasPrimaryTabs = emailEnabled || emailOtpEnabled || magicLinkEnabled;
   const hasAlternatives = passkeyEnabled || activeSocials.length > 0;
 
+  const isOAuthFlow = hasSignedOAuthQuery();
+
   const content = (
     <div className="w-full space-y-5">
       {loading || error ? (
         <TenantConfigState loading={loading} error={error} onRetry={reload} />
-      ) : activeSession ? (
+      ) : activeSession && !isOAuthFlow ? (
         <div className="space-y-4">
           <Alert color="success" variant="soft">
             <CheckCircle2 className="h-4 w-4" />
@@ -823,8 +848,9 @@ export function TenantRegisterPage({
         return;
       }
       toast.success("Akun berhasil dibuat.");
-      if (redirectTo && redirectTo.trim().length > 0) {
-        navigateAfterAuth(redirectTo);
+      const data = res.data as { url?: string } | null;
+      if (data?.url || (redirectTo && redirectTo.trim().length > 0)) {
+        navigateAfterAuth(redirectTo, data?.url);
         return;
       }
       void navigate({ to: buildTenantRoutePath(context, "login") as never });
@@ -978,8 +1004,9 @@ export function TenantVerify2FAPage({
         return;
       }
       toast.success("Verifikasi 2FA berhasil.");
-      if (redirectTo && redirectTo.trim().length > 0) {
-        navigateAfterAuth(redirectTo);
+      const data = res.data as { url?: string } | null;
+      if (data?.url || (redirectTo && redirectTo.trim().length > 0)) {
+        navigateAfterAuth(redirectTo, data?.url);
         return;
       }
       void navigate({ to: buildTenantRoutePath(context, "login") as never });
