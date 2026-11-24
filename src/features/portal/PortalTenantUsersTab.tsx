@@ -17,6 +17,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
+import { OwnerOnly } from "@/components/layout/Can";
+
+export { OwnerOnly };
 
 interface PortalTenantUsersTabProps {
   tenantId: string;

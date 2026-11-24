@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { OwnerOnly } from "@/components/layout/Can";
 import {
   Card,
   CardContent,
@@ -276,17 +277,19 @@ export function PortalTenantOAuthClientsTab({
       header: "",
       cell: ({ row }) => (
         <div className="flex justify-end">
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            color="destructive"
-            className="h-8 w-8"
-            onClick={() => setDeleteClientTarget(row.original)}
-            aria-label="Hapus OAuth client"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <OwnerOnly>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              color="destructive"
+              className="h-8 w-8"
+              onClick={() => setDeleteClientTarget(row.original)}
+              aria-label="Hapus OAuth client"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </OwnerOnly>
         </div>
       ),
     },
@@ -333,14 +336,16 @@ export function PortalTenantOAuthClientsTab({
               kali saat registrasi.
             </CardDescription>
           </div>
-          <Button
-            color="primary"
-            disabled={quotaReached}
-            onClick={() => setCreateClientOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Register Client
-          </Button>
+          <OwnerOnly>
+            <Button
+              color="primary"
+              disabled={quotaReached}
+              onClick={() => setCreateClientOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Register Client
+            </Button>
+          </OwnerOnly>
         </CardHeader>
         <CardContent className="p-0">
           <DataTable

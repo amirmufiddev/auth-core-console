@@ -20,6 +20,7 @@ import {
   TenantTierBadge,
 } from "@/features/portal/TenantBadges";
 import { Button } from "@/components/ui/button";
+import { OwnerOnly } from "@/components/layout/Can";
 import {
   Card,
   CardContent,
@@ -132,15 +133,17 @@ export function PortalTenantSettingsTab({
             </div>
 
             <div className="flex justify-end pt-2">
-              <Button
-                type="submit"
-                color="primary"
-                disabled={updateTenantMutation.isPending}
-              >
-                {updateTenantMutation.isPending
-                  ? "Menyimpan..."
-                  : "Simpan Perubahan"}
-              </Button>
+              <OwnerOnly>
+                <Button
+                  type="submit"
+                  color="primary"
+                  disabled={updateTenantMutation.isPending}
+                >
+                  {updateTenantMutation.isPending
+                    ? "Menyimpan..."
+                    : "Simpan Perubahan"}
+                </Button>
+              </OwnerOnly>
             </div>
           </form>
         </CardContent>

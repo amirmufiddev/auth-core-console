@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { fetchActorPermissions } from "@/api/actor-permissions";
-import { canPlatform } from "@/lib/console-shell";
+import { Can } from "@/components/layout/Can";
 import {
   TenantBillingStatusBadge,
   TenantStatusBadge,
@@ -19,13 +19,7 @@ export const Route = createFileRoute("/_authenticated/tenants/$tenantId/")({
   },
   component: function TenantOverviewRoute() {
     const { mode, tenant } = TenantRoute.useRouteContext();
-    const { supportRoles } = Route.useRouteContext();
-
     if (!tenant) return null;
-
-    const showOperatorActions =
-      mode === "support" &&
-      canPlatform(supportRoles ?? [], "organization", "update");
 
     return (
       <div className="space-y-6">
@@ -45,7 +39,11 @@ export const Route = createFileRoute("/_authenticated/tenants/$tenantId/")({
           <TenantBillingStatusBadge status={tenant.billingStatus} />
         </div>
 
-        {showOperatorActions && <PortalTenantSupportActions tenant={tenant} />}
+        {mode === "support" && (
+          <Can resource="organization" action="update">
+            <PortalTenantSupportActions tenant={tenant} />
+          </Can>
+        )}
       </div>
     );
   },

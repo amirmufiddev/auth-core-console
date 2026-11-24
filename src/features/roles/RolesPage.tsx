@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/layout/Can";
 import {
   Card,
   CardContent,
@@ -231,10 +232,12 @@ export function RolesPage() {
             .
           </p>
         </div>
-        <Button color="primary" onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Buat Role Baru
-        </Button>
+        <Can resource="role" action="create">
+          <Button color="primary" onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Buat Role Baru
+          </Button>
+        </Can>
       </div>
 
       {/* Split Workspace: 12 cols -> 4 left / 8 right */}
@@ -293,20 +296,22 @@ export function RolesPage() {
                       </p>
                     </div>
                     {!role.isSystem && (
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        color="destructive"
-                        className="h-7 w-7 shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTarget(role);
-                        }}
-                        aria-label={`Hapus role ${role.name}`}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <Can resource="role" action="delete">
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          color="destructive"
+                          className="h-7 w-7 shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(role);
+                          }}
+                          aria-label={`Hapus role ${role.name}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </Can>
                     )}
                   </div>
                   <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
@@ -344,21 +349,25 @@ export function RolesPage() {
                   </CardDescription>
                 </div>
 
-                <Button
-                  color="primary"
-                  disabled={updateMutation.isPending}
-                  onClick={() =>
-                    updateMutation.mutate({
-                      roleId: selectedRole.id,
-                      name: draftName,
-                      description: draftDescription,
-                      permissions: draftPermissions,
-                    })
-                  }
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  {updateMutation.isPending ? "Menyimpan..." : "Simpan Matriks"}
-                </Button>
+                <Can resource="role" action="update">
+                  <Button
+                    color="primary"
+                    disabled={updateMutation.isPending}
+                    onClick={() =>
+                      updateMutation.mutate({
+                        roleId: selectedRole.id,
+                        name: draftName,
+                        description: draftDescription,
+                        permissions: draftPermissions,
+                      })
+                    }
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    {updateMutation.isPending
+                      ? "Menyimpan..."
+                      : "Simpan Matriks"}
+                  </Button>
+                </Can>
               </CardHeader>
 
               <CardContent className="pt-5">

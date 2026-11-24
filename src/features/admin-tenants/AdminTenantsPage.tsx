@@ -78,6 +78,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Can } from "@/components/layout/Can";
 
 interface AdminTenantsPageProps {
   searchParams: AdminTenantsSearchParams;
@@ -292,10 +293,14 @@ export function AdminTenantsPage({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => openChangeTierDialog(tenant)}>
-                  <Layers className="mr-2 h-4 w-4" />
-                  Ubah Tier Langganan
-                </DropdownMenuItem>
+                <Can resource="organization" action="update">
+                  <DropdownMenuItem
+                    onClick={() => openChangeTierDialog(tenant)}
+                  >
+                    <Layers className="mr-2 h-4 w-4" />
+                    Ubah Tier Langganan
+                  </DropdownMenuItem>
+                </Can>
                 <DropdownMenuItem asChild>
                   <Link
                     to="/admin-billing"
@@ -311,28 +316,30 @@ export function AdminTenantsPage({
                     Lihat Ledger Billing
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {isActive ? (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      setStatusTarget({ tenant, nextStatus: "suspended" })
-                    }
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Ban className="mr-2 h-4 w-4" />
-                    Suspend Tenant
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      setStatusTarget({ tenant, nextStatus: "active" })
-                    }
-                    className="text-success focus:text-success"
-                  >
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                    Activate Tenant
-                  </DropdownMenuItem>
-                )}
+                <Can resource="organization" action="update">
+                  <DropdownMenuSeparator />
+                  {isActive ? (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusTarget({ tenant, nextStatus: "suspended" })
+                      }
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Ban className="mr-2 h-4 w-4" />
+                      Suspend Tenant
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        setStatusTarget({ tenant, nextStatus: "active" })
+                      }
+                      className="text-success focus:text-success"
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Activate Tenant
+                    </DropdownMenuItem>
+                  )}
+                </Can>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -353,10 +360,12 @@ export function AdminTenantsPage({
             aktivasi/suspensi.
           </p>
         </div>
-        <Button color="primary" onClick={openCreateDialog}>
-          <Plus className="mr-2 h-4 w-4" />
-          Buat Tenant
-        </Button>
+        <Can resource="organization" action="create">
+          <Button color="primary" onClick={openCreateDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Buat Tenant
+          </Button>
+        </Can>
       </div>
 
       {tenantsQuery.isError && (

@@ -25,6 +25,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/layout/Can";
 import {
   Card,
   CardContent,
@@ -249,35 +250,37 @@ export function AdminFeatureTierMatrixPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {dirtyTierIds.length > 0 && (
+        <Can resource="authConfig" action="configure">
+          <div className="flex flex-wrap items-center gap-2">
+            {dirtyTierIds.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                color="secondary"
+                onClick={resetDraft}
+                disabled={saveMatrixMutation.isPending}
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset ({dirtyTierIds.length} tier)
+              </Button>
+            )}
             <Button
               type="button"
-              variant="outline"
-              color="secondary"
-              onClick={resetDraft}
-              disabled={saveMatrixMutation.isPending}
+              color="primary"
+              disabled={
+                dirtyTierIds.length === 0 || saveMatrixMutation.isPending
+              }
+              onClick={() => saveMatrixMutation.mutate(dirtyTierIds)}
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Reset ({dirtyTierIds.length} tier)
+              <Save className="mr-2 h-4 w-4" />
+              {saveMatrixMutation.isPending
+                ? "Menyimpan..."
+                : dirtyTierIds.length > 0
+                  ? `Simpan Matriks (${dirtyTierIds.length} Tier)`
+                  : "Matriks Tersimpan"}
             </Button>
-          )}
-          <Button
-            type="button"
-            color="primary"
-            disabled={
-              dirtyTierIds.length === 0 || saveMatrixMutation.isPending
-            }
-            onClick={() => saveMatrixMutation.mutate(dirtyTierIds)}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            {saveMatrixMutation.isPending
-              ? "Menyimpan..."
-              : dirtyTierIds.length > 0
-                ? `Simpan Matriks (${dirtyTierIds.length} Tier)`
-                : "Matriks Tersimpan"}
-          </Button>
-        </div>
+          </div>
+        </Can>
       </div>
 
       {/* KPI Strip */}
@@ -479,29 +482,31 @@ export function AdminFeatureTierMatrixPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Select
-                              value={feature.status}
-                              disabled={updateStatusMutation.isPending}
-                              onValueChange={(val) =>
-                                updateStatusMutation.mutate({
-                                  featureId: feature.id,
-                                  status: val as AuthFeatureStatus,
-                                })
-                              }
-                            >
-                              <SelectTrigger className="h-8 w-36" size="sm">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="coming_soon">
-                                  Coming Soon
-                                </SelectItem>
-                                <SelectItem value="disabled">
-                                  Disabled
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Can resource="authConfig" action="configure">
+                              <Select
+                                value={feature.status}
+                                disabled={updateStatusMutation.isPending}
+                                onValueChange={(val) =>
+                                  updateStatusMutation.mutate({
+                                    featureId: feature.id,
+                                    status: val as AuthFeatureStatus,
+                                  })
+                                }
+                              >
+                                <SelectTrigger className="h-8 w-36" size="sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">Active</SelectItem>
+                                  <SelectItem value="coming_soon">
+                                    Coming Soon
+                                  </SelectItem>
+                                  <SelectItem value="disabled">
+                                    Disabled
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </Can>
                           </TableCell>
                           {sortedTiers.map((tier) => {
                             const checked = (

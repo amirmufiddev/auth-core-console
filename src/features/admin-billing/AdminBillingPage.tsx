@@ -32,6 +32,7 @@ import {
 } from "@/features/portal/TenantBadges";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/layout/Can";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -278,10 +279,12 @@ export function AdminBillingPage({
             status billing tenant.
           </p>
         </div>
-        <Button color="primary" onClick={openCreateDialog}>
-          <Plus className="mr-2 h-4 w-4" />
-          Catat Billing
-        </Button>
+        <Can resource="organization" action="update">
+          <Button color="primary" onClick={openCreateDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Catat Billing
+          </Button>
+        </Can>
       </div>
 
       {billingQuery.isError && (

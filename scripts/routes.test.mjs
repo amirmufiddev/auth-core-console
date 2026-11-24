@@ -366,3 +366,20 @@ test("komponen better-auth mandiri tidak memakai package better-auth-ui eksterna
     );
   }
 });
+
+test("tombol tulis platform dan tenant memakai gerbang izin", () => {
+  assert.match(readUtf8("src/components/layout/Can.tsx"), /export function Can/);
+  assert.match(
+    readUtf8("src/components/layout/Can.tsx"),
+    /export function OwnerOnly/,
+  );
+  assert.match(readUtf8("src/features/users/UsersPage.tsx"), /resource="user"/);
+  assert.match(
+    readUtf8("src/features/admin-tenants/AdminTenantsPage.tsx"),
+    /organization/,
+  );
+  assert.match(
+    readUtf8("src/features/portal/PortalTenantUsersTab.tsx"),
+    /OwnerOnly/,
+  );
+});

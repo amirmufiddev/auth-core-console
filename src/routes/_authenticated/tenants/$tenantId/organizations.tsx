@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { OrganizationSwitcher } from "@/components/better-auth";
+import { OwnerOnly } from "@/components/layout/Can";
 import { PortalTenantOrgsTab } from "@/features/portal/PortalTenantOrgsTab";
 import { Route as TenantRoute } from "./route";
 
@@ -8,9 +9,11 @@ function TenantOrganizationsRouteComponent() {
   if (!tenant) return null;
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <OrganizationSwitcher />
-      </div>
+      <OwnerOnly>
+        <div className="flex justify-end">
+          <OrganizationSwitcher />
+        </div>
+      </OwnerOnly>
       <PortalTenantOrgsTab tenantId={tenant.id} tenantSlug={tenant.slug} />
     </div>
   );

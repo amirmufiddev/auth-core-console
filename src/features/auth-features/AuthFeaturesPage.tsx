@@ -24,6 +24,7 @@ import { useAuthConfigStore } from "@/stores/useAuthConfigStore";
 import { type AuthFeaturesSearchParams } from "@/features/audit-logs/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/layout/Can";
 import {
   Card,
   CardContent,
@@ -211,22 +212,24 @@ export function AuthFeaturesPage({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select
-            onValueChange={(val) => {
-              applyPreset(val as ConfigPresetId);
-              toast.success(`Preset "${val}" diterapkan.`);
-            }}
-          >
-            <SelectTrigger className="h-9 w-44" size="sm">
-              <SelectValue placeholder="Terapkan Preset..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="minimal">Minimal Core</SelectItem>
-              <SelectItem value="saas">SaaS Starter</SelectItem>
-              <SelectItem value="enterprise">Enterprise IAM</SelectItem>
-              <SelectItem value="full">Enable All ({totalCount})</SelectItem>
-            </SelectContent>
-          </Select>
+          <Can resource="authConfig" action="configure">
+            <Select
+              onValueChange={(val) => {
+                applyPreset(val as ConfigPresetId);
+                toast.success(`Preset "${val}" diterapkan.`);
+              }}
+            >
+              <SelectTrigger className="h-9 w-44" size="sm">
+                <SelectValue placeholder="Terapkan Preset..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="minimal">Minimal Core</SelectItem>
+                <SelectItem value="saas">SaaS Starter</SelectItem>
+                <SelectItem value="enterprise">Enterprise IAM</SelectItem>
+                <SelectItem value="full">Enable All ({totalCount})</SelectItem>
+              </SelectContent>
+            </Select>
+          </Can>
 
           <Button
             variant="outline"
@@ -394,11 +397,15 @@ export function AuthFeaturesPage({
                   </CardDescription>
                 </div>
 
-                <Switch
-                  aria-label={`Toggle ${feature.name}`}
-                  checked={enabled}
-                  onCheckedChange={(checked) => handleToggle(feature, checked)}
-                />
+                <Can resource="authConfig" action="configure">
+                  <Switch
+                    aria-label={`Toggle ${feature.name}`}
+                    checked={enabled}
+                    onCheckedChange={(checked) =>
+                      handleToggle(feature, checked)
+                    }
+                  />
+                </Can>
               </CardHeader>
 
               <CardContent className="space-y-4 pt-4">
@@ -457,14 +464,16 @@ export function AuthFeaturesPage({
                   >
                     {FEATURE_CATEGORY_META[feature.category].label}
                   </Badge>
-                  <Button
-                    size="sm"
-                    color="primary"
-                    onClick={() => openConfigureSheet(feature)}
-                  >
-                    <Settings2 className="mr-1.5 h-3.5 w-3.5" />
-                    Configure
-                  </Button>
+                  <Can resource="authConfig" action="configure">
+                    <Button
+                      size="sm"
+                      color="primary"
+                      onClick={() => openConfigureSheet(feature)}
+                    >
+                      <Settings2 className="mr-1.5 h-3.5 w-3.5" />
+                      Configure
+                    </Button>
+                  </Can>
                 </div>
               </CardContent>
             </Card>
@@ -620,23 +629,25 @@ export function AuthFeaturesPage({
                               Batal Hapus
                             </Button>
                           ) : secretsConfigured ? (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              color="destructive"
-                              className="h-7 px-2 text-[11px]"
-                              onClick={() =>
-                                setClearSecretKeys((prev) =>
-                                  prev.includes(field.key)
-                                    ? prev
-                                    : [...prev, field.key],
-                                )
-                              }
-                            >
-                              <Trash2 className="mr-1 h-3 w-3" />
-                              Hapus
-                            </Button>
+                            <Can resource="authConfig" action="configure">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                color="destructive"
+                                className="h-7 px-2 text-[11px]"
+                                onClick={() =>
+                                  setClearSecretKeys((prev) =>
+                                    prev.includes(field.key)
+                                      ? prev
+                                      : [...prev, field.key],
+                                  )
+                                }
+                              >
+                                <Trash2 className="mr-1 h-3 w-3" />
+                                Hapus
+                              </Button>
+                            </Can>
                           ) : null}
                         </div>
                       </div>
@@ -676,13 +687,15 @@ export function AuthFeaturesPage({
                 >
                   Batal
                 </Button>
-                <Button
-                  type="button"
-                  color="primary"
-                  onClick={saveFeatureSettings}
-                >
-                  Simpan Parameter
-                </Button>
+                <Can resource="authConfig" action="configure">
+                  <Button
+                    type="button"
+                    color="primary"
+                    onClick={saveFeatureSettings}
+                  >
+                    Simpan Parameter
+                  </Button>
+                </Can>
               </SheetFooter>
             </>
           )}

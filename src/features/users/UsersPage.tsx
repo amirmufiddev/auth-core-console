@@ -51,6 +51,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/layout/Can";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -382,48 +383,56 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
                   <Eye className="mr-2 h-4 w-4" />
                   Detail & Keamanan
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => openEditModal(u)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit User
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={async () => {
-                    await impersonateUser(u);
-                    toast.info(`Mengimpersonasi ${u.email}`);
-                  }}
-                >
-                  <UserCheck className="mr-2 h-4 w-4" />
-                  Impersonate
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {u.banned ? (
-                  <DropdownMenuItem
-                    onClick={() =>
-                      banMutation.mutate({ userId: u.id, banned: false })
-                    }
-                  >
-                    <CheckCircle2 className="mr-2 h-4 w-4 text-success" />
-                    Unban User
+                <Can resource="user" action="update">
+                  <DropdownMenuItem onClick={() => openEditModal(u)}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit User
                   </DropdownMenuItem>
-                ) : (
+                </Can>
+                <Can resource="user" action="impersonate">
                   <DropdownMenuItem
-                    onClick={() => {
-                      banForm.reset({ banReason: "", banExpires: undefined });
-                      setBanTarget(u);
+                    onClick={async () => {
+                      await impersonateUser(u);
+                      toast.info(`Mengimpersonasi ${u.email}`);
                     }}
-                    className="text-warning focus:text-warning"
                   >
-                    <Ban className="mr-2 h-4 w-4" />
-                    Ban User
+                    <UserCheck className="mr-2 h-4 w-4" />
+                    Impersonate
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => setDeleteTarget(u)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Hapus User
-                </DropdownMenuItem>
+                </Can>
+                <DropdownMenuSeparator />
+                <Can resource="user" action="ban">
+                  {u.banned ? (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        banMutation.mutate({ userId: u.id, banned: false })
+                      }
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4 text-success" />
+                      Unban User
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      onClick={() => {
+                        banForm.reset({ banReason: "", banExpires: undefined });
+                        setBanTarget(u);
+                      }}
+                      className="text-warning focus:text-warning"
+                    >
+                      <Ban className="mr-2 h-4 w-4" />
+                      Ban User
+                    </DropdownMenuItem>
+                  )}
+                </Can>
+                <Can resource="user" action="delete">
+                  <DropdownMenuItem
+                    onClick={() => setDeleteTarget(u)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Hapus User
+                  </DropdownMenuItem>
+                </Can>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -444,10 +453,12 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
             Kelola akun pengguna, role RBAC, 2FA, ban/unban, dan impersonation.
           </p>
         </div>
-        <Button color="primary" onClick={openCreateModal}>
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah User
-        </Button>
+        <Can resource="user" action="create">
+          <Button color="primary" onClick={openCreateModal}>
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah User
+          </Button>
+        </Can>
       </div>
 
       {/* KPI Strip */}
@@ -649,14 +660,16 @@ export function UsersPage({ searchParams, onUpdateSearch }: UsersPageProps) {
                         >
                           Detail
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="soft"
-                          color="primary"
-                          onClick={() => openEditModal(u)}
-                        >
-                          Edit
-                        </Button>
+                        <Can resource="user" action="update">
+                          <Button
+                            size="sm"
+                            variant="soft"
+                            color="primary"
+                            onClick={() => openEditModal(u)}
+                          >
+                            Edit
+                          </Button>
+                        </Can>
                       </div>
                     </CardContent>
                   </Card>

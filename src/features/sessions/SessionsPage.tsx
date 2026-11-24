@@ -19,6 +19,7 @@ import { formatDate } from "@/lib/utils";
 import { type SessionsSearchParams } from "@/features/audit-logs/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Can } from "@/components/layout/Can";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -165,16 +166,18 @@ export function SessionsPage({
       header: "",
       cell: ({ row }) => (
         <div className="flex justify-end">
-          <Button
-            size="sm"
-            variant="outline"
-            color="destructive"
-            disabled={!row.original.active || revokeMutation.isPending}
-            onClick={() => revokeMutation.mutate(row.original.id)}
-          >
-            <LogOut className="mr-1.5 h-3.5 w-3.5" />
-            Revoke
-          </Button>
+          <Can resource="session" action="revoke">
+            <Button
+              size="sm"
+              variant="outline"
+              color="destructive"
+              disabled={!row.original.active || revokeMutation.isPending}
+              onClick={() => revokeMutation.mutate(row.original.id)}
+            >
+              <LogOut className="mr-1.5 h-3.5 w-3.5" />
+              Revoke
+            </Button>
+          </Can>
         </div>
       ),
     },
@@ -195,15 +198,17 @@ export function SessionsPage({
             Monitor sesi aktif, token impersonation, dan cabut akses perangkat.
           </p>
         </div>
-        <Button
-          variant="outline"
-          color="destructive"
-          disabled={cleanupMutation.isPending}
-          onClick={() => cleanupMutation.mutate()}
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Bersihkan Sesi Kedaluwarsa
-        </Button>
+        <Can resource="session" action="revoke">
+          <Button
+            variant="outline"
+            color="destructive"
+            disabled={cleanupMutation.isPending}
+            onClick={() => cleanupMutation.mutate()}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Bersihkan Sesi Kedaluwarsa
+          </Button>
+        </Can>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

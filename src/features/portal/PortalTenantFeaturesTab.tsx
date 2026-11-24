@@ -23,6 +23,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { OwnerOnly } from "@/components/layout/Can";
 import {
   Card,
   CardContent,
@@ -334,12 +335,14 @@ export function PortalTenantFeaturesTab({
                   </CardDescription>
                 </div>
 
-                <Switch
-                  aria-label={`Toggle ${feature.name}`}
-                  checked={feature.enabled}
-                  disabled={isLocked || updateMutation.isPending}
-                  onCheckedChange={(checked) => handleToggle(feature, checked)}
-                />
+                <OwnerOnly>
+                  <Switch
+                    aria-label={`Toggle ${feature.name}`}
+                    checked={feature.enabled}
+                    disabled={isLocked || updateMutation.isPending}
+                    onCheckedChange={(checked) => handleToggle(feature, checked)}
+                  />
+                </OwnerOnly>
               </CardHeader>
 
               <CardContent className="space-y-3 pt-4">
@@ -371,18 +374,20 @@ export function PortalTenantFeaturesTab({
                   >
                     {catLabel}
                   </Badge>
-                  <Button
-                    size="sm"
-                    color="primary"
-                    variant={isLocked ? "outline" : "default"}
-                    disabled={isLocked || feature.availableSetting.length === 0}
-                    onClick={() => openConfigureSheet(feature)}
-                  >
-                    <Settings2 className="mr-1.5 h-3.5 w-3.5" />
-                    {feature.availableSetting.length === 0
-                      ? "Tanpa Parameter"
-                      : "Configure"}
-                  </Button>
+                  <OwnerOnly>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      variant={isLocked ? "outline" : "default"}
+                      disabled={isLocked || feature.availableSetting.length === 0}
+                      onClick={() => openConfigureSheet(feature)}
+                    >
+                      <Settings2 className="mr-1.5 h-3.5 w-3.5" />
+                      {feature.availableSetting.length === 0
+                        ? "Tanpa Parameter"
+                        : "Configure"}
+                    </Button>
+                  </OwnerOnly>
                 </div>
               </CardContent>
             </Card>
@@ -495,23 +500,25 @@ export function PortalTenantFeaturesTab({
                               Batal Hapus
                             </Button>
                           ) : isConfigured ? (
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              color="destructive"
-                              className="h-7 px-2 text-[11px]"
-                              onClick={() =>
-                                setClearSecretKeys((prev) =>
-                                  prev.includes(field.key)
-                                    ? prev
-                                    : [...prev, field.key],
-                                )
-                              }
-                            >
-                              <Trash2 className="mr-1 h-3 w-3" />
-                              Hapus
-                            </Button>
+                            <OwnerOnly>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="ghost"
+                                color="destructive"
+                                className="h-7 px-2 text-[11px]"
+                                onClick={() =>
+                                  setClearSecretKeys((prev) =>
+                                    prev.includes(field.key)
+                                      ? prev
+                                      : [...prev, field.key],
+                                  )
+                                }
+                              >
+                                <Trash2 className="mr-1 h-3 w-3" />
+                                Hapus
+                              </Button>
+                            </OwnerOnly>
                           ) : null}
                         </div>
                       </div>
@@ -613,16 +620,18 @@ export function PortalTenantFeaturesTab({
                 >
                   Batal
                 </Button>
-                <Button
-                  type="button"
-                  color="primary"
-                  disabled={updateMutation.isPending}
-                  onClick={handleSaveSheet}
-                >
-                  {updateMutation.isPending
-                    ? "Menyimpan..."
-                    : "Simpan Konfigurasi"}
-                </Button>
+                <OwnerOnly>
+                  <Button
+                    type="button"
+                    color="primary"
+                    disabled={updateMutation.isPending}
+                    onClick={handleSaveSheet}
+                  >
+                    {updateMutation.isPending
+                      ? "Menyimpan..."
+                      : "Simpan Konfigurasi"}
+                  </Button>
+                </OwnerOnly>
               </SheetFooter>
             </>
           )}

@@ -19,6 +19,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { OwnerOnly } from "@/components/layout/Can";
 import {
   Card,
   CardContent,
@@ -205,17 +206,19 @@ export function PortalTenantApiKeysTab({
       header: "",
       cell: ({ row }) => (
         <div className="flex justify-end">
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            color="destructive"
-            className="h-8 w-8"
-            onClick={() => setDeleteTarget(row.original)}
-            aria-label="Cabut API Key"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <OwnerOnly>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              color="destructive"
+              className="h-8 w-8"
+              onClick={() => setDeleteTarget(row.original)}
+              aria-label="Cabut API Key"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </OwnerOnly>
         </div>
       ),
     },
@@ -258,14 +261,16 @@ export function PortalTenantApiKeysTab({
               ditampilkan sekali saat dibuat.
             </CardDescription>
           </div>
-          <Button
-            color="primary"
-            disabled={!tierAllowsApiKey}
-            onClick={() => setCreateOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Buat API Key
-          </Button>
+          <OwnerOnly>
+            <Button
+              color="primary"
+              disabled={!tierAllowsApiKey}
+              onClick={() => setCreateOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Buat API Key
+            </Button>
+          </OwnerOnly>
         </CardHeader>
         <CardContent className="p-0">
           <DataTable
