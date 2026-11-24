@@ -1,16 +1,16 @@
 # Graph Report - auth-core-console  (2026-11-24)
 
 ## Corpus Check
-- 242 files · ~110,159 words
+- 242 files · ~110,190 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1470 nodes · 4419 edges · 81 communities (72 shown, 9 thin omitted)
+- 1470 nodes · 4417 edges · 81 communities (72 shown, 9 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.62)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a13da474`
+- Built from commit: `e072a779`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -96,8 +96,8 @@
 2. `isExternalBackendConfigured()` - 79 edges
 3. `useAuthStore` - 72 edges
 4. `apiRequest()` - 58 edges
-5. `Button` - 54 edges
-6. `FileRoutesByPath` - 54 edges
+5. `FileRoutesByPath` - 54 edges
+6. `Button` - 53 edges
 7. `readMockDb()` - 36 edges
 8. `useAuthUI()` - 35 edges
 9. `Badge()` - 32 edges
@@ -154,12 +154,12 @@ Cohesion: 0.15
 Nodes (19): Autocomplete, AutocompleteContext, AutocompleteContextValue, AutocompleteItem, AutocompleteItemProps, AutocompleteProps, Command(), CommandDialog() (+11 more)
 
 ### Community 8 - "tenant-context.ts"
-Cohesion: 0.08
-Nodes (35): AuthView(), Separator, buildTenantRoutePath(), hasSignedOAuthQuery(), navigateAfterAuth(), renderTenantShell(), TenantAcceptInvitationPage(), TenantConsentPage() (+27 more)
+Cohesion: 0.14
+Nodes (25): Separator, buildTenantRoutePath(), hasSignedOAuthQuery(), navigateAfterAuth(), renderTenantShell(), TenantAcceptInvitationPage(), TenantConsentPage(), TenantLoginPage() (+17 more)
 
 ### Community 9 - "index.ts"
-Cohesion: 0.12
-Nodes (32): ACCOUNT_NAV_ITEMS, AccountView(), AccountViewProps, AccountViewTab, ChangeEmailCard(), UpdateAvatarCard(), UpdateNameCard(), ChangePasswordCard() (+24 more)
+Cohesion: 0.10
+Nodes (38): ACCOUNT_NAV_ITEMS, AccountView(), AccountViewProps, AccountViewTab, ChangeEmailCard(), UpdateAvatarCard(), UpdateNameCard(), ChangePasswordCard() (+30 more)
 
 ### Community 10 - "utils.ts"
 Cohesion: 0.14
@@ -210,8 +210,8 @@ Cohesion: 0.09
 Nodes (39): AuthUserRecord, listMyTenants(), CreateOrganizationDialog(), OrganizationSwitcherProps, UserButtonLink, UserButtonProps, tenantIdFromPath(), WorkspaceSwitcher() (+31 more)
 
 ### Community 22 - "auth-ui-provider.tsx"
-Cohesion: 0.10
-Nodes (28): AcceptInvitationPage(), ConsentPage(), BaseTenantPageProps, createAuthPlugins(), createTenantAuthClient(), rawApiUrl, fetchTenantAuthConfig(), getPlatformHostEnv() (+20 more)
+Cohesion: 0.16
+Nodes (18): BaseTenantPageProps, createAuthPlugins(), createTenantAuthClient(), rawApiUrl, fetchTenantAuthConfig(), getPlatformHostEnv(), getTenantAuthConfigUrl(), getTenantBaseDomainEnv() (+10 more)
 
 ### Community 23 - "useThemeStore.ts"
 Cohesion: 0.13
@@ -378,8 +378,8 @@ Cohesion: 0.50
 Nodes (3): Toggle, ToggleProps, toggleVariants
 
 ### Community 74 - "OrganizationView.tsx"
-Cohesion: 0.36
-Nodes (6): OrganizationSettingsCards(), OrganizationView(), OrganizationViewProps, TabsContent, TabsList, TabsTrigger
+Cohesion: 0.08
+Nodes (20): AuthView(), AcceptInvitationPage(), ConsentPage(), resolveTenantContext(), resolveTenantFromHostname(), AcceptInvitationIndexRoute(), Route, AcceptInvitationParamRoute() (+12 more)
 
 ### Community 75 - "rating.tsx"
 Cohesion: 0.50
@@ -393,7 +393,7 @@ Nodes (3): Rating, RatingProps, ratingVariants
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `PortalTenantDetailPage.tsx`, `isExternalBackendConfigured`, `mock-db.ts`, `tenant-context.ts`, `index.ts`, `utils.ts`, `use-toast.ts`, `ThemePreferencesCard.tsx`, `console-shell.ts`, `OrganizationSwitcher.tsx`, `EmailOTPForm.tsx`, `_auth.tsx`, `timeline.tsx`, `_authenticated.tsx`, `carousel.tsx`, `menubar.tsx`, `schema.ts`, `schema.ts`, `form.tsx`, `pagination.tsx`, `slider.tsx`, `steps.tsx`, `Header.tsx`, `admin-billing.tsx`, `drawer.tsx`, `navigation-menu.tsx`, `progress.tsx`, `accordion.tsx`, `tree.tsx`, `rating.tsx`, `kbd.tsx`, `toggle.tsx`, `cleave.tsx`, `OrganizationView.tsx`, `rating.tsx`, `utils.ts`?**
+- **Why does `cn()` connect `cn` to `PortalTenantDetailPage.tsx`, `isExternalBackendConfigured`, `mock-db.ts`, `tenant-context.ts`, `index.ts`, `utils.ts`, `use-toast.ts`, `ThemePreferencesCard.tsx`, `console-shell.ts`, `OrganizationSwitcher.tsx`, `EmailOTPForm.tsx`, `_auth.tsx`, `timeline.tsx`, `_authenticated.tsx`, `carousel.tsx`, `menubar.tsx`, `schema.ts`, `schema.ts`, `form.tsx`, `pagination.tsx`, `slider.tsx`, `steps.tsx`, `Header.tsx`, `admin-billing.tsx`, `drawer.tsx`, `navigation-menu.tsx`, `progress.tsx`, `accordion.tsx`, `tree.tsx`, `rating.tsx`, `kbd.tsx`, `toggle.tsx`, `cleave.tsx`, `rating.tsx`, `utils.ts`?**
   _High betweenness centrality (0.097) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `EmailOTPForm.tsx`, `package.json`?**
   _High betweenness centrality (0.097) - this node is a cross-community bridge._

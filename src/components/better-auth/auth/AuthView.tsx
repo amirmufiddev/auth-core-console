@@ -14,6 +14,7 @@ import {
   SOCIAL_PROVIDER_CATALOG,
 } from "@/components/better-auth/auth/ProviderButtons";
 import { SignInForm } from "@/components/better-auth/auth/SignInForm";
+import { RegisterAlternativeMethods } from "@/features/auth/register/RegisterAlternativeMethods";
 import { SignUpForm } from "@/components/better-auth/auth/SignUpForm";
 import { TwoFactorForm } from "@/components/better-auth/auth/TwoFactorForm";
 import { Badge } from "@/components/ui/badge";
@@ -90,9 +91,25 @@ export function AuthView({
         ) : (
           <div className="rounded-xl border border-warning/30 bg-warning-soft/70 p-4 text-center text-xs text-foreground">
             Fitur <span className="font-semibold">Email &amp; Password</span>{" "}
-            sedang dinonaktifkan di Auth Core. Silakan masuk menggunakan metode
-            autentikasi lain yang aktif (OTP, Magic Link, Passkey, atau Social
-            OAuth).
+            sedang dinonaktifkan di Auth Core. Silakan daftar menggunakan metode
+            autentikasi lain yang aktif (Passkey atau Social OAuth).
+          </div>
+        )}
+
+        <RegisterAlternativeMethods
+          variant="platform"
+          redirectTo={safeRedirect}
+          emailEnabled={emailEnabled}
+          passkeyEnabled={passkeyEnabled}
+          socialFeatureEnabled={(id) => Boolean(features[id]?.enabled)}
+          hasOneTap={Boolean(features.oneTap?.enabled)}
+          hasSiwe={Boolean(features.siwe?.enabled)}
+          hasAnonymous={Boolean(features.anonymous?.enabled)}
+        />
+
+        {!emailEnabled && !hasAlternativeProviders && (
+          <div className="rounded-xl border border-warning/30 bg-warning-soft/70 p-4 text-center text-xs text-foreground">
+            Tidak ada metode pendaftaran yang aktif di Auth Core.
           </div>
         )}
 

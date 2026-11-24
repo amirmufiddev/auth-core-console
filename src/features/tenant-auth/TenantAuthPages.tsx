@@ -28,6 +28,12 @@ import {
   sanitizeOAuthRedirectUrl,
   sanitizeRelativeRedirect,
 } from "@/lib/tenant-context";
+import { RegisterAlternativeMethods } from "@/features/auth/register/RegisterAlternativeMethods";
+import { RegisterEmailForm } from "@/features/auth/register/RegisterEmailForm";
+import {
+  resolveEmailPasswordBounds,
+  type RegisterFormValues,
+} from "@/features/auth/register/schema";
 import { SOCIAL_PROVIDER_CATALOG } from "@/components/better-auth/auth/ProviderButtons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -840,28 +846,57 @@ export function TenantRegisterPage({
   const { context, tenantClient, config, loading, error, reload } =
     useTenantAuthSetup(tenantSlug, mode);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [altSubmitting, setAltSubmitting] = useState(false);
 
   const emailEnabled = isTenantFeatureActive(config, "emailAndPassword");
+  const passkeyEnabled = isTenantFeatureActive(config, "passkey");
+  const usernameEnabled = isTenantFeatureActive(config, "username");
+  const schemaOptions = resolveEmailPasswordBounds(config?.features);
 
-  async function handleRegister(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
+  const activeSocials = useMemo(
+    () =>
+      SOCIAL_PROVIDER_CATALOG.filter(
+        (s) =>
+          SUPPORTED_TENANT_SOCIAL_BRIDGE_PROVIDERS.has(s.provider) &&
+          isTenantFeatureActive(config, s.id),
+      ),
+    [config],
+  );
+
+  const hasAlternatives = passkeyEnabled || activeSocials.length > 0;
+
+  async function handleRegister(vals: RegisterFormValues) {
+    const res = await tenantClient.signUp.email({
+      name: vals.name.trim(),
+      email: vals.email.trim(),
+      password: vals.password,
+      ...(usernameEnabled && vals.username?.trim()
+        ? { username: vals.username.trim() }
+        : {}),
+    });
+    if (res.error) {
+      toast.error(res.error.message || "Gagal mendaftarkan akun.");
+      return;
+    }
+    toast.success("Akun berhasil dibuat.");
+    const data = res.data as { url?: string } | null;
+    if (data?.url || (redirectTo && redirectTo.trim().length > 0)) {
+      navigateAfterAuth(redirectTo, data?.url);
+      return;
+    }
+    void navigate({ to: buildTenantRoutePath(context, "login") as never });
+  }
+
+  async function handlePasskeyRegister() {
+    setAltSubmitting(true);
     try {
-      const res = await tenantClient.signUp.email({
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      });
-      if (res.error) {
-        toast.error(res.error.message || "Gagal mendaftarkan akun.");
+      const res = await tenantClient.signIn.passkey();
+      if (res?.error) {
+        toast.error(res.error.message || "Autentikasi Passkey gagal.");
         return;
       }
-      toast.success("Akun berhasil dibuat.");
-      const data = res.data as { url?: string } | null;
+      toast.success("Akun berhasil didaftarkan dengan Passkey.");
+      const data = (res as { data?: { url?: string } | null })?.data;
       if (data?.url || (redirectTo && redirectTo.trim().length > 0)) {
         navigateAfterAuth(redirectTo, data?.url);
         return;
@@ -869,11 +904,20 @@ export function TenantRegisterPage({
       void navigate({ to: buildTenantRoutePath(context, "login") as never });
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Gagal mendaftarkan akun.",
+        err instanceof Error ? err.message : "Autentikasi Passkey gagal.",
       );
     } finally {
-      setSubmitting(false);
+      setAltSubmitting(false);
     }
+  }
+
+  function handleSocialRegister(provider: string) {
+    const startUrl = getTenantSocialBridgeStartUrl(
+      context,
+      provider,
+      redirectTo,
+    );
+    window.location.assign(startUrl);
   }
 
   return renderTenantShell({
@@ -885,16 +929,15 @@ export function TenantRegisterPage({
       <>
       {loading || error ? (
         <TenantConfigState loading={loading} error={error} onRetry={reload} />
-      ) : !emailEnabled ? (
+      ) : !emailEnabled && !hasAlternatives ? (
         <div className="space-y-4">
           <Alert color="warning" variant="soft">
             <ShieldAlert className="h-4 w-4" />
             <AlertTitle className="text-sm">
-              Pendaftaran Email Dinonaktifkan
+              Tidak Ada Metode Pendaftaran Aktif
             </AlertTitle>
             <AlertDescription className="text-xs">
-              Tenant ini tidak mengaktifkan pendaftaran dengan Email &amp; Kata
-              Sandi. Silakan masuk menggunakan metode lain yang tersedia.
+              Administrator tenant belum mengaktifkan metode pendaftaran apa pun.
             </AlertDescription>
           </Alert>
           <Button variant="outline" color="secondary" asChild className="w-full">
@@ -910,58 +953,39 @@ export function TenantRegisterPage({
         </div>
       ) : (
         <div className="space-y-4">
-          <form
-            onSubmit={(e) => void handleRegister(e)}
-            className="space-y-3.5"
-          >
-            <div className="space-y-1.5">
-              <Label htmlFor="tenant-reg-name">Nama Lengkap</Label>
-              <Input
-                id="tenant-reg-name"
-                type="text"
-                required
-                placeholder="Nama Anda"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="tenant-reg-email">Email</Label>
-              <Input
-                id="tenant-reg-email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="nama@perusahaan.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="tenant-reg-password">Kata Sandi</Label>
-              <Input
-                id="tenant-reg-password"
-                type="password"
-                required
-                minLength={8}
-                autoComplete="new-password"
-                placeholder="Minimal 8 karakter"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <Button
-              type="submit"
-              color="primary"
-              className="w-full"
-              disabled={submitting}
-            >
-              {submitting && (
-                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-              )}
-              Buat Akun
-            </Button>
-          </form>
+          {!emailEnabled && (
+            <Alert color="warning" variant="soft">
+              <ShieldAlert className="h-4 w-4" />
+              <AlertTitle className="text-sm">
+                Pendaftaran Email Dinonaktifkan
+              </AlertTitle>
+              <AlertDescription className="text-xs">
+                Gunakan Passkey atau Social OAuth untuk membuat akun.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {emailEnabled && (
+            <RegisterEmailForm
+              idPrefix="tenant-reg"
+              schemaOptions={schemaOptions}
+              usernameEnabled={usernameEnabled}
+              submitLabel="Buat Akun"
+              submittingLabel="Mendaftarkan..."
+              onSubmit={handleRegister}
+            />
+          )}
+
+          <RegisterAlternativeMethods
+            variant="tenant"
+            emailEnabled={emailEnabled}
+            passkeyEnabled={passkeyEnabled}
+            activeSocials={activeSocials}
+            disabled={altSubmitting}
+            onPasskey={() => void handlePasskeyRegister()}
+            onSocial={handleSocialRegister}
+            passkeyLabel="Daftar dengan Passkey"
+          />
 
           <p className="text-center text-xs text-muted-foreground">
             Sudah memiliki akun?{" "}

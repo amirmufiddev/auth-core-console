@@ -246,6 +246,7 @@ const platformRoutes = [
   "src/routes/_authenticated/platform/audit.tsx",
   "src/routes/_authenticated/platform/auth-features.tsx",
   "src/routes/_authenticated/platform/account.tsx",
+  "src/routes/_authenticated/platform/onboarding.tsx",
 ];
 
 test("file route platform shell terdaftar", () => {

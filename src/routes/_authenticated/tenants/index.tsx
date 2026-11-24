@@ -1,5 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { isPlatformActor } from "@/lib/console-shell";
+import { listMyTenants } from "@/api/tenant-service";
+import { isPlatformActor, toConsoleActor } from "@/lib/console-shell";
+import {
+  PLATFORM_ONBOARDING_PATH,
+  shouldRedirectToOwnerOnboarding,
+} from "@/lib/owner-onboarding";
 import { PortalTenantsPage } from "@/features/portal/PortalTenantsPage";
 import { useAuthStore } from "@/stores/useAuthStore";
 import {
@@ -30,14 +35,17 @@ function PortalTenantsRouteComponent() {
 
 export const Route = createFileRoute("/_authenticated/tenants/")({
   validateSearch: portalTenantsSearchSchema,
-  beforeLoad: () => {
+  beforeLoad: async () => {
     const user = useAuthStore.getState().user;
-    const actor = {
-      role: user?.role ?? null,
-      tenantId: null,
-    };
+    const actor = toConsoleActor(user);
     if (user && isPlatformActor(actor)) {
       throw redirect({ to: "/platform/tenants" });
+    }
+    if (user && shouldRedirectToOwnerOnboarding(actor, 0)) {
+      const page = await listMyTenants({ page: 0, pageSize: 1 });
+      if (page.total === 0) {
+        throw redirect({ to: PLATFORM_ONBOARDING_PATH });
+      }
     }
   },
   component: PortalTenantsRouteComponent,

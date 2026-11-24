@@ -4,6 +4,11 @@ import {
   resolveConsoleHome,
   toConsoleActor,
 } from "@/lib/console-shell";
+import {
+  PLATFORM_ONBOARDING_PATH,
+  needsOwnerOnboarding,
+  shouldRedirectToOwnerOnboarding,
+} from "@/lib/owner-onboarding";
 import { sanitizeRelativeRedirect } from "@/lib/tenant-context";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -22,6 +27,13 @@ export async function resolvePostAuthRedirect(
 ): Promise<string> {
   if (redirectTo?.trim()) {
     return sanitizeRelativeRedirect(redirectTo);
+  }
+  const actor = toConsoleActor(useAuthStore.getState().user);
+  if (needsOwnerOnboarding(actor)) {
+    const page = await listMyTenants({ page: 0, pageSize: 1 });
+    if (shouldRedirectToOwnerOnboarding(actor, page.total)) {
+      return PLATFORM_ONBOARDING_PATH;
+    }
   }
   return resolveAuthenticatedHome();
 }

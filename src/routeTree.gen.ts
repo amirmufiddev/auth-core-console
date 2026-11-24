@@ -36,6 +36,7 @@ import { Route as AuthenticatedPlatformAccountRouteImport } from './routes/_auth
 import { Route as AuthenticatedPlatformAuditRouteImport } from './routes/_authenticated/platform/audit'
 import { Route as AuthenticatedPlatformAuthFeaturesRouteImport } from './routes/_authenticated/platform/auth-features'
 import { Route as AuthenticatedPlatformBillingRouteImport } from './routes/_authenticated/platform/billing'
+import { Route as AuthenticatedPlatformOnboardingRouteImport } from './routes/_authenticated/platform/onboarding'
 import { Route as AuthenticatedPlatformRolesRouteImport } from './routes/_authenticated/platform/roles'
 import { Route as AuthenticatedPlatformSessionsRouteImport } from './routes/_authenticated/platform/sessions'
 import { Route as AuthenticatedPlatformStaffRouteImport } from './routes/_authenticated/platform/staff'
@@ -206,6 +207,12 @@ const AuthenticatedPlatformBillingRoute =
   AuthenticatedPlatformBillingRouteImport.update({
     id: '/billing',
     path: '/billing',
+    getParentRoute: () => AuthenticatedPlatformRouteRoute,
+  } as any)
+const AuthenticatedPlatformOnboardingRoute =
+  AuthenticatedPlatformOnboardingRouteImport.update({
+    id: '/onboarding',
+    path: '/onboarding',
     getParentRoute: () => AuthenticatedPlatformRouteRoute,
   } as any)
 const AuthenticatedPlatformRolesRoute =
@@ -393,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/platform/audit': typeof AuthenticatedPlatformAuditRoute
   '/platform/auth-features': typeof AuthenticatedPlatformAuthFeaturesRoute
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
+  '/platform/onboarding': typeof AuthenticatedPlatformOnboardingRoute
   '/platform/roles': typeof AuthenticatedPlatformRolesRoute
   '/platform/sessions': typeof AuthenticatedPlatformSessionsRoute
   '/platform/staff': typeof AuthenticatedPlatformStaffRoute
@@ -444,6 +452,7 @@ export interface FileRoutesByTo {
   '/platform/audit': typeof AuthenticatedPlatformAuditRoute
   '/platform/auth-features': typeof AuthenticatedPlatformAuthFeaturesRoute
   '/platform/billing': typeof AuthenticatedPlatformBillingRoute
+  '/platform/onboarding': typeof AuthenticatedPlatformOnboardingRoute
   '/platform/roles': typeof AuthenticatedPlatformRolesRoute
   '/platform/sessions': typeof AuthenticatedPlatformSessionsRoute
   '/platform/staff': typeof AuthenticatedPlatformStaffRoute
@@ -500,6 +509,7 @@ export interface FileRoutesById {
   '/_authenticated/platform/audit': typeof AuthenticatedPlatformAuditRoute
   '/_authenticated/platform/auth-features': typeof AuthenticatedPlatformAuthFeaturesRoute
   '/_authenticated/platform/billing': typeof AuthenticatedPlatformBillingRoute
+  '/_authenticated/platform/onboarding': typeof AuthenticatedPlatformOnboardingRoute
   '/_authenticated/platform/roles': typeof AuthenticatedPlatformRolesRoute
   '/_authenticated/platform/sessions': typeof AuthenticatedPlatformSessionsRoute
   '/_authenticated/platform/staff': typeof AuthenticatedPlatformStaffRoute
@@ -556,6 +566,7 @@ export interface FileRouteTypes {
     | '/platform/audit'
     | '/platform/auth-features'
     | '/platform/billing'
+    | '/platform/onboarding'
     | '/platform/roles'
     | '/platform/sessions'
     | '/platform/staff'
@@ -607,6 +618,7 @@ export interface FileRouteTypes {
     | '/platform/audit'
     | '/platform/auth-features'
     | '/platform/billing'
+    | '/platform/onboarding'
     | '/platform/roles'
     | '/platform/sessions'
     | '/platform/staff'
@@ -662,6 +674,7 @@ export interface FileRouteTypes {
     | '/_authenticated/platform/audit'
     | '/_authenticated/platform/auth-features'
     | '/_authenticated/platform/billing'
+    | '/_authenticated/platform/onboarding'
     | '/_authenticated/platform/roles'
     | '/_authenticated/platform/sessions'
     | '/_authenticated/platform/staff'
@@ -891,6 +904,13 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/platform/billing'
       preLoaderRoute: typeof AuthenticatedPlatformBillingRouteImport
+      parentRoute: typeof AuthenticatedPlatformRouteRoute
+    }
+    '/_authenticated/platform/onboarding': {
+      id: '/_authenticated/platform/onboarding'
+      path: '/onboarding'
+      fullPath: '/platform/onboarding'
+      preLoaderRoute: typeof AuthenticatedPlatformOnboardingRouteImport
       parentRoute: typeof AuthenticatedPlatformRouteRoute
     }
     '/_authenticated/platform/roles': {
@@ -1127,6 +1147,7 @@ interface AuthenticatedPlatformRouteRouteChildren {
   AuthenticatedPlatformAuditRoute: typeof AuthenticatedPlatformAuditRoute
   AuthenticatedPlatformAuthFeaturesRoute: typeof AuthenticatedPlatformAuthFeaturesRoute
   AuthenticatedPlatformBillingRoute: typeof AuthenticatedPlatformBillingRoute
+  AuthenticatedPlatformOnboardingRoute: typeof AuthenticatedPlatformOnboardingRoute
   AuthenticatedPlatformRolesRoute: typeof AuthenticatedPlatformRolesRoute
   AuthenticatedPlatformSessionsRoute: typeof AuthenticatedPlatformSessionsRoute
   AuthenticatedPlatformStaffRoute: typeof AuthenticatedPlatformStaffRoute
@@ -1143,6 +1164,7 @@ const AuthenticatedPlatformRouteRouteChildren: AuthenticatedPlatformRouteRouteCh
     AuthenticatedPlatformAuthFeaturesRoute:
       AuthenticatedPlatformAuthFeaturesRoute,
     AuthenticatedPlatformBillingRoute: AuthenticatedPlatformBillingRoute,
+    AuthenticatedPlatformOnboardingRoute: AuthenticatedPlatformOnboardingRoute,
     AuthenticatedPlatformRolesRoute: AuthenticatedPlatformRolesRoute,
     AuthenticatedPlatformSessionsRoute: AuthenticatedPlatformSessionsRoute,
     AuthenticatedPlatformStaffRoute: AuthenticatedPlatformStaffRoute,

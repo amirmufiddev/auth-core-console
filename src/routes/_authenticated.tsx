@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { Outlet, createFileRoute, redirect, useRouterState } from "@tanstack/react-router";
 import { isExternalBackendConfigured } from "@/api/client";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { ConsoleSidebar } from "@/components/layout/ConsoleSidebar";
@@ -7,6 +7,11 @@ import { Header } from "@/components/layout/Header";
 import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
 
 function AuthenticatedLayout() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (pathname === "/platform/onboarding") {
+    return <Outlet />;
+  }
+
   return (
     <div className="flex min-h-screen bg-page-bg text-foreground">
       <ConsoleSidebar />

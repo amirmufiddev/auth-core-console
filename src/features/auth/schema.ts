@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { buildRegisterSchema } from "@/features/auth/register/schema";
 
 export const loginEmailSchema = z.object({
   identifier: z.string().min(2, "Email atau username wajib diisi"),
@@ -14,12 +15,7 @@ export const otpLoginSchema = z.object({
   otp: z.string().min(4, "Kode OTP minimal 4 digit").max(8),
 });
 
-export const registerSchema = z.object({
-  name: z.string().min(2, "Nama lengkap minimal 2 karakter"),
-  email: z.string().email("Format email tidak valid"),
-  username: z.string().optional(),
-  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
-});
+export const registerSchema = buildRegisterSchema();
 
 export const forgotPasswordSchema = z.object({
   email: z.string().email("Format email tidak valid"),
@@ -33,5 +29,6 @@ export type LoginEmailValues = z.infer<typeof loginEmailSchema>;
 export type MagicLinkValues = z.infer<typeof magicLinkSchema>;
 export type OtpLoginValues = z.infer<typeof otpLoginSchema>;
 export type RegisterValues = z.infer<typeof registerSchema>;
+export type { RegisterFormValues } from "@/features/auth/register/schema";
 export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 export type VerifyTwoFactorValues = z.infer<typeof verifyTwoFactorSchema>;
