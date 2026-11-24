@@ -152,13 +152,13 @@ test("setiap href non-platform di menus.ts memiliki file route di src/routes/_au
     );
   }
 
-  const tenantDetailRouteFile = path.join(
+  const tenantShellRouteFile = path.join(
     ROOT,
-    "src/routes/_authenticated/tenants/$tenantId.tsx",
+    "src/routes/_authenticated/tenants/$tenantId/route.tsx",
   );
   assert.ok(
-    fs.existsSync(tenantDetailRouteFile),
-    `File route detail tenant tidak ditemukan: ${tenantDetailRouteFile}`,
+    fs.existsSync(tenantShellRouteFile),
+    `File route shell tenant tidak ditemukan: ${tenantShellRouteFile}`,
   );
 
   for (const authRoute of [
@@ -256,6 +256,47 @@ test("file route platform shell terdaftar", () => {
 test("Header tidak merender OrganizationSwitcher", () => {
   const headerSource = readUtf8("src/components/layout/Header.tsx");
   assert.doesNotMatch(headerSource, /<OrganizationSwitcher/);
+});
+
+const tenantChildRoutes = [
+  "src/routes/_authenticated/tenants/$tenantId/route.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/index.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/settings.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/features.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/oauth-clients.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/api-keys.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/users.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/organizations.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/billing.tsx",
+  "src/routes/_authenticated/tenants/$tenantId/account.tsx",
+];
+
+test("file route tenant shell terdaftar", () => {
+  for (const route of tenantChildRoutes) {
+    assert.ok(
+      fs.existsSync(path.join(ROOT, route)),
+      `File route tenant tidak ditemukan: ${route}`,
+    );
+  }
+});
+
+test("tenant-shell memuat loadTenantShell dan resolveTenantMode", () => {
+  const source = readUtf8("src/lib/tenant-shell.ts");
+  assert.match(source, /loadTenantShell/);
+  assert.match(source, /resolveTenantMode/);
+  assert.match(source, /adminGetTenant/);
+});
+
+test("PortalTenantDetailPage tidak lagi memakai TabsTrigger", () => {
+  const legacy = path.join(
+    ROOT,
+    "src/features/portal/PortalTenantDetailPage.tsx",
+  );
+  assert.equal(
+    fs.existsSync(legacy),
+    false,
+    "PortalTenantDetailPage harus dihapus setelah pemecahan route",
+  );
 });
 
 test("komponen better-auth mandiri tidak memakai package better-auth-ui eksternal", () => {

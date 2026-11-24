@@ -64,6 +64,24 @@ export interface PortalOAuthClientRecord {
   plainClientSecret?: string;
 }
 
+export interface PortalTenantApiKeyRecord {
+  id: string;
+  tenantId: string;
+  name: string;
+  prefix: string;
+  keyPreview: string;
+  ownerEmail: string;
+  scopes: string[];
+  rateLimitMax: number;
+  rateLimitWindow: number;
+  enabled: boolean;
+  requestCount: number;
+  lastUsedAt?: string;
+  expiresAt?: string;
+  createdAt: string;
+  plainApiKey?: string;
+}
+
 export interface PortalTenantUserRecord {
   id: string;
   tenantId: string | null;
@@ -241,6 +259,7 @@ interface MockMultiTenantDb {
   tenants: TenantRecord[];
   billingRecords: BillingRecord[];
   oauthClients: PortalOAuthClientRecord[];
+  tenantApiKeys?: PortalTenantApiKeyRecord[];
   tenantUsers?: PortalTenantUserRecord[];
   tenantOrgs?: PortalTenantOrgRecord[];
 }
@@ -672,6 +691,108 @@ export async function createTenantOAuthClient(
   return plainClientSecret ? { ...created, plainClientSecret } : created;
 }
 
+export async function listTenantApiKeys(
+  tenantId: string,
+  params: { page?: number; pageSize?: number; search?: string } = {},
+): Promise<PaginatedResult<PortalTenantApiKeyRecord>> {
+  if (isExternalBackendConfigured()) {
+    return apiRequest<PaginatedResult<PortalTenantApiKeyRecord>>(
+      `/api/portal/tenants/${encodeURIComponent(tenantId)}/api-keys${buildQuery({
+        page: params.page ?? 0,
+        pageSize: params.pageSize ?? 10,
+        search: params.search,
+      })}`,
+    );
+  }
+
+  const db = readMockTenantDb();
+  const tenant = db.tenants.find((t) => t.id === tenantId);
+  if (!tenant) throw new Error("Tenant tidak ditemukan.");
+  if (!["tier_basic", "tier_business", "tier_enterprise"].includes(tenant.tierId)) {
+    throw new Error("Fitur API Key tidak tersedia pada tier ini.");
+  }
+  let list = (db.tenantApiKeys ?? []).filter((k) => k.tenantId === tenantId);
+  if (params.search) {
+    const q = params.search.toLowerCase();
+    list = list.filter(
+      (k) =>
+        k.name.toLowerCase().includes(q) ||
+        k.prefix.toLowerCase().includes(q) ||
+        k.ownerEmail.toLowerCase().includes(q),
+    );
+  }
+  return paginateMock(list, params.page, params.pageSize);
+}
+
+export async function createTenantApiKey(
+  tenantId: string,
+  input: {
+    name: string;
+    scopes?: string[];
+    rateLimitMax?: number;
+    expiresAt?: string;
+  },
+): Promise<PortalTenantApiKeyRecord> {
+  if (isExternalBackendConfigured()) {
+    return apiRequest<PortalTenantApiKeyRecord>(
+      `/api/portal/tenants/${encodeURIComponent(tenantId)}/api-keys`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  const db = readMockTenantDb();
+  const tenant = db.tenants.find((t) => t.id === tenantId);
+  if (!tenant) throw new Error("Tenant tidak ditemukan.");
+  if (!["tier_basic", "tier_business", "tier_enterprise"].includes(tenant.tierId)) {
+    throw new Error("Fitur API Key tidak tersedia pada tier ini.");
+  }
+  const plain = `ak_live_mock_${Math.random().toString(36).slice(2, 18)}`;
+  const created: PortalTenantApiKeyRecord = {
+    id: `key_${Date.now()}`,
+    tenantId,
+    name: input.name,
+    prefix: "ak_live_",
+    keyPreview: `${plain.slice(0, 12)}••••••`,
+    ownerEmail: "owner@mock.local",
+    scopes: input.scopes?.length ? input.scopes : ["sessions:verify"],
+    rateLimitMax: input.rateLimitMax ?? 100,
+    rateLimitWindow: 60,
+    enabled: true,
+    requestCount: 0,
+    createdAt: new Date().toISOString(),
+    plainApiKey: plain,
+  };
+  writeMockTenantDb({
+    ...db,
+    tenantApiKeys: [created, ...(db.tenantApiKeys ?? [])],
+  });
+  return created;
+}
+
+export async function deleteTenantApiKey(
+  tenantId: string,
+  keyId: string,
+): Promise<void> {
+  if (isExternalBackendConfigured()) {
+    await apiRequest<void>(
+      `/api/portal/tenants/${encodeURIComponent(tenantId)}/api-keys/${encodeURIComponent(keyId)}`,
+      { method: "DELETE" },
+    );
+    return;
+  }
+
+  const db = readMockTenantDb();
+  writeMockTenantDb({
+    ...db,
+    tenantApiKeys: (db.tenantApiKeys ?? []).filter(
+      (k) => !(k.tenantId === tenantId && k.id === keyId),
+    ),
+  });
+}
+
 export async function deleteTenantOAuthClient(
   tenantId: string,
   clientId: string,
@@ -820,6 +941,19 @@ export async function adminListTenantUsers(
 // ============================================================================
 // Operator Tenants API (/api/admin/tenants)
 // ============================================================================
+
+export async function adminGetTenant(tenantId: string): Promise<TenantRecord> {
+  if (isExternalBackendConfigured()) {
+    return apiRequest<TenantRecord>(
+      `/api/admin/tenants/${encodeURIComponent(tenantId)}`,
+    );
+  }
+
+  const db = readMockTenantDb();
+  const found = db.tenants.find((t) => t.id === tenantId);
+  if (!found) throw new Error("Tenant tidak ditemukan.");
+  return found;
+}
 
 export async function adminListTenants(params: {
   page?: number;

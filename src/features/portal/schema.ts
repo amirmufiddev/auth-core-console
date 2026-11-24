@@ -64,3 +64,11 @@ export type UpdatePortalTenantValues = z.infer<typeof updatePortalTenantSchema>;
 export type CreatePortalOAuthClientValues = z.infer<
   typeof createPortalOAuthClientSchema
 >;
+
+export const createPortalApiKeySchema = z.object({
+  name: z.string().trim().min(1, "Nama API Key wajib diisi"),
+  scopesText: z.string().trim().min(1, "Minimal 1 scope wajib diisi"),
+  rateLimitMax: z.coerce.number().int().min(1).max(10_000),
+});
+
+export type CreatePortalApiKeyValues = z.infer<typeof createPortalApiKeySchema>;

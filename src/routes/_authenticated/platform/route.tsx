@@ -6,10 +6,10 @@ import { PlatformShell } from "@/components/layout/PlatformShell";
 
 export const Route = createFileRoute("/_authenticated/platform")({
   beforeLoad: async () => {
-    const { user, activeOrgId } = useAuthStore.getState();
+    const user = useAuthStore.getState().user;
     const actor = {
       role: user?.role ?? null,
-      tenantId: activeOrgId,
+      tenantId: null,
     };
     if (!user || !isPlatformActor(actor)) {
       throw redirect({ to: "/tenants" });

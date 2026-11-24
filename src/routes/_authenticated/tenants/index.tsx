@@ -1,5 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { isPlatformActor } from "@/lib/console-shell";
 import { PortalTenantsPage } from "@/features/portal/PortalTenantsPage";
+import { useAuthStore } from "@/stores/useAuthStore";
 import {
   type PortalTenantsSearchParams,
   portalTenantsSearchSchema,
@@ -28,5 +30,15 @@ function PortalTenantsRouteComponent() {
 
 export const Route = createFileRoute("/_authenticated/tenants/")({
   validateSearch: portalTenantsSearchSchema,
+  beforeLoad: () => {
+    const user = useAuthStore.getState().user;
+    const actor = {
+      role: user?.role ?? null,
+      tenantId: null,
+    };
+    if (user && isPlatformActor(actor)) {
+      throw redirect({ to: "/platform/tenants" });
+    }
+  },
   component: PortalTenantsRouteComponent,
 });
