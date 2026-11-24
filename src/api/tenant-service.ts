@@ -82,6 +82,15 @@ export interface PortalTenantUserRecord {
   updatedAt: string;
 }
 
+export interface PortalTenantOrgRecord {
+  id: string;
+  tenantId: string;
+  name: string;
+  slug: string | null;
+  logo: string | null;
+  createdAt: string;
+}
+
 export interface PortalBillingSummary {
   tenantId: string;
   tierId: string;
@@ -230,6 +239,7 @@ interface MockMultiTenantDb {
   billingRecords: BillingRecord[];
   oauthClients: PortalOAuthClientRecord[];
   tenantUsers?: PortalTenantUserRecord[];
+  tenantOrgs?: PortalTenantOrgRecord[];
 }
 
 function createInitialMockDb(): MockMultiTenantDb {
@@ -369,6 +379,32 @@ function createInitialMockDb(): MockMultiTenantDb {
         lastLoginMethod: "email",
         createdAt: iso(-5),
         updatedAt: iso(-5),
+      },
+    ],
+    tenantOrgs: [
+      {
+        id: "org_ten_acme_01",
+        tenantId: "ten_acme_01",
+        name: "Acme Engineering",
+        slug: "acme-engineering",
+        logo: null,
+        createdAt: iso(-15),
+      },
+      {
+        id: "org_ten_acme_02",
+        tenantId: "ten_acme_01",
+        name: "Acme Operations",
+        slug: "acme-ops",
+        logo: null,
+        createdAt: iso(-8),
+      },
+      {
+        id: "org_ten_nusantara_01",
+        tenantId: "ten_nusantara_02",
+        name: "Nusantara Core Team",
+        slug: "nusantara-core",
+        logo: null,
+        createdAt: iso(-4),
       },
     ],
   };
@@ -714,6 +750,36 @@ export async function listTenantUsers(
         u.name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
         (u.username?.toLowerCase().includes(q) ?? false),
+    );
+  }
+  return paginateMock(list, params.page, params.pageSize);
+}
+
+export async function listTenantOrganizations(
+  tenantId: string,
+  params: { page?: number; pageSize?: number; search?: string } = {},
+): Promise<PaginatedResult<PortalTenantOrgRecord>> {
+  if (isExternalBackendConfigured()) {
+    return apiRequest<PaginatedResult<PortalTenantOrgRecord>>(
+      `/api/portal/tenants/${encodeURIComponent(tenantId)}/organizations${buildQuery(
+        {
+          page: params.page ?? 0,
+          pageSize: params.pageSize ?? 10,
+          search: params.search,
+        },
+      )}`,
+    );
+  }
+
+  const db = readMockTenantDb();
+  const seedOrgs = db.tenantOrgs ?? createInitialMockDb().tenantOrgs ?? [];
+  let list = seedOrgs.filter((o) => o.tenantId === tenantId);
+  if (params.search) {
+    const q = params.search.toLowerCase();
+    list = list.filter(
+      (o) =>
+        o.name.toLowerCase().includes(q) ||
+        (o.slug?.toLowerCase().includes(q) ?? false),
     );
   }
   return paginateMock(list, params.page, params.pageSize);

@@ -14,6 +14,10 @@
     "test:routes": "node --test scripts/routes.test.mjs"
   },
   "dependencies": {
+    "@better-auth/api-key": "^1.7.27",
+    "@better-auth/oauth-provider": "^1.7.27",
+    "@better-auth/passkey": "^1.7.27",
+    "@better-auth/sso": "^1.7.27",
     "@fontsource-variable/inter": "^5.2.5",
     "@hookform/resolvers": "^5.0.1",
     "@iconify/react": "^6.0.4",
@@ -45,9 +49,6 @@
     "@tailwindcss/vite": "^4.1.7",
     "@tanstack/react-query": "^5.76.1",
     "@tanstack/react-router": "^1.120.2",
-    "@better-auth/api-key": "^1.7.27",
-    "@better-auth/passkey": "^1.7.27",
-    "@better-auth/sso": "^1.7.27",
     "@tanstack/react-table": "^8.21.3",
     "better-auth": "^1.7.27",
     "class-variance-authority": "^0.7.1",

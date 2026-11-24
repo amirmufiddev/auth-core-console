@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   ArrowLeft,
+  Building2,
   CheckCircle2,
   Copy,
   CreditCard,
@@ -46,6 +47,7 @@ import {
   TenantStatusBadge,
   TenantTierBadge,
 } from "@/features/portal/TenantBadges";
+import { PortalTenantOrgsTab } from "@/features/portal/PortalTenantOrgsTab";
 import { PortalTenantUsersTab } from "@/features/portal/PortalTenantUsersTab";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -100,7 +102,7 @@ export function PortalTenantDetailPage({
   const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<
-    "settings" | "oauth-clients" | "users" | "billing"
+    "settings" | "oauth-clients" | "users" | "organizations" | "billing"
   >("settings");
   const [oauthPaging, setOauthPaging] = useState({
     page: 0,
@@ -496,7 +498,12 @@ export function PortalTenantDetailPage({
         value={activeTab}
         onValueChange={(val) =>
           setActiveTab(
-            val as "settings" | "oauth-clients" | "users" | "billing",
+            val as
+              | "settings"
+              | "oauth-clients"
+              | "users"
+              | "organizations"
+              | "billing",
           )
         }
       >
@@ -512,6 +519,10 @@ export function PortalTenantDetailPage({
           <TabsTrigger value="users">
             <Users className="mr-1.5 h-3.5 w-3.5" />
             Users
+          </TabsTrigger>
+          <TabsTrigger value="organizations">
+            <Building2 className="mr-1.5 h-3.5 w-3.5" />
+            Organizations
           </TabsTrigger>
           <TabsTrigger value="billing">
             <CreditCard className="mr-1.5 h-3.5 w-3.5" />
@@ -692,7 +703,12 @@ export function PortalTenantDetailPage({
           <PortalTenantUsersTab tenantId={tenantId} tenantSlug={tenant.slug} />
         </TabsContent>
 
-        {/* TAB 4: BILLING SUMMARY */}
+        {/* TAB 4: TENANT ORGANIZATIONS */}
+        <TabsContent value="organizations" className="pt-4">
+          <PortalTenantOrgsTab tenantId={tenantId} tenantSlug={tenant.slug} />
+        </TabsContent>
+
+        {/* TAB 5: BILLING SUMMARY */}
         <TabsContent value="billing" className="space-y-4 pt-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Card>

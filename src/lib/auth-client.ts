@@ -18,6 +18,7 @@ import {
 } from "better-auth/client/plugins";
 import { passkeyClient } from "@better-auth/passkey/client";
 import { apiKeyClient } from "@better-auth/api-key/client";
+import { oauthProviderClient } from "@better-auth/oauth-provider/client";
 import { ssoClient } from "@better-auth/sso/client";
 
 const rawApiUrl = import.meta.env.VITE_API_URL as string | undefined;
@@ -54,6 +55,7 @@ export const authClient = createAuthClient({
     siweClient(),
     apiKeyClient(),
     ssoClient(),
+    oauthProviderClient(),
     lastLoginMethodClient(),
     oneTimeTokenClient(),
   ],

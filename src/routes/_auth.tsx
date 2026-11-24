@@ -149,7 +149,13 @@ function AuthLayoutComponent() {
 }
 
 export const Route = createFileRoute("/_auth")({
-  beforeLoad: () => {
+  beforeLoad: ({ location }) => {
+    if (
+      location.pathname === "/consent" ||
+      location.pathname === "/auth/accept-invitation"
+    ) {
+      return;
+    }
     const user = useAuthStore.getState().user;
     if (user) {
       throw redirect({ to: "/dashboard" });

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthConsentRouteImport } from './routes/_auth/consent'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
@@ -27,6 +28,7 @@ import { Route as AuthenticatedOrganizationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
 import { Route as AuthenticatedSessionsRouteImport } from './routes/_authenticated/sessions'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthAuthAcceptInvitationRouteImport } from './routes/_auth/auth/accept-invitation'
 import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants/index'
 import { Route as AuthenticatedTenantsTenantIdRouteImport } from './routes/_authenticated/tenants/$tenantId'
 
@@ -42,6 +44,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConsentRoute = AuthConsentRouteImport.update({
+  id: '/consent',
+  path: '/consent',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   id: '/forgot-password',
@@ -122,6 +129,12 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthAuthAcceptInvitationRoute =
+  AuthAuthAcceptInvitationRouteImport.update({
+    id: '/auth/accept-invitation',
+    path: '/auth/accept-invitation',
+    getParentRoute: () => AuthRoute,
+  } as any)
 const AuthenticatedTenantsIndexRoute =
   AuthenticatedTenantsIndexRouteImport.update({
     id: '/tenants/',
@@ -137,6 +150,7 @@ const AuthenticatedTenantsTenantIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/consent': typeof AuthConsentRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
@@ -152,11 +166,13 @@ export interface FileRoutesByFullPath {
   '/roles': typeof AuthenticatedRolesRoute
   '/sessions': typeof AuthenticatedSessionsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
   '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
   '/tenants/': typeof AuthenticatedTenantsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/consent': typeof AuthConsentRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
@@ -172,6 +188,7 @@ export interface FileRoutesByTo {
   '/roles': typeof AuthenticatedRolesRoute
   '/sessions': typeof AuthenticatedSessionsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
   '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
   '/tenants': typeof AuthenticatedTenantsIndexRoute
 }
@@ -180,6 +197,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_auth/consent': typeof AuthConsentRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
@@ -195,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/sessions': typeof AuthenticatedSessionsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_auth/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
   '/_authenticated/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
   '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
 }
@@ -202,6 +221,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/consent'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -217,11 +237,13 @@ export interface FileRouteTypes {
     | '/roles'
     | '/sessions'
     | '/users'
+    | '/auth/accept-invitation'
     | '/tenants/$tenantId'
     | '/tenants/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/consent'
     | '/forgot-password'
     | '/login'
     | '/register'
@@ -237,6 +259,7 @@ export interface FileRouteTypes {
     | '/roles'
     | '/sessions'
     | '/users'
+    | '/auth/accept-invitation'
     | '/tenants/$tenantId'
     | '/tenants'
   id:
@@ -244,6 +267,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_auth'
     | '/_authenticated'
+    | '/_auth/consent'
     | '/_auth/forgot-password'
     | '/_auth/login'
     | '/_auth/register'
@@ -259,6 +283,7 @@ export interface FileRouteTypes {
     | '/_authenticated/roles'
     | '/_authenticated/sessions'
     | '/_authenticated/users'
+    | '/_auth/auth/accept-invitation'
     | '/_authenticated/tenants/$tenantId'
     | '/_authenticated/tenants/'
   fileRoutesById: FileRoutesById
@@ -291,6 +316,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_auth/consent': {
+      id: '/_auth/consent'
+      path: '/consent'
+      fullPath: '/consent'
+      preLoaderRoute: typeof AuthConsentRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_auth/forgot-password': {
       id: '/_auth/forgot-password'
@@ -397,6 +429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_auth/auth/accept-invitation': {
+      id: '/_auth/auth/accept-invitation'
+      path: '/auth/accept-invitation'
+      fullPath: '/auth/accept-invitation'
+      preLoaderRoute: typeof AuthAuthAcceptInvitationRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_authenticated/tenants/': {
       id: '/_authenticated/tenants/'
       path: '/tenants'
@@ -415,17 +454,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthRouteChildren {
+  AuthConsentRoute: typeof AuthConsentRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   AuthVerify2faRoute: typeof AuthVerify2faRoute
+  AuthAuthAcceptInvitationRoute: typeof AuthAuthAcceptInvitationRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthConsentRoute: AuthConsentRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   AuthVerify2faRoute: AuthVerify2faRoute,
+  AuthAuthAcceptInvitationRoute: AuthAuthAcceptInvitationRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

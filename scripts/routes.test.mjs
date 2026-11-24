@@ -150,6 +150,17 @@ test("setiap href di menus.ts memiliki file route di src/routes/_authenticated/"
     fs.existsSync(tenantDetailRouteFile),
     `File route detail tenant tidak ditemukan: ${tenantDetailRouteFile}`,
   );
+
+  for (const authRoute of [
+    "src/routes/_auth/consent.tsx",
+    "src/routes/_auth/auth/accept-invitation.tsx",
+  ]) {
+    const fullPath = path.join(ROOT, authRoute);
+    assert.ok(
+      fs.existsSync(fullPath),
+      `File route auth tidak ditemukan: ${fullPath}`,
+    );
+  }
 });
 
 test("tidak ada import atau direktif Next.js terlarang di src/", () => {
