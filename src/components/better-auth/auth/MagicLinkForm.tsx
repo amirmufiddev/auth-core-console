@@ -29,7 +29,7 @@ export function MagicLinkForm({
     <form
       onSubmit={form.handleSubmit(async (vals) => {
         try {
-          await signInWithMagicLink(vals.email);
+          await signInWithMagicLink(vals.email, redirectTo);
           if (isExternalBackendConfigured()) {
             toast.success(
               "Magic link dikirim ke email Anda. Periksa Mailpit (port 8025).",

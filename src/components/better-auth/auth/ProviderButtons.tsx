@@ -114,7 +114,7 @@ export function ProviderButtons({
 
   const handleSocial = async (provider: string, id: BetterAuthFeatureId) => {
     try {
-      await signInWithSocial(provider, id);
+      await signInWithSocial(provider, id, redirectTo);
       toast.success(`Berhasil masuk via ${provider}.`);
       navigate(redirectTo);
     } catch (err) {

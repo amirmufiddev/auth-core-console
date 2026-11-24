@@ -37,6 +37,8 @@ import { Route as TTenantSlugConsentRouteImport } from './routes/t/$tenantSlug/c
 import { Route as TTenantSlugLoginRouteImport } from './routes/t/$tenantSlug/login'
 import { Route as TTenantSlugRegisterRouteImport } from './routes/t/$tenantSlug/register'
 import { Route as TTenantSlugVerify2faRouteImport } from './routes/t/$tenantSlug/verify-2fa'
+import { Route as AuthAuthAcceptInvitationInvitationIdRouteImport } from './routes/_auth/auth/accept-invitation.$invitationId'
+import { Route as TTenantSlugAcceptInvitationInvitationIdRouteImport } from './routes/t/$tenantSlug/accept-invitation.$invitationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -184,6 +186,18 @@ const TTenantSlugVerify2faRoute = TTenantSlugVerify2faRouteImport.update({
   path: '/t/$tenantSlug/verify-2fa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthAuthAcceptInvitationInvitationIdRoute =
+  AuthAuthAcceptInvitationInvitationIdRouteImport.update({
+    id: '/$invitationId',
+    path: '/$invitationId',
+    getParentRoute: () => AuthAuthAcceptInvitationRoute,
+  } as any)
+const TTenantSlugAcceptInvitationInvitationIdRoute =
+  TTenantSlugAcceptInvitationInvitationIdRouteImport.update({
+    id: '/$invitationId',
+    path: '/$invitationId',
+    getParentRoute: () => TTenantSlugAcceptInvitationRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -204,14 +218,16 @@ export interface FileRoutesByFullPath {
   '/roles': typeof AuthenticatedRolesRoute
   '/sessions': typeof AuthenticatedSessionsRoute
   '/users': typeof AuthenticatedUsersRoute
-  '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
+  '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRouteWithChildren
   '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
-  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRoute
+  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRouteWithChildren
   '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
   '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
   '/t/$tenantSlug/register': typeof TTenantSlugRegisterRoute
   '/t/$tenantSlug/verify-2fa': typeof TTenantSlugVerify2faRoute
   '/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAuthAcceptInvitationInvitationIdRoute
+  '/t/$tenantSlug/accept-invitation/$invitationId': typeof TTenantSlugAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -232,14 +248,16 @@ export interface FileRoutesByTo {
   '/roles': typeof AuthenticatedRolesRoute
   '/sessions': typeof AuthenticatedSessionsRoute
   '/users': typeof AuthenticatedUsersRoute
-  '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
+  '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRouteWithChildren
   '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
-  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRoute
+  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRouteWithChildren
   '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
   '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
   '/t/$tenantSlug/register': typeof TTenantSlugRegisterRoute
   '/t/$tenantSlug/verify-2fa': typeof TTenantSlugVerify2faRoute
   '/tenants': typeof AuthenticatedTenantsIndexRoute
+  '/auth/accept-invitation/$invitationId': typeof AuthAuthAcceptInvitationInvitationIdRoute
+  '/t/$tenantSlug/accept-invitation/$invitationId': typeof TTenantSlugAcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -263,14 +281,16 @@ export interface FileRoutesById {
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/sessions': typeof AuthenticatedSessionsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
-  '/_auth/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
+  '/_auth/auth/accept-invitation': typeof AuthAuthAcceptInvitationRouteWithChildren
   '/_authenticated/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
-  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRoute
+  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRouteWithChildren
   '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
   '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
   '/t/$tenantSlug/register': typeof TTenantSlugRegisterRoute
   '/t/$tenantSlug/verify-2fa': typeof TTenantSlugVerify2faRoute
   '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
+  '/_auth/auth/accept-invitation/$invitationId': typeof AuthAuthAcceptInvitationInvitationIdRoute
+  '/t/$tenantSlug/accept-invitation/$invitationId': typeof TTenantSlugAcceptInvitationInvitationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -301,6 +321,8 @@ export interface FileRouteTypes {
     | '/t/$tenantSlug/register'
     | '/t/$tenantSlug/verify-2fa'
     | '/tenants/'
+    | '/auth/accept-invitation/$invitationId'
+    | '/t/$tenantSlug/accept-invitation/$invitationId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -329,6 +351,8 @@ export interface FileRouteTypes {
     | '/t/$tenantSlug/register'
     | '/t/$tenantSlug/verify-2fa'
     | '/tenants'
+    | '/auth/accept-invitation/$invitationId'
+    | '/t/$tenantSlug/accept-invitation/$invitationId'
   id:
     | '__root__'
     | '/'
@@ -359,13 +383,15 @@ export interface FileRouteTypes {
     | '/t/$tenantSlug/register'
     | '/t/$tenantSlug/verify-2fa'
     | '/_authenticated/tenants/'
+    | '/_auth/auth/accept-invitation/$invitationId'
+    | '/t/$tenantSlug/accept-invitation/$invitationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  TTenantSlugAcceptInvitationRoute: typeof TTenantSlugAcceptInvitationRoute
+  TTenantSlugAcceptInvitationRoute: typeof TTenantSlugAcceptInvitationRouteWithChildren
   TTenantSlugConsentRoute: typeof TTenantSlugConsentRoute
   TTenantSlugLoginRoute: typeof TTenantSlugLoginRoute
   TTenantSlugRegisterRoute: typeof TTenantSlugRegisterRoute
@@ -570,8 +596,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TTenantSlugVerify2faRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth/auth/accept-invitation/$invitationId': {
+      id: '/_auth/auth/accept-invitation/$invitationId'
+      path: '/$invitationId'
+      fullPath: '/auth/accept-invitation/$invitationId'
+      preLoaderRoute: typeof AuthAuthAcceptInvitationInvitationIdRouteImport
+      parentRoute: typeof AuthAuthAcceptInvitationRoute
+    }
+    '/t/$tenantSlug/accept-invitation/$invitationId': {
+      id: '/t/$tenantSlug/accept-invitation/$invitationId'
+      path: '/$invitationId'
+      fullPath: '/t/$tenantSlug/accept-invitation/$invitationId'
+      preLoaderRoute: typeof TTenantSlugAcceptInvitationInvitationIdRouteImport
+      parentRoute: typeof TTenantSlugAcceptInvitationRoute
+    }
   }
 }
+
+interface AuthAuthAcceptInvitationRouteChildren {
+  AuthAuthAcceptInvitationInvitationIdRoute: typeof AuthAuthAcceptInvitationInvitationIdRoute
+}
+
+const AuthAuthAcceptInvitationRouteChildren: AuthAuthAcceptInvitationRouteChildren =
+  {
+    AuthAuthAcceptInvitationInvitationIdRoute:
+      AuthAuthAcceptInvitationInvitationIdRoute,
+  }
+
+const AuthAuthAcceptInvitationRouteWithChildren =
+  AuthAuthAcceptInvitationRoute._addFileChildren(
+    AuthAuthAcceptInvitationRouteChildren,
+  )
 
 interface AuthRouteChildren {
   AuthConsentRoute: typeof AuthConsentRoute
@@ -579,7 +634,7 @@ interface AuthRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   AuthVerify2faRoute: typeof AuthVerify2faRoute
-  AuthAuthAcceptInvitationRoute: typeof AuthAuthAcceptInvitationRoute
+  AuthAuthAcceptInvitationRoute: typeof AuthAuthAcceptInvitationRouteWithChildren
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -588,7 +643,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   AuthVerify2faRoute: AuthVerify2faRoute,
-  AuthAuthAcceptInvitationRoute: AuthAuthAcceptInvitationRoute,
+  AuthAuthAcceptInvitationRoute: AuthAuthAcceptInvitationRouteWithChildren,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
@@ -631,11 +686,27 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface TTenantSlugAcceptInvitationRouteChildren {
+  TTenantSlugAcceptInvitationInvitationIdRoute: typeof TTenantSlugAcceptInvitationInvitationIdRoute
+}
+
+const TTenantSlugAcceptInvitationRouteChildren: TTenantSlugAcceptInvitationRouteChildren =
+  {
+    TTenantSlugAcceptInvitationInvitationIdRoute:
+      TTenantSlugAcceptInvitationInvitationIdRoute,
+  }
+
+const TTenantSlugAcceptInvitationRouteWithChildren =
+  TTenantSlugAcceptInvitationRoute._addFileChildren(
+    TTenantSlugAcceptInvitationRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  TTenantSlugAcceptInvitationRoute: TTenantSlugAcceptInvitationRoute,
+  TTenantSlugAcceptInvitationRoute:
+    TTenantSlugAcceptInvitationRouteWithChildren,
   TTenantSlugConsentRoute: TTenantSlugConsentRoute,
   TTenantSlugLoginRoute: TTenantSlugLoginRoute,
   TTenantSlugRegisterRoute: TTenantSlugRegisterRoute,

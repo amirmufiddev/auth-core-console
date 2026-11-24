@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { type AuthUserRecord, appendAuditLog, readMockDb } from "@/api/mock-db";
 import { apiRequest, isExternalBackendConfigured } from "@/api/client";
 import { authClient } from "@/lib/auth-client";
+import { sanitizeRelativeRedirect } from "@/lib/tenant-context";
 import {
   type BetterAuthFeatureId,
   BETTER_AUTH_FEATURE_MAP,
@@ -143,7 +144,7 @@ interface AuthStoreState {
     mode?: "email" | "username";
   }) => Promise<{ requires2FA: boolean }>;
   verifyTwoFactor: (code: string) => Promise<void>;
-  signInWithMagicLink: (email: string) => Promise<void>;
+  signInWithMagicLink: (email: string, redirectTo?: string) => Promise<void>;
   signInWithOtp: (input: {
     channel: "email" | "phone";
     target: string;
@@ -153,6 +154,7 @@ interface AuthStoreState {
   signInWithSocial: (
     provider: string,
     featureId: BetterAuthFeatureId,
+    redirectTo?: string,
   ) => Promise<void>;
   signInAnonymous: () => Promise<void>;
   signUp: (input: {
@@ -462,13 +464,16 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
       });
     },
 
-    signInWithMagicLink: async (email) => {
+    signInWithMagicLink: async (email, redirectTo) => {
       assertFeatureEnabled("magicLink");
 
       if (isExternalBackendConfigured()) {
+        const safeRedirect = redirectTo
+          ? sanitizeRelativeRedirect(redirectTo)
+          : "/dashboard";
         const res = await authClient.signIn.magicLink({
           email,
-          callbackURL: `${window.location.origin}/dashboard`,
+          callbackURL: `${window.location.origin}${safeRedirect}`,
         });
         if (res.error) {
           throw extractAuthError(res.error, "Gagal mengirim magic link.");
@@ -591,15 +596,18 @@ export const useAuthStore = create<AuthStoreState>((set, get) => {
       });
     },
 
-    signInWithSocial: async (provider, featureId) => {
+    signInWithSocial: async (provider, featureId, redirectTo) => {
       assertFeatureEnabled(featureId);
 
       if (isExternalBackendConfigured()) {
+        const safeRedirect = redirectTo
+          ? sanitizeRelativeRedirect(redirectTo)
+          : "/dashboard";
         const res = await authClient.signIn.social({
           provider: provider as Parameters<
             typeof authClient.signIn.social
           >[0]["provider"],
-          callbackURL: `${window.location.origin}/dashboard`,
+          callbackURL: `${window.location.origin}${safeRedirect}`,
         });
         if (res?.error) {
           throw extractAuthError(

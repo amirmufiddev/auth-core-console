@@ -8,6 +8,7 @@ import {
   loginEmailSchema,
 } from "@/features/auth/schema";
 import { isExternalBackendConfigured } from "@/api/client";
+import { sanitizeRelativeRedirect } from "@/lib/tenant-context";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,24 @@ export function SignInForm({
     return null;
   }
 
+  const safeRedirect = redirectTo
+    ? sanitizeRelativeRedirect(redirectTo)
+    : "/dashboard";
+
   const handleSuccess = async () => {
     toast.success("Berhasil masuk ke Auth Core.");
-    navigate(redirectTo || "/dashboard");
+    navigate(safeRedirect);
+  };
+
+  const navigateToTwoFactor = () => {
+    toast.info("Masukkan kode verifikasi 2FA Anda.");
+    if (redirectTo) {
+      navigate(
+        `${basePaths.twoFactor}?redirect=${encodeURIComponent(safeRedirect)}`,
+      );
+      return;
+    }
+    navigate(basePaths.twoFactor);
   };
 
   const onSubmit = async (vals: LoginEmailValues) => {
@@ -67,8 +83,7 @@ export function SignInForm({
         mode,
       });
       if (res.requires2FA) {
-        toast.info("Masukkan kode verifikasi 2FA Anda.");
-        navigate(basePaths.twoFactor);
+        navigateToTwoFactor();
         return;
       }
       await handleSuccess();
@@ -200,8 +215,7 @@ export function SignInForm({
                     mode: "email",
                   });
                   if (res.requires2FA) {
-                    toast.info("Masukkan kode verifikasi 2FA Anda.");
-                    navigate(basePaths.twoFactor);
+                    navigateToTwoFactor();
                     return;
                   }
                   await handleSuccess();

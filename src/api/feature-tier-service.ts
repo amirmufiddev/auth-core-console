@@ -1,5 +1,5 @@
 import { apiRequest, isExternalBackendConfigured } from "@/api/client";
-import { TENANT_TIER_OPTIONS } from "@/api/tenant-service";
+import { TENANT_TIER_OPTIONS, getMyTenant } from "@/api/tenant-service";
 import { BETTER_AUTH_FEATURES } from "@/config/better-auth.config";
 
 export type AuthFeatureStatus = "active" | "disabled" | "coming_soon";
@@ -192,12 +192,21 @@ export async function getPortalTenantFeatures(
       `/api/portal/tenants/${encodeURIComponent(tenantId)}/features`,
     );
   }
+  let tenantTierId = "tier_free";
+  try {
+    const tenant = await getMyTenant(tenantId);
+    tenantTierId = tenant.tierId;
+  } catch {
+    // fallback to default free tier when tenant record is unavailable
+  }
+  const activeTier =
+    localTiers.find((t) => t.id === tenantTierId) ?? localTiers[0];
+
   let map = localTenantConfigs.get(tenantId);
   if (!map) {
     map = new Map();
-    const defaultTier = localTiers[0];
     for (const f of localFeatures) {
-      const allowed = defaultTier.featureIds.includes(f.id);
+      const allowed = activeTier.featureIds.includes(f.id);
       const secretsConfigured: Record<string, boolean> = {};
       const settings: Record<string, string | number | boolean> = {};
       for (const s of f.availableSetting) {
@@ -222,6 +231,21 @@ export async function getPortalTenantFeatures(
       });
     }
     localTenantConfigs.set(tenantId, map);
+  } else {
+    for (const [code, existing] of map.entries()) {
+      const allowed = activeTier.featureIds.includes(existing.featureId);
+      const featureDef = localFeatures.find((f) => f.id === existing.featureId);
+      const currentStatus = featureDef?.status ?? existing.status;
+      map.set(code, {
+        ...existing,
+        status: currentStatus,
+        allowedInTier: allowed,
+        enabled:
+          allowed && currentStatus === "active"
+            ? existing.configuredEnabled
+            : false,
+      });
+    }
   }
   return Array.from(map.values());
 }

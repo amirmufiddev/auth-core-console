@@ -141,6 +141,23 @@ export function PortalTenantFeaturesTab({
 
   const handleSaveSheet = () => {
     if (!configuringFeature) return;
+    const cleanSettings: Record<string, string | number | boolean> = {};
+    for (const field of configuringFeature.availableSetting) {
+      if (field.type === "secret") continue;
+      const val = draftSettings[field.key];
+      if (field.type === "number") {
+        if (val === "" || val === undefined) {
+          if (typeof configuringFeature.settings[field.key] === "number") {
+            cleanSettings[field.key] = configuringFeature.settings[field.key];
+          }
+        } else if (Number.isFinite(Number(val))) {
+          cleanSettings[field.key] = Number(val);
+        }
+      } else if (val !== undefined) {
+        cleanSettings[field.key] = val;
+      }
+    }
+
     const secretsToSend: Record<string, string> = {};
     for (const [key, val] of Object.entries(draftSecrets)) {
       if (val.trim().length > 0) {
@@ -151,7 +168,7 @@ export function PortalTenantFeaturesTab({
     updateMutation.mutate({
       featureCode: configuringFeature.featureCode,
       enabled: configuringFeature.configuredEnabled,
-      settings: draftSettings,
+      settings: cleanSettings,
       secrets:
         Object.keys(secretsToSend).length > 0 ? secretsToSend : undefined,
       clearSecretKeys:
@@ -462,7 +479,22 @@ export function PortalTenantFeaturesTab({
                           <p className="text-[11px] text-muted-foreground">
                             Nilai kosong tidak akan menimpa secret lama.
                           </p>
-                          {isConfigured && (
+                          {markedForClear ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              color="secondary"
+                              className="h-7 px-2 text-[11px]"
+                              onClick={() =>
+                                setClearSecretKeys((prev) =>
+                                  prev.filter((k) => k !== field.key),
+                                )
+                              }
+                            >
+                              Batal Hapus
+                            </Button>
+                          ) : isConfigured ? (
                             <Button
                               type="button"
                               size="sm"
@@ -470,16 +502,17 @@ export function PortalTenantFeaturesTab({
                               color="destructive"
                               className="h-7 px-2 text-[11px]"
                               onClick={() =>
-                                setClearSecretKeys((prev) => [
-                                  ...prev,
-                                  field.key,
-                                ])
+                                setClearSecretKeys((prev) =>
+                                  prev.includes(field.key)
+                                    ? prev
+                                    : [...prev, field.key],
+                                )
                               }
                             >
                               <Trash2 className="mr-1 h-3 w-3" />
                               Hapus
                             </Button>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     );
@@ -553,15 +586,18 @@ export function PortalTenantFeaturesTab({
                         id={`tenant-cfg-${field.key}`}
                         type={field.type === "number" ? "number" : "text"}
                         value={String(val ?? "")}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const rawVal = e.target.value;
                           setDraftSettings((prev) => ({
                             ...prev,
                             [field.key]:
                               field.type === "number"
-                                ? Number(e.target.value)
-                                : e.target.value,
-                          }))
-                        }
+                                ? rawVal === ""
+                                  ? ""
+                                  : Number(rawVal)
+                                : rawVal,
+                          }));
+                        }}
                       />
                     </div>
                   );

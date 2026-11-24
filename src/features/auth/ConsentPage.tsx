@@ -4,6 +4,10 @@ import { CheckCircle2, Loader2, ShieldAlert, ShieldCheck, XCircle } from "lucide
 import { toast } from "sonner";
 import { isExternalBackendConfigured } from "@/api/client";
 import { authClient } from "@/lib/auth-client";
+import {
+  sanitizeOAuthRedirectUrl,
+  sanitizeRelativeRedirect,
+} from "@/lib/tenant-context";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -69,10 +73,11 @@ export function ConsentPage() {
       }
       if (!active) return;
       if (!currentUser) {
-        const returnUrl =
+        const returnUrl = sanitizeRelativeRedirect(
           typeof window !== "undefined"
             ? `${window.location.pathname}${window.location.search}`
-            : "/consent";
+            : "/consent",
+        );
         void navigate({
           to: "/login",
           search: { redirect: returnUrl },
@@ -108,7 +113,14 @@ export function ConsentPage() {
 
       const redirectUrl = res.data?.url;
       if (redirectUrl) {
-        window.location.assign(redirectUrl);
+        const safeUrl = sanitizeOAuthRedirectUrl(redirectUrl);
+        if (!safeUrl) {
+          const msg = "URL redirect OAuth tidak valid atau tidak aman.";
+          setErrorMessage(msg);
+          toast.error(msg);
+          return;
+        }
+        window.location.assign(safeUrl);
         return;
       }
 

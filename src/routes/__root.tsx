@@ -7,6 +7,7 @@ import {
 import { type QueryClient } from "@tanstack/react-query";
 import { ShieldAlert } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { resolveTenantFromHostname } from "@/lib/tenant-context";
 import { useThemeStore } from "@/stores/useThemeStore";
 import { useAuthConfigStore } from "@/stores/useAuthConfigStore";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -28,8 +29,17 @@ function RootComponent() {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const listener = () => syncFromSystem();
     media.addEventListener("change", listener);
-    void hydrateFromRemote();
-    void hydrateSession();
+
+    const isSubdomainTenant =
+      resolveTenantFromHostname().mode === "subdomain";
+    const isPathTenant = window.location.pathname.startsWith("/t/");
+    if (!isSubdomainTenant) {
+      void hydrateFromRemote();
+    }
+    if (!isSubdomainTenant && !isPathTenant) {
+      void hydrateSession();
+    }
+
     return () => media.removeEventListener("change", listener);
   }, [syncFromSystem, hydrateFromRemote, hydrateSession]);
 

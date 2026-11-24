@@ -167,13 +167,13 @@ export function AdminBillingPage({
 
   const records = billingQuery.data?.items ?? [];
   const total = billingQuery.data?.total ?? 0;
-  const pageAmountSum = records.reduce(
-    (sum, r) => sum + (r.status === "void" ? 0 : r.amount),
-    0,
+  const nonVoidRecords = records.filter((r) => r.status !== "void");
+  const pageAmountSum = nonVoidRecords.reduce((sum, r) => sum + r.amount, 0);
+  const currencies = new Set(
+    nonVoidRecords.map((r) => r.currency).filter(Boolean),
   );
-  const currencies = new Set(records.map((r) => r.currency).filter(Boolean));
   const pageAmountDisplay =
-    records.length === 0
+    nonVoidRecords.length === 0
       ? formatCurrency(0, "IDR")
       : currencies.size === 1
         ? formatCurrency(pageAmountSum, Array.from(currencies)[0])

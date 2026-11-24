@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { sanitizeRelativeRedirect } from "@/lib/tenant-context";
 import { useAuthUI } from "@/components/better-auth/auth-ui-provider";
 import { AppLogo } from "@/components/layout/AppLogo";
 import { EmailOTPForm } from "@/components/better-auth/auth/EmailOTPForm";
@@ -43,6 +44,12 @@ export function AuthView({
   const pending2FA = useAuthStore((s) => s.pending2FA);
   const [otpFocusedMode, setOtpFocusedMode] = useState(false);
 
+  const safeRedirect = redirectTo
+    ? sanitizeRelativeRedirect(redirectTo)
+    : "/dashboard";
+  const redirectSearch =
+    safeRedirect !== "/dashboard" ? { redirect: safeRedirect } : undefined;
+
   const emailEnabled = Boolean(features.emailAndPassword?.enabled);
   const magicLinkEnabled = Boolean(features.magicLink?.enabled);
   const emailOtpEnabled = Boolean(features.emailOTP?.enabled);
@@ -80,7 +87,7 @@ export function AuthView({
         </div>
 
         {emailEnabled ? (
-          <SignUpForm redirectTo={redirectTo} />
+          <SignUpForm redirectTo={safeRedirect} />
         ) : (
           <div className="rounded-xl border border-warning/30 bg-warning-soft/70 p-4 text-center text-xs text-foreground">
             Fitur <span className="font-semibold">Email &amp; Password</span>{" "}
@@ -94,6 +101,7 @@ export function AuthView({
           Sudah memiliki akun?{" "}
           <Link
             to={basePaths.signIn}
+            search={redirectSearch as never}
             className="font-semibold text-primary hover:underline"
           >
             Masuk
@@ -163,11 +171,12 @@ export function AuthView({
           </p>
         </div>
 
-        <TwoFactorForm redirectTo={redirectTo} />
+        <TwoFactorForm redirectTo={safeRedirect} />
 
         <p className="text-center text-xs text-muted-foreground">
           <Link
             to={basePaths.signIn}
+            search={redirectSearch as never}
             className="font-semibold text-primary hover:underline"
           >
             Gunakan akun lain
@@ -270,7 +279,7 @@ export function AuthView({
 
             {emailEnabled && (
               <TabsContent value="password" className="pt-4">
-                <SignInForm redirectTo={redirectTo} />
+                <SignInForm redirectTo={safeRedirect} />
               </TabsContent>
             )}
 
@@ -280,7 +289,7 @@ export function AuthView({
                 className={otpFocusedMode ? "pt-0" : "pt-4"}
               >
                 <EmailOTPForm
-                  redirectTo={redirectTo}
+                  redirectTo={safeRedirect}
                   onStepChange={(step) => setOtpFocusedMode(step !== "request")}
                 />
               </TabsContent>
@@ -288,7 +297,7 @@ export function AuthView({
 
             {magicLinkEnabled && (
               <TabsContent value="magic-link" className="pt-4">
-                <MagicLinkForm redirectTo={redirectTo} />
+                <MagicLinkForm redirectTo={safeRedirect} />
               </TabsContent>
             )}
           </Tabs>
@@ -306,8 +315,8 @@ export function AuthView({
             )}
 
             <div className="space-y-2">
-              <PasskeyButton redirectTo={redirectTo} />
-              <ProviderButtons redirectTo={redirectTo} />
+              <PasskeyButton redirectTo={safeRedirect} />
+              <ProviderButtons redirectTo={safeRedirect} />
             </div>
           </>
         )}
@@ -325,6 +334,7 @@ export function AuthView({
           Belum punya akun?{" "}
           <Link
             to={basePaths.signUp}
+            search={redirectSearch as never}
             className="font-semibold text-primary hover:underline"
           >
             Daftar sekarang

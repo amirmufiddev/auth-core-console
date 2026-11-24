@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { type authClient as defaultAuthClient } from "@/lib/auth-client";
+import { sanitizeRelativeRedirect } from "@/lib/tenant-context";
 import { useAuthConfigStore } from "@/stores/useAuthConfigStore";
 import { type FeatureConfigMap } from "@/config/better-auth.config";
 
@@ -87,7 +88,17 @@ export function AuthUIProvider({
       localization: { ...DEFAULT_LOCALIZATION, ...localization },
       features,
       navigate: (to: string) => {
-        void routerNavigate({ to });
+        const safeTo = sanitizeRelativeRedirect(to);
+        const parsed = new URL(safeTo, "https://safe.local");
+        const searchEntries = Object.fromEntries(parsed.searchParams.entries());
+        if (Object.keys(searchEntries).length > 0) {
+          void routerNavigate({
+            to: parsed.pathname as never,
+            search: searchEntries as never,
+          });
+          return;
+        }
+        void routerNavigate({ to: parsed.pathname as never });
       },
     }),
     [authClient, basePaths, localization, features, routerNavigate],

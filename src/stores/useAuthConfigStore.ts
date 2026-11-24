@@ -10,6 +10,72 @@ import {
 } from "@/config/better-auth.config";
 
 const CONFIG_STORAGE_KEY = "authcore-feature-config";
+const SECRET_KEY_PATTERN = /secret|token|password|apikey|private/i;
+
+export interface AuthConfigFeatureUpdateInput {
+  enabled?: boolean;
+  settings?: Record<string, string | number | boolean>;
+  secrets?: Record<string, string | null | undefined>;
+  clearSecretKeys?: string[];
+}
+
+function getSecretKeysForFeature(id: BetterAuthFeatureId): Set<string> {
+  const def = BETTER_AUTH_FEATURE_MAP[id];
+  return new Set(
+    (def?.settingsSchema ?? [])
+      .filter((s) => s.type === "secret")
+      .map((s) => s.key),
+  );
+}
+
+function stripSecretSettings(
+  id: BetterAuthFeatureId,
+  settings?: Record<string, unknown>,
+): Record<string, string | number | boolean> {
+  const secretKeys = getSecretKeysForFeature(id);
+  const clean: Record<string, string | number | boolean> = {};
+  if (!settings || typeof settings !== "object") return clean;
+  for (const [key, value] of Object.entries(settings)) {
+    if (secretKeys.has(key) || SECRET_KEY_PATTERN.test(key)) {
+      continue;
+    }
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
+      clean[key] = value;
+    }
+  }
+  return clean;
+}
+
+function sanitizeConfigMapForStorage(
+  features: FeatureConfigMap,
+): FeatureConfigMap {
+  const defaults = buildDefaultFeatureConfigMap();
+  const clean = {} as FeatureConfigMap;
+  for (const key of Object.keys(defaults) as BetterAuthFeatureId[]) {
+    const entry = features[key] ?? defaults[key];
+    const defaultSecrets = defaults[key].secretsConfigured;
+    clean[key] = {
+      enabled: Boolean(entry.enabled),
+      settings: {
+        ...defaults[key].settings,
+        ...stripSecretSettings(key, entry.settings),
+      },
+      ...(defaultSecrets || entry.secretsConfigured
+        ? {
+            secretsConfigured: {
+              ...(defaultSecrets ?? {}),
+              ...(entry.secretsConfigured ?? {}),
+            },
+          }
+        : {}),
+    };
+  }
+  return clean;
+}
 
 export class FeatureDisabledError extends Error {
   readonly featureId: BetterAuthFeatureId;
@@ -36,12 +102,21 @@ function loadStoredConfig(): FeatureConfigMap {
     for (const key of Object.keys(defaults) as BetterAuthFeatureId[]) {
       const saved = parsed[key];
       if (saved && typeof saved.enabled === "boolean") {
+        const defaultSecrets = defaults[key].secretsConfigured;
         merged[key] = {
           enabled: saved.enabled,
           settings: {
             ...defaults[key].settings,
-            ...(saved.settings ?? {}),
+            ...stripSecretSettings(key, saved.settings),
           },
+          ...(defaultSecrets || saved.secretsConfigured
+            ? {
+                secretsConfigured: {
+                  ...(defaultSecrets ?? {}),
+                  ...(saved.secretsConfigured ?? {}),
+                },
+              }
+            : {}),
         };
       }
     }
@@ -54,25 +129,55 @@ function loadStoredConfig(): FeatureConfigMap {
 function persistConfig(features: FeatureConfigMap) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(features));
+    window.localStorage.setItem(
+      CONFIG_STORAGE_KEY,
+      JSON.stringify(sanitizeConfigMapForStorage(features)),
+    );
   } catch {
     // ignore quota errors
   }
 }
 
-async function syncRemoteConfig(features: FeatureConfigMap): Promise<boolean> {
-  if (!isExternalBackendConfigured()) return false;
+async function syncRemoteConfig(
+  features: FeatureConfigMap,
+  secretPatches?: Partial<
+    Record<
+      BetterAuthFeatureId,
+      {
+        secrets?: Record<string, string | null | undefined>;
+        clearSecretKeys?: string[];
+      }
+    >
+  >,
+): Promise<Partial<FeatureConfigMap> | null> {
+  if (!isExternalBackendConfigured()) return null;
   try {
-    await apiRequest<{ features: Partial<FeatureConfigMap> }>(
+    const payloadFeatures: Record<string, AuthConfigFeatureUpdateInput> = {};
+    for (const key of Object.keys(features) as BetterAuthFeatureId[]) {
+      const entry = features[key];
+      const patch = secretPatches?.[key];
+      payloadFeatures[key] = {
+        enabled: entry.enabled,
+        settings: stripSecretSettings(key, entry.settings),
+        ...(patch?.secrets && Object.keys(patch.secrets).length > 0
+          ? { secrets: patch.secrets }
+          : {}),
+        ...(patch?.clearSecretKeys && patch.clearSecretKeys.length > 0
+          ? { clearSecretKeys: patch.clearSecretKeys }
+          : {}),
+      };
+    }
+
+    const res = await apiRequest<{ features?: Partial<FeatureConfigMap> }>(
       "/api/auth-config",
       {
         method: "PUT",
-        body: JSON.stringify({ features }),
+        body: JSON.stringify({ features: payloadFeatures }),
       },
     );
-    return true;
+    return res?.features ?? {};
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -88,10 +193,42 @@ interface AuthConfigStoreState {
   updateFeatureSettings: (
     id: BetterAuthFeatureId,
     settings: Record<string, string | number | boolean>,
+    options?: {
+      secrets?: Record<string, string>;
+      clearSecretKeys?: string[];
+    },
   ) => void;
   applyPreset: (preset: ConfigPresetId) => void;
   resetDefaults: () => void;
   hydrateFromRemote: () => Promise<void>;
+}
+
+function mergeRemoteFeaturesInto(
+  base: FeatureConfigMap,
+  remoteFeatures: Partial<FeatureConfigMap>,
+): FeatureConfigMap {
+  const merged = { ...base };
+  for (const key of Object.keys(base) as BetterAuthFeatureId[]) {
+    const remote = remoteFeatures[key];
+    if (remote && typeof remote.enabled === "boolean") {
+      merged[key] = {
+        enabled: remote.enabled,
+        settings: {
+          ...base[key].settings,
+          ...stripSecretSettings(key, remote.settings),
+        },
+        ...(base[key].secretsConfigured || remote.secretsConfigured
+          ? {
+              secretsConfigured: {
+                ...(base[key].secretsConfigured ?? {}),
+                ...(remote.secretsConfigured ?? {}),
+              },
+            }
+          : {}),
+      };
+    }
+  }
+  return merged;
 }
 
 export const useAuthConfigStore = create<AuthConfigStoreState>((set, get) => ({
@@ -149,24 +286,50 @@ export const useAuthConfigStore = create<AuthConfigStoreState>((set, get) => ({
     });
 
     if (isExternalBackendConfigured()) {
-      void syncRemoteConfig(next).then((synced) => {
-        set({ syncStatus: synced ? "synced" : "local" });
+      void syncRemoteConfig(next).then((remoteFeatures) => {
+        if (remoteFeatures) {
+          const syncedMap = mergeRemoteFeaturesInto(get().features, remoteFeatures);
+          persistConfig(syncedMap);
+          set({ features: syncedMap, syncStatus: "synced" });
+        } else {
+          set({ syncStatus: "local" });
+        }
       });
     }
 
     return { ok: true, autoEnabled };
   },
 
-  updateFeatureSettings: (id, settings) => {
+  updateFeatureSettings: (id, settings, options) => {
     const current = get().features;
+    const cleanIncomingSettings = stripSecretSettings(id, settings);
+    const nextSecretsConfigured: Record<string, boolean> = {
+      ...(current[id]?.secretsConfigured ?? {}),
+    };
+    if (options?.secrets) {
+      for (const [k, v] of Object.entries(options.secrets)) {
+        if (typeof v === "string" && v.trim().length > 0) {
+          nextSecretsConfigured[k] = true;
+        }
+      }
+    }
+    if (options?.clearSecretKeys) {
+      for (const k of options.clearSecretKeys) {
+        nextSecretsConfigured[k] = false;
+      }
+    }
+
     const next: FeatureConfigMap = {
       ...current,
       [id]: {
         ...current[id],
         settings: {
-          ...current[id].settings,
-          ...settings,
+          ...stripSecretSettings(id, current[id].settings),
+          ...cleanIncomingSettings,
         },
+        ...(Object.keys(nextSecretsConfigured).length > 0
+          ? { secretsConfigured: nextSecretsConfigured }
+          : {}),
       },
     };
     persistConfig(next);
@@ -176,8 +339,19 @@ export const useAuthConfigStore = create<AuthConfigStoreState>((set, get) => ({
       syncStatus: isExternalBackendConfigured() ? "syncing" : "local",
     });
     if (isExternalBackendConfigured()) {
-      void syncRemoteConfig(next).then((synced) => {
-        set({ syncStatus: synced ? "synced" : "local" });
+      void syncRemoteConfig(next, {
+        [id]: {
+          secrets: options?.secrets,
+          clearSecretKeys: options?.clearSecretKeys,
+        },
+      }).then((remoteFeatures) => {
+        if (remoteFeatures) {
+          const syncedMap = mergeRemoteFeaturesInto(get().features, remoteFeatures);
+          persistConfig(syncedMap);
+          set({ features: syncedMap, syncStatus: "synced" });
+        } else {
+          set({ syncStatus: "local" });
+        }
       });
     }
   },
@@ -191,8 +365,14 @@ export const useAuthConfigStore = create<AuthConfigStoreState>((set, get) => ({
       syncStatus: isExternalBackendConfigured() ? "syncing" : "local",
     });
     if (isExternalBackendConfigured()) {
-      void syncRemoteConfig(next).then((synced) => {
-        set({ syncStatus: synced ? "synced" : "local" });
+      void syncRemoteConfig(next).then((remoteFeatures) => {
+        if (remoteFeatures) {
+          const syncedMap = mergeRemoteFeaturesInto(get().features, remoteFeatures);
+          persistConfig(syncedMap);
+          set({ features: syncedMap, syncStatus: "synced" });
+        } else {
+          set({ syncStatus: "local" });
+        }
       });
     }
   },
@@ -206,8 +386,14 @@ export const useAuthConfigStore = create<AuthConfigStoreState>((set, get) => ({
       syncStatus: isExternalBackendConfigured() ? "syncing" : "local",
     });
     if (isExternalBackendConfigured()) {
-      void syncRemoteConfig(next).then((synced) => {
-        set({ syncStatus: synced ? "synced" : "local" });
+      void syncRemoteConfig(next).then((remoteFeatures) => {
+        if (remoteFeatures) {
+          const syncedMap = mergeRemoteFeaturesInto(get().features, remoteFeatures);
+          persistConfig(syncedMap);
+          set({ features: syncedMap, syncStatus: "synced" });
+        } else {
+          set({ syncStatus: "local" });
+        }
       });
     }
   },
@@ -219,17 +405,7 @@ export const useAuthConfigStore = create<AuthConfigStoreState>((set, get) => ({
         features?: Partial<FeatureConfigMap>;
       }>("/api/auth-config");
       if (!payload?.features) return;
-      const base = get().features;
-      const merged = { ...base };
-      for (const key of Object.keys(base) as BetterAuthFeatureId[]) {
-        const remote = payload.features[key];
-        if (remote && typeof remote.enabled === "boolean") {
-          merged[key] = {
-            enabled: remote.enabled,
-            settings: { ...base[key].settings, ...(remote.settings ?? {}) },
-          };
-        }
-      }
+      const merged = mergeRemoteFeaturesInto(get().features, payload.features);
       persistConfig(merged);
       set({
         features: merged,

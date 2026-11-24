@@ -17,12 +17,14 @@ import {
 import { toast } from "sonner";
 import { createTenantAuthClient } from "@/lib/auth-client";
 import {
+  SUPPORTED_TENANT_SOCIAL_BRIDGE_PROVIDERS,
   type TenantAccessMode,
   type TenantAuthConfigResponse,
   type TenantContextInfo,
   fetchTenantAuthConfig,
   getTenantSocialBridgeStartUrl,
   isTenantFeatureActive,
+  sanitizeOAuthRedirectUrl,
   sanitizeRelativeRedirect,
 } from "@/lib/tenant-context";
 import { SOCIAL_PROVIDER_CATALOG } from "@/components/better-auth/auth/ProviderButtons";
@@ -41,6 +43,7 @@ interface BaseTenantPageProps {
   mode?: TenantAccessMode;
   redirectTo?: string;
   embedded?: boolean;
+  invitationId?: string;
 }
 
 function buildTenantRoutePath(
@@ -206,8 +209,10 @@ export function TenantLoginPage({
   const passkeyEnabled = isTenantFeatureActive(config, "passkey");
   const activeSocials = useMemo(
     () =>
-      SOCIAL_PROVIDER_CATALOG.filter((s) =>
-        isTenantFeatureActive(config, s.id),
+      SOCIAL_PROVIDER_CATALOG.filter(
+        (s) =>
+          SUPPORTED_TENANT_SOCIAL_BRIDGE_PROVIDERS.has(s.provider) &&
+          isTenantFeatureActive(config, s.id),
       ),
     [config],
   );
@@ -237,7 +242,9 @@ export function TenantLoginPage({
         const verifyPath = buildTenantRoutePath(context, "verify-2fa");
         void navigate({
           to: verifyPath as never,
-          search: (redirectTo ? { redirect: redirectTo } : {}) as never,
+          search: (redirectTo
+            ? { redirect: sanitizeRelativeRedirect(redirectTo) }
+            : {}) as never,
         });
         return;
       }
@@ -302,10 +309,13 @@ export function TenantLoginPage({
     e.preventDefault();
     setSubmitting(true);
     try {
-      const callbackURL =
+      const safeRedirect =
         redirectTo && redirectTo.trim().length > 0
           ? sanitizeRelativeRedirect(redirectTo)
-          : window.location.origin;
+          : context.mode === "path" && context.tenantSlug
+            ? buildTenantRoutePath(context, "login")
+            : "/";
+      const callbackURL = `${window.location.origin}${safeRedirect}`;
       const res = await tenantClient.signIn.magicLink({
         email: magicEmail.trim(),
         callbackURL,
@@ -612,6 +622,9 @@ export function TenantLoginPage({
               Belum punya akun?{" "}
               <Link
                 to={buildTenantRoutePath(context, "register") as never}
+                search={(redirectTo
+                  ? { redirect: sanitizeRelativeRedirect(redirectTo) }
+                  : {}) as never}
                 className="font-semibold text-primary hover:underline"
               >
                 Daftar sekarang
@@ -715,7 +728,12 @@ export function TenantRegisterPage({
             </AlertDescription>
           </Alert>
           <Button variant="outline" color="secondary" asChild className="w-full">
-            <Link to={buildTenantRoutePath(context, "login") as never}>
+            <Link
+              to={buildTenantRoutePath(context, "login") as never}
+              search={(redirectTo
+                ? { redirect: sanitizeRelativeRedirect(redirectTo) }
+                : {}) as never}
+            >
               Kembali ke Halaman Masuk
             </Link>
           </Button>
@@ -779,6 +797,9 @@ export function TenantRegisterPage({
             Sudah memiliki akun?{" "}
             <Link
               to={buildTenantRoutePath(context, "login") as never}
+              search={(redirectTo
+                ? { redirect: sanitizeRelativeRedirect(redirectTo) }
+                : {}) as never}
               className="font-semibold text-primary hover:underline"
             >
               Masuk
@@ -854,7 +875,12 @@ export function TenantVerify2FAPage({
             </AlertDescription>
           </Alert>
           <Button variant="outline" color="secondary" asChild className="w-full">
-            <Link to={buildTenantRoutePath(context, "login") as never}>
+            <Link
+              to={buildTenantRoutePath(context, "login") as never}
+              search={(redirectTo
+                ? { redirect: sanitizeRelativeRedirect(redirectTo) }
+                : {}) as never}
+            >
               Kembali ke Halaman Masuk
             </Link>
           </Button>
@@ -967,15 +993,16 @@ export function TenantConsentPage({
   useEffect(() => {
     let active = true;
     async function checkSession() {
+      const returnUrl = sanitizeRelativeRedirect(
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : buildTenantRoutePath(context, "consent"),
+      );
       try {
         const res = await tenantClient.getSession();
         if (!active) return;
         const sessionUser = res.data?.user;
         if (!sessionUser) {
-          const returnUrl =
-            typeof window !== "undefined"
-              ? `${window.location.pathname}${window.location.search}`
-              : buildTenantRoutePath(context, "consent");
           void navigate({
             to: buildTenantRoutePath(context, "login") as never,
             search: { redirect: returnUrl } as never,
@@ -988,6 +1015,7 @@ export function TenantConsentPage({
         if (!active) return;
         void navigate({
           to: buildTenantRoutePath(context, "login") as never,
+          search: { redirect: returnUrl } as never,
           replace: true,
         });
         return;
@@ -1019,7 +1047,14 @@ export function TenantConsentPage({
       }
       const redirectUrl = res.data?.url;
       if (redirectUrl) {
-        window.location.assign(redirectUrl);
+        const safeUrl = sanitizeOAuthRedirectUrl(redirectUrl);
+        if (!safeUrl) {
+          const msg = "URL redirect OAuth tidak valid atau tidak aman.";
+          setConsentError(msg);
+          toast.error(msg);
+          return;
+        }
+        window.location.assign(safeUrl);
         return;
       }
       toast.success(
@@ -1163,6 +1198,7 @@ export function TenantAcceptInvitationPage({
   tenantSlug,
   mode = "path",
   embedded = false,
+  invitationId: propInvitationId,
 }: BaseTenantPageProps) {
   const navigate = useNavigate();
   const { context, tenantClient, loading, error, reload } = useTenantAuthSetup(
@@ -1177,28 +1213,34 @@ export function TenantAcceptInvitationPage({
   const [inviteError, setInviteError] = useState<string | null>(null);
 
   const invitationId = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    const params = new URLSearchParams(window.location.search);
-    return (
-      params.get("invitationId") ??
-      params.get("id") ??
-      params.get("token") ??
-      ""
-    ).trim();
-  }, []);
+    const queryInviteId =
+      typeof window !== "undefined"
+        ? (() => {
+            const params = new URLSearchParams(window.location.search);
+            return (
+              params.get("invitationId") ??
+              params.get("id") ??
+              params.get("token") ??
+              ""
+            );
+          })()
+        : "";
+    return (queryInviteId || propInvitationId || "").trim();
+  }, [propInvitationId]);
 
   useEffect(() => {
     let active = true;
     async function checkSession() {
+      const returnUrl = sanitizeRelativeRedirect(
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : buildTenantRoutePath(context, "accept-invitation"),
+      );
       try {
         const res = await tenantClient.getSession();
         if (!active) return;
         const sessionUser = res.data?.user;
         if (!sessionUser) {
-          const returnUrl =
-            typeof window !== "undefined"
-              ? `${window.location.pathname}${window.location.search}`
-              : buildTenantRoutePath(context, "accept-invitation");
           void navigate({
             to: buildTenantRoutePath(context, "login") as never,
             search: { redirect: returnUrl } as never,
@@ -1211,6 +1253,7 @@ export function TenantAcceptInvitationPage({
         if (!active) return;
         void navigate({
           to: buildTenantRoutePath(context, "login") as never,
+          search: { redirect: returnUrl } as never,
           replace: true,
         });
         return;

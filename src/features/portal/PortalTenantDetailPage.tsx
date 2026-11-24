@@ -471,11 +471,13 @@ export function PortalTenantDetailPage({
   const tenant = tenantQuery.data;
   const isFreeTier = tenant.tierId === FREE_TIER_ID;
   const oauthTotal = oauthQuery.data?.total ?? 0;
+  const quotaLoading = isFreeTier && oauthQuotaQuery.isLoading;
   const unfilteredOAuthTotal = isFreeTier
     ? (oauthQuotaQuery.data?.total ?? (oauthPaging.search ? 0 : oauthTotal))
     : oauthTotal;
   const quotaReached =
-    isFreeTier && unfilteredOAuthTotal >= FREE_TIER_MAX_OAUTH_CLIENTS;
+    isFreeTier &&
+    (quotaLoading || unfilteredOAuthTotal >= FREE_TIER_MAX_OAUTH_CLIENTS);
 
   return (
     <div className="space-y-6">
@@ -663,7 +665,8 @@ export function PortalTenantDetailPage({
               </AlertTitle>
               <AlertDescription className="text-xs">
                 Tier Free mengizinkan maksimal {FREE_TIER_MAX_OAUTH_CLIENTS}{" "}
-                OAuth client per tenant (saat ini: {unfilteredOAuthTotal}/
+                OAuth client per tenant (saat ini:{" "}
+                {quotaLoading ? "..." : unfilteredOAuthTotal}/
                 {FREE_TIER_MAX_OAUTH_CLIENTS}). Hubungi operator untuk upgrade
                 ke Basic/Business jika membutuhkan multi-client.
               </AlertDescription>
@@ -715,17 +718,17 @@ export function PortalTenantDetailPage({
           </Card>
         </TabsContent>
 
-        {/* TAB 3: TENANT USERS */}
+        {/* TAB 4: TENANT USERS */}
         <TabsContent value="users" className="pt-4">
           <PortalTenantUsersTab tenantId={tenantId} tenantSlug={tenant.slug} />
         </TabsContent>
 
-        {/* TAB 4: TENANT ORGANIZATIONS */}
+        {/* TAB 5: TENANT ORGANIZATIONS */}
         <TabsContent value="organizations" className="pt-4">
           <PortalTenantOrgsTab tenantId={tenantId} tenantSlug={tenant.slug} />
         </TabsContent>
 
-        {/* TAB 5: BILLING SUMMARY */}
+        {/* TAB 6: BILLING SUMMARY */}
         <TabsContent value="billing" className="space-y-4 pt-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Card>

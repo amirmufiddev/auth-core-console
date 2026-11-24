@@ -28,6 +28,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/auth-features": "Auth Features",
   "/account": "Account Settings",
   "/admin-tenants": "Tenants (Operator)",
+  "/admin-tiers": "Feature & Tier Matrix",
   "/admin-billing": "Billing Ledger",
   "/tenants": "Tenant Portal",
 };

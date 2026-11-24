@@ -8,6 +8,7 @@ import {
   Settings2,
   ShieldCheck,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
 import {
   BETTER_AUTH_FEATURES,
@@ -82,6 +83,8 @@ export function AuthFeaturesPage({
   const [draftSettings, setDraftSettings] = useState<
     Record<string, string | number | boolean>
   >({});
+  const [draftSecrets, setDraftSecrets] = useState<Record<string, string>>({});
+  const [clearSecretKeys, setClearSecretKeys] = useState<string[]>([]);
 
   const totalCount = BETTER_AUTH_FEATURES.length;
   const activeCount = BETTER_AUTH_FEATURES.filter(
@@ -134,15 +137,20 @@ export function AuthFeaturesPage({
     setConfiguringFeature(feature);
     const currentSettings =
       features[feature.id]?.settings ?? feature.defaultSettings;
-    const nextDraft: Record<string, string | number | boolean> = {
-      ...currentSettings,
-    };
+    const nextDraft: Record<string, string | number | boolean> = {};
+    const nextSecrets: Record<string, string> = {};
     for (const field of feature.settingsSchema) {
       if (field.type === "secret") {
-        nextDraft[field.key] = "";
+        nextSecrets[field.key] = "";
+      } else if (field.key in currentSettings) {
+        nextDraft[field.key] = currentSettings[field.key];
+      } else if (field.key in feature.defaultSettings) {
+        nextDraft[field.key] = feature.defaultSettings[field.key];
       }
     }
     setDraftSettings(nextDraft);
+    setDraftSecrets(nextSecrets);
+    setClearSecretKeys([]);
   };
 
   const saveFeatureSettings = () => {
@@ -150,18 +158,36 @@ export function AuthFeaturesPage({
     const existingSettings =
       features[configuringFeature.id]?.settings ??
       configuringFeature.defaultSettings;
-    const mergedSettings: Record<string, string | number | boolean> = {
-      ...draftSettings,
-    };
+    const cleanSettings: Record<string, string | number | boolean> = {};
     for (const field of configuringFeature.settingsSchema) {
-      if (field.type === "secret") {
-        const incoming = String(draftSettings[field.key] ?? "");
-        if (incoming.trim().length === 0) {
-          mergedSettings[field.key] = existingSettings[field.key] ?? "";
+      if (field.type === "secret") continue;
+      const incoming = draftSettings[field.key];
+      if (field.type === "number") {
+        if (incoming === "" || incoming === undefined) {
+          if (typeof existingSettings[field.key] === "number") {
+            cleanSettings[field.key] = existingSettings[field.key];
+          }
+        } else if (Number.isFinite(Number(incoming))) {
+          cleanSettings[field.key] = Number(incoming);
         }
+      } else if (incoming !== undefined) {
+        cleanSettings[field.key] = incoming;
       }
     }
-    updateFeatureSettings(configuringFeature.id, mergedSettings);
+
+    const secretsToSend: Record<string, string> = {};
+    for (const [key, val] of Object.entries(draftSecrets)) {
+      if (val.trim().length > 0) {
+        secretsToSend[key] = val;
+      }
+    }
+
+    updateFeatureSettings(configuringFeature.id, cleanSettings, {
+      secrets:
+        Object.keys(secretsToSend).length > 0 ? secretsToSend : undefined,
+      clearSecretKeys:
+        clearSecretKeys.length > 0 ? clearSecretKeys : undefined,
+    });
     toast.success(`Parameter ${configuringFeature.name} diperbarui.`);
     setConfiguringFeature(null);
   };
@@ -363,7 +389,7 @@ export function AuthFeaturesPage({
                       {enabled ? "Active" : "Off"}
                     </Badge>
                   </div>
-                  <CardDescription className="font-semiboldums text-[11px]">
+                  <CardDescription className="font-mono text-[11px]">
                     {feature.packageName} · {feature.pluginKey}
                   </CardDescription>
                 </div>
@@ -384,7 +410,7 @@ export function AuthFeaturesPage({
                   {feature.endpoints.slice(0, 2).map((ep) => (
                     <span
                       key={ep}
-                      className="rounded bg-muted px-2 py-0.5 font-semiboldums text-[10px] text-default-700"
+                      className="rounded bg-muted px-2 py-0.5 font-mono text-[10px] text-default-700"
                     >
                       {ep}
                     </span>
@@ -394,7 +420,7 @@ export function AuthFeaturesPage({
                 {feature.dependencies?.length ? (
                   <div className="text-[11px] text-muted-foreground">
                     Memerlukan:{" "}
-                    <span className="font-semiboldums text-default-800">
+                    <span className="font-semibold text-default-800">
                       {feature.dependencies.join(", ")}
                     </span>
                   </div>
@@ -407,7 +433,7 @@ export function AuthFeaturesPage({
                       .filter((s) => s.type === "secret")
                       .map((s) => {
                         const configured = Boolean(
-                          runtime?.settings?.[s.key],
+                          runtime?.secretsConfigured?.[s.key],
                         );
                         return (
                           <Badge
@@ -515,27 +541,41 @@ export function AuthFeaturesPage({
                     );
                   }
                   if (field.type === "secret") {
-                    const secretsConfigured = Boolean(
-                      features[configuringFeature.id]?.settings?.[field.key],
-                    );
+                    const markedForClear = clearSecretKeys.includes(field.key);
+                    const secretsConfigured =
+                      Boolean(
+                        features[configuringFeature.id]?.secretsConfigured?.[
+                          field.key
+                        ],
+                      ) && !markedForClear;
                     return (
                       <div
                         key={field.key}
-                        className="space-y-1.5 rounded-lg border border-border p-3"
+                        className="space-y-2 rounded-lg border border-border p-3"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <Label htmlFor={`cfg-${field.key}`}>
                             {field.label}
                           </Label>
-                          <Badge
-                            color={secretsConfigured ? "success" : "secondary"}
-                            variant="soft"
-                            className="text-[10px]"
-                          >
-                            {secretsConfigured
-                              ? "Terkonfigurasi"
-                              : "Belum diatur"}
-                          </Badge>
+                          {markedForClear ? (
+                            <Badge
+                              color="destructive"
+                              variant="soft"
+                              className="text-[10px]"
+                            >
+                              Akan dihapus
+                            </Badge>
+                          ) : (
+                            <Badge
+                              color={secretsConfigured ? "success" : "secondary"}
+                              variant="soft"
+                              className="text-[10px]"
+                            >
+                              {secretsConfigured
+                                ? "Terkonfigurasi"
+                                : "Belum diatur"}
+                            </Badge>
+                          )}
                         </div>
                         <Input
                           id={`cfg-${field.key}`}
@@ -546,14 +586,59 @@ export function AuthFeaturesPage({
                               ? "•••••••• (kosongkan untuk mempertahankan)"
                               : "Masukkan secret platform..."
                           }
-                          value={String(val ?? "")}
-                          onChange={(e) =>
-                            setDraftSettings((prev) => ({
+                          value={draftSecrets[field.key] ?? ""}
+                          onChange={(e) => {
+                            const nextVal = e.target.value;
+                            setDraftSecrets((prev) => ({
                               ...prev,
-                              [field.key]: e.target.value,
-                            }))
-                          }
+                              [field.key]: nextVal,
+                            }));
+                            if (nextVal.length > 0 && markedForClear) {
+                              setClearSecretKeys((prev) =>
+                                prev.filter((k) => k !== field.key),
+                              );
+                            }
+                          }}
                         />
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-[11px] text-muted-foreground">
+                            Nilai kosong tidak akan menimpa secret lama.
+                          </p>
+                          {markedForClear ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              color="secondary"
+                              className="h-7 px-2 text-[11px]"
+                              onClick={() =>
+                                setClearSecretKeys((prev) =>
+                                  prev.filter((k) => k !== field.key),
+                                )
+                              }
+                            >
+                              Batal Hapus
+                            </Button>
+                          ) : secretsConfigured ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              color="destructive"
+                              className="h-7 px-2 text-[11px]"
+                              onClick={() =>
+                                setClearSecretKeys((prev) =>
+                                  prev.includes(field.key)
+                                    ? prev
+                                    : [...prev, field.key],
+                                )
+                              }
+                            >
+                              <Trash2 className="mr-1 h-3 w-3" />
+                              Hapus
+                            </Button>
+                          ) : null}
+                        </div>
                       </div>
                     );
                   }
@@ -564,15 +649,18 @@ export function AuthFeaturesPage({
                         id={`cfg-${field.key}`}
                         type={field.type === "number" ? "number" : "text"}
                         value={String(val ?? "")}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const rawVal = e.target.value;
                           setDraftSettings((prev) => ({
                             ...prev,
                             [field.key]:
                               field.type === "number"
-                                ? Number(e.target.value)
-                                : e.target.value,
-                          }))
-                        }
+                                ? rawVal === ""
+                                  ? ""
+                                  : Number(rawVal)
+                                : rawVal,
+                          }));
+                        }}
                       />
                     </div>
                   );

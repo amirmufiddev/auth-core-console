@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 import { CheckCircle2, Moon, Sun } from "lucide-react";
 import { BETTER_AUTH_FEATURES } from "@/config/better-auth.config";
+import { resolveTenantFromHostname } from "@/lib/tenant-context";
 import { cn } from "@/lib/utils";
 import { useAuthConfigStore } from "@/stores/useAuthConfigStore";
 import { useAuthStore } from "@/stores/useAuthStore";
@@ -152,7 +153,9 @@ export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ location }) => {
     if (
       location.pathname === "/consent" ||
-      location.pathname === "/auth/accept-invitation"
+      location.pathname.startsWith("/auth/accept-invitation") ||
+      location.pathname.startsWith("/t/") ||
+      resolveTenantFromHostname().mode === "subdomain"
     ) {
       return;
     }

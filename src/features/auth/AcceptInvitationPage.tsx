@@ -4,6 +4,7 @@ import { CheckCircle2, Loader2, MailCheck, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { isExternalBackendConfigured } from "@/api/client";
 import { authClient } from "@/lib/auth-client";
+import { sanitizeRelativeRedirect } from "@/lib/tenant-context";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function AcceptInvitationPage() {
+export function AcceptInvitationPage({
+  invitationId: propInvitationId,
+}: {
+  invitationId?: string;
+} = {}) {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const hydrateSession = useAuthStore((s) => s.hydrateSession);
@@ -27,15 +32,20 @@ export function AcceptInvitationPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const invitationId = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    const params = new URLSearchParams(window.location.search);
-    return (
-      params.get("invitationId") ??
-      params.get("id") ??
-      params.get("token") ??
-      ""
-    ).trim();
-  }, []);
+    const queryInviteId =
+      typeof window !== "undefined"
+        ? (() => {
+            const params = new URLSearchParams(window.location.search);
+            return (
+              params.get("invitationId") ??
+              params.get("id") ??
+              params.get("token") ??
+              ""
+            );
+          })()
+        : "";
+    return (queryInviteId || propInvitationId || "").trim();
+  }, [propInvitationId]);
 
   useEffect(() => {
     let active = true;
@@ -46,10 +56,11 @@ export function AcceptInvitationPage() {
       }
       if (!active) return;
       if (!currentUser) {
-        const returnUrl =
+        const returnUrl = sanitizeRelativeRedirect(
           typeof window !== "undefined"
             ? `${window.location.pathname}${window.location.search}`
-            : "/auth/accept-invitation";
+            : "/auth/accept-invitation",
+        );
         void navigate({
           to: "/login",
           search: { redirect: returnUrl },

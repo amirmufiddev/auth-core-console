@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from "@/api/client";
+import { getApiBaseUrl, unwrapApiEnvelope } from "@/api/client";
 import {
   type BetterAuthFeatureId,
   type FeatureConfigMap,
@@ -12,6 +12,11 @@ export interface TenantContextInfo {
   tenantSlug: string | null;
 }
 
+export interface TenantOriginTarget {
+  origin: string;
+  pathPrefix: string;
+}
+
 export interface TenantCapabilityEntry {
   available: boolean;
   reason?: string;
@@ -22,6 +27,11 @@ export interface TenantAuthConfigResponse {
   features: FeatureConfigMap;
   capabilities: Partial<Record<BetterAuthFeatureId, TenantCapabilityEntry>>;
 }
+
+export const SUPPORTED_TENANT_SOCIAL_BRIDGE_PROVIDERS = new Set([
+  "google",
+  "github",
+]);
 
 const RESERVED_PLATFORM_SUBDOMAINS = new Set([
   "auth",
@@ -38,6 +48,23 @@ function isIpAddress(hostname: string): boolean {
   return false;
 }
 
+function getPlatformHostEnv(): string {
+  return (
+    (import.meta.env.VITE_PLATFORM_HOST as string | undefined)
+      ?.trim()
+      .toLowerCase() ?? ""
+  );
+}
+
+function getTenantBaseDomainEnv(): string {
+  return (
+    (import.meta.env.VITE_TENANT_BASE_DOMAIN as string | undefined)
+      ?.trim()
+      .toLowerCase()
+      .replace(/^\./, "") ?? ""
+  );
+}
+
 export function resolveTenantFromHostname(
   hostnameInput?: string,
 ): TenantContextInfo {
@@ -50,21 +77,12 @@ export function resolveTenantFromHostname(
     return { mode: "platform", tenantSlug: null };
   }
 
-  const platformHost = (
-    import.meta.env.VITE_PLATFORM_HOST as string | undefined
-  )
-    ?.trim()
-    .toLowerCase();
+  const platformHost = getPlatformHostEnv();
   if (platformHost && hostname === platformHost) {
     return { mode: "platform", tenantSlug: null };
   }
 
-  const baseDomain = (
-    import.meta.env.VITE_TENANT_BASE_DOMAIN as string | undefined
-  )
-    ?.trim()
-    .toLowerCase()
-    .replace(/^\./, "");
+  const baseDomain = getTenantBaseDomainEnv();
 
   if (baseDomain) {
     if (hostname === baseDomain) {
@@ -101,27 +119,171 @@ export function resolveTenantContext(
   return resolveTenantFromHostname();
 }
 
-function resolveOriginBase(): string {
+function rewriteSubdomainApiHost(
+  apiBase: string,
+  tenantSlug: string,
+): TenantOriginTarget {
+  const slug = tenantSlug.trim().toLowerCase();
+  const pathFallback: TenantOriginTarget = {
+    origin: apiBase,
+    pathPrefix: `/t/${encodeURIComponent(slug)}`,
+  };
+
+  let apiUrl: URL;
+  try {
+    apiUrl = new URL(apiBase);
+  } catch {
+    return pathFallback;
+  }
+
+  const apiHost = apiUrl.hostname.toLowerCase();
+  if (!apiHost || isIpAddress(apiHost)) {
+    return pathFallback;
+  }
+
+  const platformHost = getPlatformHostEnv();
+  const baseDomainEnv = getTenantBaseDomainEnv();
+  const windowHost =
+    typeof window !== "undefined"
+      ? window.location.hostname.trim().toLowerCase()
+      : "";
+
+  const isRewriteableLabel = (sub: string) =>
+    Boolean(sub) &&
+    !sub.includes(".") &&
+    (sub === slug ||
+      RESERVED_PLATFORM_SUBDOMAINS.has(sub) ||
+      (platformHost !== "" && apiHost === platformHost));
+
+  if (apiHost === "localhost" || apiHost.endsWith(".localhost")) {
+    if (apiHost === "localhost") {
+      apiUrl.hostname = `${slug}.localhost`;
+      return { origin: apiUrl.origin, pathPrefix: "" };
+    }
+    const sub = apiHost.slice(0, -".localhost".length);
+    if (isRewriteableLabel(sub)) {
+      apiUrl.hostname = `${slug}.localhost`;
+      return { origin: apiUrl.origin, pathPrefix: "" };
+    }
+    return pathFallback;
+  }
+
+  const inferredBaseDomain =
+    baseDomainEnv ||
+    (windowHost.startsWith(`${slug}.`)
+      ? windowHost.slice(slug.length + 1)
+      : "");
+
+  if (inferredBaseDomain) {
+    if (apiHost === inferredBaseDomain) {
+      apiUrl.hostname = `${slug}.${inferredBaseDomain}`;
+      return { origin: apiUrl.origin, pathPrefix: "" };
+    }
+    const suffix = `.${inferredBaseDomain}`;
+    if (apiHost.endsWith(suffix)) {
+      const sub = apiHost.slice(0, -suffix.length);
+      if (isRewriteableLabel(sub)) {
+        apiUrl.hostname = `${slug}.${inferredBaseDomain}`;
+        return { origin: apiUrl.origin, pathPrefix: "" };
+      }
+    }
+    return pathFallback;
+  }
+
+  const parts = apiHost.split(".").filter(Boolean);
+  if (parts.length === 2) {
+    apiUrl.hostname = `${slug}.${apiHost}`;
+    return { origin: apiUrl.origin, pathPrefix: "" };
+  }
+  if (parts.length >= 3 && isRewriteableLabel(parts[0])) {
+    apiUrl.hostname = `${slug}.${parts.slice(1).join(".")}`;
+    return { origin: apiUrl.origin, pathPrefix: "" };
+  }
+
+  return pathFallback;
+}
+
+export function resolveTenantOriginTarget(
+  context: TenantContextInfo,
+): TenantOriginTarget {
   const apiBase = getApiBaseUrl();
-  if (apiBase) return apiBase;
-  if (typeof window !== "undefined") return window.location.origin;
-  return "http://localhost:2000";
+  if (!apiBase) {
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:2000";
+    const pathPrefix =
+      context.mode === "path" && context.tenantSlug
+        ? `/t/${encodeURIComponent(context.tenantSlug)}`
+        : "";
+    return { origin, pathPrefix };
+  }
+
+  if (context.mode === "subdomain" && context.tenantSlug) {
+    return rewriteSubdomainApiHost(apiBase, context.tenantSlug);
+  }
+
+  if (context.mode === "path" && context.tenantSlug) {
+    return {
+      origin: apiBase,
+      pathPrefix: `/t/${encodeURIComponent(context.tenantSlug)}`,
+    };
+  }
+
+  return { origin: apiBase, pathPrefix: "" };
 }
 
 export function getTenantAuthConfigUrl(context: TenantContextInfo): string {
-  const base = resolveOriginBase();
-  if (context.mode === "path" && context.tenantSlug) {
-    return `${base}/t/${encodeURIComponent(context.tenantSlug)}/api/auth-config`;
+  const { origin, pathPrefix } = resolveTenantOriginTarget(context);
+  return `${origin}${pathPrefix}/api/auth-config`;
+}
+
+function hasControlOrBackslash(value: string): boolean {
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code <= 0x1f || code === 0x7f || code === 0x5c) {
+      return true;
+    }
   }
-  return `${base}/api/auth-config`;
+  return /(?:%0[0-9a-f]|%1[0-9a-f]|%7f|%5c)/i.test(value);
 }
 
 export function sanitizeRelativeRedirect(value?: string): string {
   const trimmed = value?.trim() ?? "";
-  if (/^\/(?!\/)/.test(trimmed) && !trimmed.includes("\\")) {
-    return trimmed;
+  if (!trimmed || hasControlOrBackslash(trimmed)) {
+    return "/";
   }
-  return "/";
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) {
+    return "/";
+  }
+  try {
+    const parsed = new URL(trimmed, "https://safe.local");
+    if (parsed.origin !== "https://safe.local") {
+      return "/";
+    }
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return "/";
+  }
+}
+
+export function sanitizeOAuthRedirectUrl(value?: string): string | null {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed || hasControlOrBackslash(trimmed)) {
+    return null;
+  }
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
+    return sanitizeRelativeRedirect(trimmed);
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+      return parsed.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export function getTenantSocialBridgeStartUrl(
@@ -129,13 +291,9 @@ export function getTenantSocialBridgeStartUrl(
   provider: string,
   returnTo?: string,
 ): string {
-  const base = resolveOriginBase();
-  const prefix =
-    context.mode === "path" && context.tenantSlug
-      ? `${base}/t/${encodeURIComponent(context.tenantSlug)}`
-      : base;
+  const { origin, pathPrefix } = resolveTenantOriginTarget(context);
   const url = new URL(
-    `${prefix}/api/social-bridge/start/${encodeURIComponent(provider)}`,
+    `${origin}${pathPrefix}/api/social-bridge/start/${encodeURIComponent(provider)}`,
   );
   if (returnTo) {
     url.searchParams.set("returnTo", sanitizeRelativeRedirect(returnTo));
@@ -158,23 +316,37 @@ export async function fetchTenantAuthConfig(
   if (!response.ok) {
     let message = `Gagal memuat konfigurasi tenant (${response.status})`;
     try {
-      const body = (await response.json()) as { message?: string };
+      const body = (await response.json()) as {
+        message?: string;
+        error?: { message?: string };
+      };
       if (body?.message) message = body.message;
+      else if (body?.error?.message) message = body.error.message;
     } catch {
       // ignore invalid json
     }
     throw new Error(message);
   }
 
-  const raw = (await response.json()) as {
+  const payload = (await response.json()) as unknown;
+  const unwrapped = unwrapApiEnvelope<{
     features?: Partial<FeatureConfigMap>;
     capabilities?: Partial<Record<BetterAuthFeatureId, TenantCapabilityEntry>>;
-  };
+  }>(payload);
+  const raw =
+    unwrapped &&
+    typeof unwrapped === "object" &&
+    !("features" in unwrapped) &&
+    "data" in unwrapped &&
+    (unwrapped as { data?: unknown }).data &&
+    typeof (unwrapped as { data?: unknown }).data === "object"
+      ? (unwrapped as { data: typeof unwrapped }).data
+      : unwrapped;
 
   const defaults = buildDefaultFeatureConfigMap();
   const mergedFeatures: FeatureConfigMap = { ...defaults };
 
-  if (raw.features) {
+  if (raw?.features) {
     for (const key of Object.keys(defaults) as BetterAuthFeatureId[]) {
       const remote = raw.features[key];
       if (remote && typeof remote.enabled === "boolean") {
@@ -184,6 +356,11 @@ export async function fetchTenantAuthConfig(
             ...defaults[key].settings,
             ...(remote.settings ?? {}),
           },
+          ...(remote.secretsConfigured
+            ? { secretsConfigured: { ...remote.secretsConfigured } }
+            : defaults[key].secretsConfigured
+              ? { secretsConfigured: { ...defaults[key].secretsConfigured } }
+              : {}),
         };
       }
     }
@@ -191,7 +368,7 @@ export async function fetchTenantAuthConfig(
 
   return {
     features: mergedFeatures,
-    capabilities: raw.capabilities ?? {},
+    capabilities: raw?.capabilities ?? {},
   };
 }
 

@@ -553,6 +553,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
       { key: "providerId", label: "Provider ID", type: "text" },
       { key: "discoveryUrl", label: "OIDC Discovery URL", type: "text" },
       { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
     ],
     defaultSettings: {
       providerId: "keycloak",
@@ -573,6 +574,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     endpoints: ["/api/auth/sign-in/social", "/api/auth/callback/google"],
     settingsSchema: [
       { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
       {
         key: "prompt",
         label: "Consent Prompt",
@@ -596,6 +598,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     endpoints: ["/api/auth/sign-in/social", "/api/auth/callback/github"],
     settingsSchema: [
       { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
       { key: "scope", label: "Scopes", type: "text" },
     ],
     defaultSettings: {
@@ -615,6 +618,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     endpoints: ["/api/auth/callback/microsoft"],
     settingsSchema: [
       { key: "clientId", label: "Application (Client) ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
       { key: "tenantId", label: "Tenant ID", type: "text" },
     ],
     defaultSettings: { clientId: "", tenantId: "common" },
@@ -628,7 +632,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Sign in with Apple untuk web & aplikasi iOS/macOS.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/apple"],
-    settingsSchema: [{ key: "clientId", label: "Service ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Service ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
   {
@@ -640,7 +647,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Autentikasi komunitas dengan Discord OAuth2.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/discord"],
-    settingsSchema: [{ key: "clientId", label: "Client ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
   {
@@ -654,6 +664,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     endpoints: ["/api/auth/callback/gitlab"],
     settingsSchema: [
       { key: "clientId", label: "Application ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
     ],
     defaultSettings: { clientId: "" },
   },
@@ -666,7 +677,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Sign in with Slack untuk workspace tim.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/slack"],
-    settingsSchema: [{ key: "clientId", label: "Client ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
   {
@@ -678,7 +692,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Sign in with LinkedIn OpenID Connect.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/linkedin"],
-    settingsSchema: [{ key: "clientId", label: "Client ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
   {
@@ -690,7 +707,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "OAuth 2.0 PKCE dengan akun X / Twitter.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/twitter"],
-    settingsSchema: [{ key: "clientId", label: "Client ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
   {
@@ -702,7 +722,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Sign-in dengan akun Figma.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/figma"],
-    settingsSchema: [{ key: "clientId", label: "Client ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
   {
@@ -716,6 +739,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     endpoints: ["/api/auth/callback/notion"],
     settingsSchema: [
       { key: "clientId", label: "OAuth Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
     ],
     defaultSettings: { clientId: "" },
   },
@@ -728,7 +752,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Sign-in dengan akun Linear.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/linear"],
-    settingsSchema: [{ key: "clientId", label: "Client ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
   {
@@ -740,7 +767,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Sign in with Vercel.",
     defaultEnabled: false,
     endpoints: ["/api/auth/callback/vercel"],
-    settingsSchema: [{ key: "clientId", label: "Client ID", type: "text" }],
+    settingsSchema: [
+      { key: "clientId", label: "Client ID", type: "text" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
+    ],
     defaultSettings: { clientId: "" },
   },
 
@@ -976,6 +1006,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
         type: "boolean",
       },
       { key: "provisionUser", label: "JIT User Provisioning", type: "boolean" },
+      { key: "clientSecret", label: "Client Secret", type: "secret" },
     ],
     defaultSettings: {
       domainVerification: true,
@@ -1000,6 +1031,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
         type: "select",
         options: ["hashed", "encrypted"],
       },
+      { key: "scimToken", label: "SCIM Token", type: "secret" },
     ],
     defaultSettings: {
       storeSCIMToken: "hashed",
@@ -1096,6 +1128,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
         options: ["cloudflare-turnstile", "google-recaptcha", "hcaptcha"],
       },
       { key: "siteKey", label: "Site Key", type: "text" },
+      { key: "secretKey", label: "Secret Key", type: "secret" },
     ],
     defaultSettings: {
       provider: "cloudflare-turnstile",
@@ -1118,6 +1151,7 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
         label: "Custom Error Message",
         type: "text",
       },
+      { key: "apiKey", label: "API Key", type: "secret" },
     ],
     defaultSettings: {
       customPasswordCompromisedMessage:
@@ -1265,6 +1299,8 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
         label: "Create Customer On Sign-Up",
         type: "boolean",
       },
+      { key: "secretKey", label: "Secret Key", type: "secret" },
+      { key: "webhookSecret", label: "Webhook Secret", type: "secret" },
     ],
     defaultSettings: { createCustomerOnSignUp: true },
   },
@@ -1285,6 +1321,8 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
         type: "select",
         options: ["sandbox", "production"],
       },
+      { key: "accessToken", label: "Access Token", type: "secret" },
+      { key: "webhookSecret", label: "Webhook Secret", type: "secret" },
     ],
     defaultSettings: { environment: "sandbox" },
   },
@@ -1297,7 +1335,10 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Pricing plans, entitlement check, dan metered billing.",
     defaultEnabled: false,
     endpoints: ["/api/auth/autumn/*"],
-    settingsSchema: [{ key: "url", label: "Autumn API URL", type: "text" }],
+    settingsSchema: [
+      { key: "url", label: "Autumn API URL", type: "text" },
+      { key: "secretKey", label: "Secret Key", type: "secret" },
+    ],
     defaultSettings: { url: "" },
   },
   {
@@ -1317,6 +1358,8 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
         type: "select",
         options: ["test_mode", "live_mode"],
       },
+      { key: "apiKey", label: "API Key", type: "secret" },
+      { key: "webhookSecret", label: "Webhook Secret", type: "secret" },
     ],
     defaultSettings: { environment: "test_mode" },
   },
@@ -1329,7 +1372,11 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Checkout SaaS, license key, dan subscription access control.",
     defaultEnabled: false,
     endpoints: ["/api/auth/creem/webhook"],
-    settingsSchema: [{ key: "testMode", label: "Test Mode", type: "boolean" }],
+    settingsSchema: [
+      { key: "testMode", label: "Test Mode", type: "boolean" },
+      { key: "apiKey", label: "API Key", type: "secret" },
+      { key: "webhookSecret", label: "Webhook Secret", type: "secret" },
+    ],
     defaultSettings: { testMode: true },
   },
   {
@@ -1341,7 +1388,11 @@ export const BETTER_AUTH_FEATURES: BetterAuthFeatureDefinition[] = [
     description: "Subscription enterprise & invoicing melalui Chargebee.",
     defaultEnabled: false,
     endpoints: ["/api/auth/chargebee/*"],
-    settingsSchema: [{ key: "site", label: "Chargebee Site", type: "text" }],
+    settingsSchema: [
+      { key: "site", label: "Chargebee Site", type: "text" },
+      { key: "apiKey", label: "API Key", type: "secret" },
+      { key: "webhookSecret", label: "Webhook Secret", type: "secret" },
+    ],
     defaultSettings: { site: "" },
   },
 ];
@@ -1356,6 +1407,7 @@ export const BETTER_AUTH_FEATURE_MAP: Record<
 export interface FeatureRuntimeConfig {
   enabled: boolean;
   settings: Record<string, string | number | boolean>;
+  secretsConfigured?: Record<string, boolean>;
 }
 
 export type FeatureConfigMap = Record<
@@ -1366,9 +1418,17 @@ export type FeatureConfigMap = Record<
 export function buildDefaultFeatureConfigMap(): FeatureConfigMap {
   const map = {} as FeatureConfigMap;
   for (const feature of BETTER_AUTH_FEATURES) {
+    const secretFields = feature.settingsSchema.filter(
+      (s) => s.type === "secret",
+    );
+    const secretsConfigured =
+      secretFields.length > 0
+        ? Object.fromEntries(secretFields.map((s) => [s.key, false]))
+        : undefined;
     map[feature.id] = {
       enabled: feature.defaultEnabled,
       settings: { ...feature.defaultSettings },
+      ...(secretsConfigured ? { secretsConfigured } : {}),
     };
   }
   return map;
@@ -1446,6 +1506,9 @@ export function buildPresetFeatureConfigMap(
     next[feature.id] = {
       enabled: enabledSet.has(feature.id),
       settings: { ...(base[feature.id]?.settings ?? feature.defaultSettings) },
+      ...(base[feature.id]?.secretsConfigured
+        ? { secretsConfigured: { ...base[feature.id].secretsConfigured } }
+        : {}),
     };
   }
   return next;
