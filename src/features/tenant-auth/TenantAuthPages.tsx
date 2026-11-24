@@ -6,6 +6,7 @@ import {
   Fingerprint,
   KeyRound,
   Loader2,
+  LogOut,
   Mail,
   MailCheck,
   RefreshCw,
@@ -59,6 +60,18 @@ function buildTenantRoutePath(
   return `/${page}`;
 }
 
+interface TenantSessionSnapshot {
+  user: {
+    id: string;
+    name?: string | null;
+    email: string;
+    tenantId?: string | null;
+  };
+  session?: {
+    activeOrganizationId?: string | null;
+  } | null;
+}
+
 function useTenantAuthSetup(tenantSlug: string, mode: TenantAccessMode = "path") {
   const context = useMemo<TenantContextInfo>(
     () => ({ mode, tenantSlug }),
@@ -71,14 +84,29 @@ function useTenantAuthSetup(tenantSlug: string, mode: TenantAccessMode = "path")
   );
 
   const [config, setConfig] = useState<TenantAuthConfigResponse | null>(null);
+  const [activeSession, setActiveSession] =
+    useState<TenantSessionSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const refreshSession = useCallback(async () => {
+    try {
+      const res = await tenantClient.getSession();
+      const data = res?.data as TenantSessionSnapshot | null | undefined;
+      setActiveSession(data?.user ? data : null);
+    } catch {
+      setActiveSession(null);
+    }
+  }, [tenantClient]);
 
   const loadConfig = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchTenantAuthConfig(context);
+      const [data] = await Promise.all([
+        fetchTenantAuthConfig(context),
+        refreshSession(),
+      ]);
       setConfig(data);
     } catch (err) {
       setError(
@@ -89,13 +117,23 @@ function useTenantAuthSetup(tenantSlug: string, mode: TenantAccessMode = "path")
     } finally {
       setLoading(false);
     }
-  }, [context]);
+  }, [context, refreshSession]);
 
   useEffect(() => {
     void loadConfig();
   }, [loadConfig]);
 
-  return { context, tenantClient, config, loading, error, reload: loadConfig };
+  return {
+    context,
+    tenantClient,
+    config,
+    activeSession,
+    setActiveSession,
+    refreshSession,
+    loading,
+    error,
+    reload: loadConfig,
+  };
 }
 
 function TenantConfigState({
@@ -191,8 +229,17 @@ export function TenantLoginPage({
   embedded = false,
 }: BaseTenantPageProps) {
   const navigate = useNavigate();
-  const { context, tenantClient, config, loading, error, reload } =
-    useTenantAuthSetup(tenantSlug, mode);
+  const {
+    context,
+    tenantClient,
+    config,
+    activeSession,
+    setActiveSession,
+    refreshSession,
+    loading,
+    error,
+    reload,
+  } = useTenantAuthSetup(tenantSlug, mode);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -249,7 +296,11 @@ export function TenantLoginPage({
         return;
       }
       toast.success("Berhasil masuk.");
-      navigateAfterAuth(redirectTo);
+      if (redirectTo && redirectTo.trim().length > 0) {
+        navigateAfterAuth(redirectTo);
+        return;
+      }
+      await refreshSession();
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Gagal masuk ke akun tenant.",
@@ -295,7 +346,11 @@ export function TenantLoginPage({
         return;
       }
       toast.success("Berhasil masuk dengan OTP.");
-      navigateAfterAuth(redirectTo);
+      if (redirectTo && redirectTo.trim().length > 0) {
+        navigateAfterAuth(redirectTo);
+        return;
+      }
+      await refreshSession();
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Gagal memverifikasi OTP.",
@@ -344,7 +399,11 @@ export function TenantLoginPage({
         return;
       }
       toast.success("Berhasil masuk dengan Passkey.");
-      navigateAfterAuth(redirectTo);
+      if (redirectTo && redirectTo.trim().length > 0) {
+        navigateAfterAuth(redirectTo);
+        return;
+      }
+      await refreshSession();
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Autentikasi Passkey gagal.",
@@ -363,6 +422,21 @@ export function TenantLoginPage({
     window.location.assign(startUrl);
   }
 
+  async function handleTenantSignOut() {
+    setSubmitting(true);
+    try {
+      await tenantClient.signOut();
+      setActiveSession(null);
+      toast.success("Berhasil keluar dari sesi tenant.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Gagal keluar dari sesi tenant.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   const hasPrimaryTabs = emailEnabled || emailOtpEnabled || magicLinkEnabled;
   const hasAlternatives = passkeyEnabled || activeSocials.length > 0;
 
@@ -370,6 +444,58 @@ export function TenantLoginPage({
     <div className="w-full space-y-5">
       {loading || error ? (
         <TenantConfigState loading={loading} error={error} onRetry={reload} />
+      ) : activeSession ? (
+        <div className="space-y-4">
+          <Alert color="success" variant="soft">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertTitle className="text-sm">Sesi Tenant Aktif</AlertTitle>
+            <AlertDescription className="text-xs">
+              Anda masuk sebagai{" "}
+              <span className="font-semibold">
+                {activeSession.user.name || activeSession.user.email}
+              </span>{" "}
+              ({activeSession.user.email}) pada tenant{" "}
+              <span className="font-mono font-semibold">{tenantSlug}</span>.
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-1.5 rounded-xl border border-border/60 bg-muted/40 p-3 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-muted-foreground">User ID</span>
+              <span className="font-mono text-foreground">
+                {activeSession.user.id}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-muted-foreground">Tenant ID</span>
+              <span className="font-mono text-foreground">
+                {activeSession.user.tenantId ?? "-"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-muted-foreground">Active Organization</span>
+              <span className="font-mono text-foreground">
+                {activeSession.session?.activeOrganizationId ?? "Belum dipilih"}
+              </span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            color="destructive"
+            className="w-full"
+            disabled={submitting}
+            onClick={() => void handleTenantSignOut()}
+          >
+            {submitting ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="mr-1.5 h-4 w-4" />
+            )}
+            Keluar dari Sesi Tenant
+          </Button>
+        </div>
       ) : (
         <>
           {hasPrimaryTabs && (
@@ -672,6 +798,7 @@ export function TenantRegisterPage({
   redirectTo,
   embedded = false,
 }: BaseTenantPageProps) {
+  const navigate = useNavigate();
   const { context, tenantClient, config, loading, error, reload } =
     useTenantAuthSetup(tenantSlug, mode);
 
@@ -696,7 +823,11 @@ export function TenantRegisterPage({
         return;
       }
       toast.success("Akun berhasil dibuat.");
-      navigateAfterAuth(redirectTo);
+      if (redirectTo && redirectTo.trim().length > 0) {
+        navigateAfterAuth(redirectTo);
+        return;
+      }
+      void navigate({ to: buildTenantRoutePath(context, "login") as never });
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Gagal mendaftarkan akun.",
@@ -818,6 +949,7 @@ export function TenantVerify2FAPage({
   redirectTo,
   embedded = false,
 }: BaseTenantPageProps) {
+  const navigate = useNavigate();
   const { context, tenantClient, config, loading, error, reload } =
     useTenantAuthSetup(tenantSlug, mode);
 
@@ -846,7 +978,11 @@ export function TenantVerify2FAPage({
         return;
       }
       toast.success("Verifikasi 2FA berhasil.");
-      navigateAfterAuth(redirectTo);
+      if (redirectTo && redirectTo.trim().length > 0) {
+        navigateAfterAuth(redirectTo);
+        return;
+      }
+      void navigate({ to: buildTenantRoutePath(context, "login") as never });
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Gagal memverifikasi kode 2FA.",
