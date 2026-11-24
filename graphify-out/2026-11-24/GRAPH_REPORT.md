@@ -1,12 +1,12 @@
 # Graph Report - auth-core-console  (2026-11-24)
 
 ## Corpus Check
-- 242 files · ~110,062 words
+- 242 files · ~110,159 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1468 nodes · 4413 edges · 79 communities (70 shown, 9 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 62 edges (avg confidence: 0.62)
+- 1470 nodes · 4419 edges · 81 communities (72 shown, 9 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.62)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -84,6 +84,7 @@
 - [[_COMMUNITY_task-4-console-shell-brief|task-4-console-shell-brief.md]]
 - [[_COMMUNITY_toggle.tsx|toggle.tsx]]
 - [[_COMMUNITY_cleave.tsx|cleave.tsx]]
+- [[_COMMUNITY_OrganizationView.tsx|OrganizationView.tsx]]
 - [[_COMMUNITY_rating.tsx|rating.tsx]]
 - [[_COMMUNITY_account.tsx|account.tsx]]
 - [[_COMMUNITY_task-5-console-shell-brief|task-5-console-shell-brief.md]]
@@ -118,19 +119,19 @@
 - 1-file cycle: `src/components/ui/sonner.tsx -> src/components/ui/sonner.tsx`
 - 1-file cycle: `src/components/ui/input-otp.tsx -> src/components/ui/input-otp.tsx`
 
-## Communities (79 total, 9 thin omitted)
+## Communities (81 total, 9 thin omitted)
 
 ### Community 0 - "PortalTenantDetailPage.tsx"
-Cohesion: 0.12
-Nodes (33): BillingRecord, BillingRecordStatus, formatCurrency(), slugifyTenantName(), TENANT_TIER_OPTIONS, TenantBillingStatus, TenantRecord, TenantStatus (+25 more)
+Cohesion: 0.13
+Nodes (26): BillingRecord, BillingRecordStatus, formatCurrency(), slugifyTenantName(), TENANT_TIER_OPTIONS, TenantBillingStatus, TenantRecord, TenantStatus (+18 more)
 
 ### Community 1 - "isExternalBackendConfigured"
-Cohesion: 0.18
-Nodes (21): avatarSchema, changeEmailSchema, profileSchema, Alert, AlertDescription, AlertProps, AlertTitle, alertVariants (+13 more)
+Cohesion: 0.17
+Nodes (25): avatarSchema, changeEmailSchema, profileSchema, KEY_SCOPES, Alert, AlertDescription, AlertProps, AlertTitle (+17 more)
 
 ### Community 2 - "routeTree.gen.ts"
-Cohesion: 0.02
-Nodes (95): DashboardPage(), Route, Route, Route, Route, Route, Route, Route (+87 more)
+Cohesion: 0.03
+Nodes (73): Route, Route, Route, AuthAuthAcceptInvitationIndexRoute, AuthAuthAcceptInvitationInvitationIdRoute, AuthAuthAcceptInvitationRoute, AuthAuthAcceptInvitationRouteChildren, AuthAuthAcceptInvitationRouteWithChildren (+65 more)
 
 ### Community 3 - "dependencies"
 Cohesion: 0.03
@@ -141,44 +142,44 @@ Cohesion: 0.04
 Nodes (42): 1. Gambaran Umum Arsitektur, 2. Mode Operasi Hybrid (`VITE_API_URL`), 3. File-Based Routing & Route Guards, 4. State Management (`src/stores/`), 5. Sistem RBAC (`src/lib/rbac.ts`), 6. Kualitas Kode & Pengujian, Arsitektur Aplikasi — Auth Core, 1. Provider & Guards (+34 more)
 
 ### Community 5 - "mock-db.ts"
-Cohesion: 0.15
-Nodes (22): KEY_SCOPES, FeatureDisabledCard(), Checkbox, CheckboxProps, checkboxVariants, DialogContent, DialogContentProps, DialogDescription (+14 more)
+Cohesion: 0.20
+Nodes (13): Checkbox, CheckboxProps, checkboxVariants, ApiKeysPageProps, AVAILABLE_API_SCOPES, ApiKeysSearchParams, apiKeysSearchSchema, createApiKeySchema (+5 more)
 
 ### Community 6 - "useAuthConfigStore.ts"
 Cohesion: 0.07
-Nodes (37): AdminFeatureRecord, AdminTierRecord, AuthFeatureAvailableSetting, AuthFeatureStatus, localFeatures, localTenantConfigs, localTiers, TenantFeatureConfigView (+29 more)
+Nodes (39): AdminFeatureRecord, AdminTierRecord, AuthFeatureAvailableSetting, AuthFeatureStatus, localFeatures, localTenantConfigs, localTiers, TenantFeatureConfigView (+31 more)
 
 ### Community 7 - "cn"
 Cohesion: 0.15
 Nodes (19): Autocomplete, AutocompleteContext, AutocompleteContextValue, AutocompleteItem, AutocompleteItemProps, AutocompleteProps, Command(), CommandDialog() (+11 more)
 
 ### Community 8 - "tenant-context.ts"
-Cohesion: 0.06
-Nodes (62): Separator, AcceptInvitationPage(), ConsentPage(), BaseTenantPageProps, buildTenantRoutePath(), hasSignedOAuthQuery(), navigateAfterAuth(), renderTenantShell() (+54 more)
+Cohesion: 0.08
+Nodes (35): AuthView(), Separator, buildTenantRoutePath(), hasSignedOAuthQuery(), navigateAfterAuth(), renderTenantShell(), TenantAcceptInvitationPage(), TenantConsentPage() (+27 more)
 
 ### Community 9 - "index.ts"
-Cohesion: 0.17
-Nodes (30): ACCOUNT_NAV_ITEMS, AccountViewProps, ChangeEmailCard(), UpdateAvatarCard(), UpdateNameCard(), ChangePasswordCard(), DeleteAccountCard(), PasskeysCard() (+22 more)
+Cohesion: 0.12
+Nodes (32): ACCOUNT_NAV_ITEMS, AccountView(), AccountViewProps, AccountViewTab, ChangeEmailCard(), UpdateAvatarCard(), UpdateNameCard(), ChangePasswordCard() (+24 more)
 
 ### Community 10 - "utils.ts"
-Cohesion: 0.13
-Nodes (10): Input, InputProps, inputVariants, TimePicker, TimePickerProps, createOrgSchema, CreateOrgValues, inviteOrgMemberSchema (+2 more)
+Cohesion: 0.14
+Nodes (17): OrganizationRecord, CreateOrganizationDialogProps, Button, ButtonColor, ButtonProps, ButtonSize, ButtonVariant, Input (+9 more)
 
 ### Community 11 - "AuthView.tsx"
-Cohesion: 0.15
-Nodes (14): SignInFormProps, SignUpForm(), forgotPasswordSchema, ForgotPasswordValues, loginEmailSchema, LoginEmailValues, magicLinkSchema, MagicLinkValues (+6 more)
+Cohesion: 0.10
+Nodes (21): SignInFormProps, AuthUIBasePaths, AuthUIContext, AuthUILocalization, AuthUIProvider(), AuthUIProviderProps, DEFAULT_BASE_PATHS, DEFAULT_LOCALIZATION (+13 more)
 
 ### Community 12 - "TenantAuthPages.tsx"
-Cohesion: 0.22
-Nodes (10): fetchActorPermissions(), adminGetTenant(), PlatformShell(), PortalTenantSupportActions(), ActorRoleGrant, ConsoleActor, resolveTenantMode(), isTenantNotFoundError() (+2 more)
+Cohesion: 0.30
+Nodes (9): ensureActorPermissions(), fetchActorPermissions(), adminGetTenant(), PortalTenantSupportActions(), ConsoleActor, resolveTenantMode(), isTenantNotFoundError(), loadTenantShell() (+1 more)
 
 ### Community 13 - "use-toast.ts"
 Cohesion: 0.12
 Nodes (23): Toast, ToastAction, ToastClose, ToastDescription, ToastProps, ToastTitle, toastVariants, ToastViewport (+15 more)
 
 ### Community 14 - "ThemePreferencesCard.tsx"
-Cohesion: 0.28
-Nodes (11): DataTableProps, Skeleton(), Table, TableBody, TableCaption, TableCell, TableFooter, TableHead (+3 more)
+Cohesion: 0.19
+Nodes (19): DataTableProps, Select(), SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectTriggerProps (+11 more)
 
 ### Community 15 - "compilerOptions"
 Cohesion: 0.08
@@ -190,7 +191,7 @@ Nodes (6): Concerns, Deferred (Task 4), Files changed, Status, Task 3 Report: Ka
 
 ### Community 17 - "schema.ts"
 Cohesion: 0.09
-Nodes (30): UnauthorizedState(), AuditLogsPage(), AuditLogsPageProps, AuditLogsSearchParams, auditLogsSearchSchema, AuthFeaturesSearchParams, authFeaturesSearchSchema, SessionsSearchParams (+22 more)
+Nodes (34): PlatformShell(), UnauthorizedState(), AdminBillingPageProps, AdminBillingSearchParams, adminBillingSearchSchema, adminCreateBillingSchema, AdminCreateBillingValues, AuditLogsPageProps (+26 more)
 
 ### Community 18 - "components.json"
 Cohesion: 0.11
@@ -201,36 +202,36 @@ Cohesion: 0.05
 Nodes (124): AuditLogPage, banOrUnbanUser(), buildQuery(), cancelOrganizationInvitation(), createApiKey(), createOAuthClient(), createOrganization(), createRole() (+116 more)
 
 ### Community 20 - "ProfileCards.tsx"
-Cohesion: 0.27
-Nodes (10): ConsoleSidebar(), platformRolesFromMatches(), tenantIdFromPath(), MenuItemProps, menusConfig, ownerPortalNav, platformNav, tenantNav() (+2 more)
+Cohesion: 0.23
+Nodes (12): ACTOR_PERMISSIONS_QUERY_KEY, ConsoleSidebar(), platformRolesFromMatches(), tenantIdFromPath(), MenuItemProps, menusConfig, ownerPortalNav, platformNav (+4 more)
 
 ### Community 21 - "console-shell.ts"
-Cohesion: 0.13
-Nodes (23): AuthUserRecord, listMyTenants(), resolveAuthenticatedHome(), ConsoleMenuItem, filterNav(), isPlatformActor(), PLATFORM_EXACT, redirectLegacyPath() (+15 more)
+Cohesion: 0.09
+Nodes (39): AuthUserRecord, listMyTenants(), CreateOrganizationDialog(), OrganizationSwitcherProps, UserButtonLink, UserButtonProps, tenantIdFromPath(), WorkspaceSwitcher() (+31 more)
 
 ### Community 22 - "auth-ui-provider.tsx"
-Cohesion: 0.27
-Nodes (9): AuthUIBasePaths, AuthUIContext, AuthUIContextValue, AuthUILocalization, AuthUIProviderProps, DEFAULT_BASE_PATHS, DEFAULT_LOCALIZATION, FeatureConfigMap (+1 more)
+Cohesion: 0.10
+Nodes (28): AcceptInvitationPage(), ConsentPage(), BaseTenantPageProps, createAuthPlugins(), createTenantAuthClient(), rawApiUrl, fetchTenantAuthConfig(), getPlatformHostEnv() (+20 more)
 
 ### Community 23 - "useThemeStore.ts"
-Cohesion: 0.07
-Nodes (28): COLOR_SCHEME_OPTIONS, FOOTER_TYPE_OPTIONS, NAV_LAYOUT_OPTIONS, NAVBAR_TYPE_OPTIONS, RADIUS_OPTIONS, SIDEBAR_TYPE_OPTIONS, RadioGroup, RadioGroupItem (+20 more)
+Cohesion: 0.13
+Nodes (13): ColorThemeDefinition, ColorThemeId, DEFAULT_PREFS, getSystemTheme(), initialPrefs, initialResolved, initialTheme, LEGACY_THEME_MAP (+5 more)
 
 ### Community 24 - "compilerOptions"
 Cohesion: 0.12
 Nodes (16): compilerOptions, allowImportingTsExtensions, isolatedModules, lib, module, moduleDetection, moduleResolution, noEmit (+8 more)
 
 ### Community 25 - "OrganizationSwitcher.tsx"
-Cohesion: 0.10
-Nodes (26): CreateOrganizationDialog(), OrganizationLogo(), OrganizationLogoProps, SIZE_CLASSES, OrganizationSwitcherProps, SIZE_CLASSES, UserAvatar(), UserAvatarProps (+18 more)
+Cohesion: 0.20
+Nodes (11): OrganizationLogo(), OrganizationLogoProps, SIZE_CLASSES, SIZE_CLASSES, UserAvatar(), UserAvatarProps, Avatar, AvatarFallback (+3 more)
 
 ### Community 26 - "EmailOTPForm.tsx"
-Cohesion: 0.17
-Nodes (16): input-otp, AuthMascot(), AuthMascotProps, AuthStage, AuthStageContext, AuthStageContextValue, AuthStageProvider(), useAuthStage() (+8 more)
+Cohesion: 0.24
+Nodes (12): input-otp, AuthMascot(), AuthMascotProps, useAuthStage(), EmailOTPForm(), EmailOTPFormProps, TwoFactorForm(), InputOTP (+4 more)
 
 ### Community 27 - "_auth.tsx"
-Cohesion: 0.15
-Nodes (15): AnimatedAuthBackground(), AuthUIProvider(), AppLogo(), AppLogoProps, SIZE_MAP, SidebarMenuContent(), SonnToaster(), OrganizationsPage() (+7 more)
+Cohesion: 0.14
+Nodes (15): AnimatedAuthBackground(), AuthStage, AuthStageContext, AuthStageContextValue, AuthStageProvider(), AppLogo(), AppLogoProps, SIZE_MAP (+7 more)
 
 ### Community 28 - "Task 2 Report: Fungsi murni shell console"
 Cohesion: 0.13
@@ -245,8 +246,8 @@ Cohesion: 0.14
 Nodes (13): dotVariants, Timeline, TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineItemProps, timelineItemVariants (+5 more)
 
 ### Community 31 - "useAuthStore.ts"
-Cohesion: 0.28
-Nodes (7): AdminBillingPageProps, AdminBillingSearchParams, adminBillingSearchSchema, adminCreateBillingSchema, AdminCreateBillingValues, BillingRouteComponent(), Route
+Cohesion: 0.06
+Nodes (24): DashboardPage(), Route, Route, Route, Route, Route, Route, Route (+16 more)
 
 ### Community 32 - "watermark.tsx"
 Cohesion: 0.18
@@ -269,8 +270,8 @@ Cohesion: 0.29
 Nodes (6): Commit, Delivered, Notes, Status, Task 4 Report: Platform shell & routes, Verification
 
 ### Community 37 - "schema.ts"
-Cohesion: 0.10
-Nodes (30): OrganizationRecord, getTierLabel(), CreateOrganizationDialogProps, OrganizationSettingsCards(), OrganizationView(), OrganizationViewProps, Badge(), BadgeProps (+22 more)
+Cohesion: 0.11
+Nodes (23): getTierLabel(), FeatureDisabledCard(), SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader(), SheetOverlay (+15 more)
 
 ### Community 38 - "AppSidebar.tsx"
 Cohesion: 0.12
@@ -279,6 +280,10 @@ Nodes (15): isValidOAuthRedirectUri(), PortalTenantsPage(), PortalTenantsPagePro
 ### Community 39 - "schema.ts"
 Cohesion: 0.24
 Nodes (8): AdminTenantsPage(), AdminTenantsPageProps, adminCreateTenantSchema, AdminCreateTenantValues, AdminTenantsSearchParams, adminTenantsSearchSchema, Route, TenantsRouteComponent()
+
+### Community 40 - "schema.ts"
+Cohesion: 0.11
+Nodes (17): COLOR_SCHEME_OPTIONS, FOOTER_TYPE_OPTIONS, NAV_LAYOUT_OPTIONS, NAVBAR_TYPE_OPTIONS, RADIUS_OPTIONS, SIDEBAR_TYPE_OPTIONS, RadioGroup, RadioGroupItem (+9 more)
 
 ### Community 41 - "form.tsx"
 Cohesion: 0.20
@@ -289,20 +294,20 @@ Cohesion: 0.22
 Nodes (9): Pagination(), PaginationContent, PaginationEllipsis(), PaginationItem, PaginationLink(), PaginationLinkProps, PaginationNext(), PaginationPrevious() (+1 more)
 
 ### Community 43 - "slider.tsx"
-Cohesion: 0.17
-Nodes (12): AppSidebar(), ScrollArea, ScrollBar, Slider, SliderMark, SliderProps, sliderVariants, TooltipContent (+4 more)
+Cohesion: 0.18
+Nodes (11): SidebarMenuContent(), ScrollArea, ScrollBar, Slider, SliderMark, SliderProps, sliderVariants, TooltipContent (+3 more)
 
 ### Community 44 - "steps.tsx"
 Cohesion: 0.20
 Nodes (9): Step, StepDescription, StepLabel, Stepper, StepperProps, stepperVariants, StepProps, StepSharedProps (+1 more)
 
 ### Community 45 - "Header.tsx"
-Cohesion: 0.14
-Nodes (13): Header(), platformRolesFromMatches(), ROUTE_TITLES, BreadcrumbItem, BreadcrumbItemProps, breadcrumbItemsVariants, Breadcrumbs, BreadcrumbsProps (+5 more)
+Cohesion: 0.17
+Nodes (13): UserButton(), AppSidebar(), Header(), platformRolesFromMatches(), ROUTE_TITLES, BreadcrumbItem, BreadcrumbItemProps, breadcrumbItemsVariants (+5 more)
 
 ### Community 46 - "admin-billing.tsx"
 Cohesion: 0.16
-Nodes (27): changePasswordSchema, updateOrgSchema, AccordionContent, AccordionItem, AccordionTrigger, AlertDialogAction, AlertDialogCancel, AlertDialogContent (+19 more)
+Nodes (30): changePasswordSchema, updateOrgSchema, AccordionContent, AccordionItem, AccordionTrigger, AlertDialogAction, AlertDialogCancel, AlertDialogContent (+22 more)
 
 ### Community 47 - "scripts"
 Cohesion: 0.25
@@ -366,19 +371,19 @@ Nodes (3): Kbd, KbdProps, kbdVariants
 
 ### Community 70 - "account.tsx"
 Cohesion: 0.08
-Nodes (15): NotFoundState(), TenantShell(), PortalTenantApiKeysTab(), PortalTenantBillingTab(), PortalTenantOrgsTab(), PortalTenantUsersTab(), TenantShellMode, Route (+7 more)
+Nodes (16): OrganizationSwitcher(), NotFoundState(), TenantShell(), PortalTenantApiKeysTab(), PortalTenantBillingTab(), PortalTenantOrgsTab(), PortalTenantUsersTab(), TenantShellMode (+8 more)
 
 ### Community 72 - "toggle.tsx"
 Cohesion: 0.50
 Nodes (3): Toggle, ToggleProps, toggleVariants
 
+### Community 74 - "OrganizationView.tsx"
+Cohesion: 0.36
+Nodes (6): OrganizationSettingsCards(), OrganizationView(), OrganizationViewProps, TabsContent, TabsList, TabsTrigger
+
 ### Community 75 - "rating.tsx"
 Cohesion: 0.50
 Nodes (3): Rating, RatingProps, ratingVariants
-
-### Community 76 - "account.tsx"
-Cohesion: 0.22
-Nodes (6): AccountView(), AccountViewTab, accountSearchSchema, Route, accountSearchSchema, Route
 
 ## Knowledge Gaps
 - **550 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+545 more)
@@ -388,17 +393,17 @@ Nodes (6): AccountView(), AccountViewTab, accountSearchSchema, Route, accountSea
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `cn()` connect `cn` to `PortalTenantDetailPage.tsx`, `isExternalBackendConfigured`, `mock-db.ts`, `tenant-context.ts`, `index.ts`, `utils.ts`, `use-toast.ts`, `ThemePreferencesCard.tsx`, `console-shell.ts`, `OrganizationSwitcher.tsx`, `EmailOTPForm.tsx`, `_auth.tsx`, `timeline.tsx`, `_authenticated.tsx`, `carousel.tsx`, `menubar.tsx`, `schema.ts`, `schema.ts`, `form.tsx`, `pagination.tsx`, `slider.tsx`, `steps.tsx`, `Header.tsx`, `admin-billing.tsx`, `drawer.tsx`, `navigation-menu.tsx`, `progress.tsx`, `accordion.tsx`, `tree.tsx`, `rating.tsx`, `kbd.tsx`, `toggle.tsx`, `cleave.tsx`, `OrganizationView.tsx`, `rating.tsx`, `utils.ts`?**
+  _High betweenness centrality (0.097) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `EmailOTPForm.tsx`, `package.json`?**
-  _High betweenness centrality (0.095) - this node is a cross-community bridge._
-- **Why does `cn()` connect `cn` to `PortalTenantDetailPage.tsx`, `isExternalBackendConfigured`, `mock-db.ts`, `tenant-context.ts`, `index.ts`, `utils.ts`, `use-toast.ts`, `ThemePreferencesCard.tsx`, `useThemeStore.ts`, `OrganizationSwitcher.tsx`, `EmailOTPForm.tsx`, `_auth.tsx`, `timeline.tsx`, `_authenticated.tsx`, `carousel.tsx`, `menubar.tsx`, `schema.ts`, `form.tsx`, `pagination.tsx`, `slider.tsx`, `steps.tsx`, `Header.tsx`, `admin-billing.tsx`, `drawer.tsx`, `navigation-menu.tsx`, `progress.tsx`, `accordion.tsx`, `tree.tsx`, `rating.tsx`, `kbd.tsx`, `toggle.tsx`, `cleave.tsx`, `rating.tsx`?**
-  _High betweenness centrality (0.093) - this node is a cross-community bridge._
-- **Why does `sonner` connect `dependencies` to `admin-billing.tsx`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
+  _High betweenness centrality (0.097) - this node is a cross-community bridge._
+- **Why does `sonner` connect `dependencies` to `isExternalBackendConfigured`?**
+  _High betweenness centrality (0.070) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
   _550 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PortalTenantDetailPage.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.12073170731707317 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13446969696969696 - nodes in this community are weakly interconnected._
 - **Should `routeTree.gen.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.024056767047421254 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.02664002664002664 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.03389830508474576 - nodes in this community are weakly interconnected._

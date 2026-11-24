@@ -1,12 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { menusConfig, type MenuItemProps } from "@/config/menus";
 import { cn, isLocationMatch } from "@/lib/utils";
 import { useAuthConfigStore } from "@/stores/useAuthConfigStore";
 import { useLayoutStore } from "@/stores/useLayoutStore";
 import { AppLogo } from "@/components/layout/AppLogo";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -153,9 +152,6 @@ export function AppSidebar({
   logoHref?: string;
 } = {}) {
   const sidebarCollapsed = useLayoutStore((s) => s.sidebarCollapsed);
-  const toggleSidebarCollapsed = useLayoutStore(
-    (s) => s.toggleSidebarCollapsed,
-  );
   const mobileSidebarOpen = useLayoutStore((s) => s.mobileSidebarOpen);
   const setMobileSidebarOpen = useLayoutStore((s) => s.setMobileSidebarOpen);
   const navStyle = useLayoutStore((s) => s.navStyle);
@@ -199,7 +195,7 @@ export function AppSidebar({
         <div
           className={cn(
             "flex h-16 shrink-0 items-center border-b border-sidebar-border px-4",
-            isCollapsed ? "justify-center" : "justify-between",
+            isCollapsed ? "justify-center" : "justify-start",
           )}
         >
           <Link to={logoHref} className="flex items-center gap-2.5">
@@ -209,41 +205,11 @@ export function AppSidebar({
               size="md"
             />
           </Link>
-
-          {!isCollapsed && (
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              color="secondary"
-              className="h-8 w-8"
-              onClick={toggleSidebarCollapsed}
-              aria-label="Perkecil sidebar"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          )}
         </div>
 
         <ScrollArea className="min-h-0 flex-1">
           <SidebarMenuContent collapsed={isCollapsed} items={sidebarItems} />
         </ScrollArea>
-
-        {isCollapsed && (
-          <div className="flex shrink-0 justify-center border-t border-border p-3">
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              color="secondary"
-              className="h-8 w-8"
-              onClick={toggleSidebarCollapsed}
-              aria-label="Perluas sidebar"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
       </aside>
 
       <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>

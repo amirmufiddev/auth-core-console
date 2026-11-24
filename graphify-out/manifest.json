@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "src/api/auth-service.ts": {
-    "mtime": 1795524493.2426713,
-    "ast_hash": "a1a63061cb89780134012fb76887e7d0",
+    "mtime": 1795525995.9490979,
+    "ast_hash": "bdc2c14ab21d9949dc1b35785126091a",
     "semantic_hash": ""
   },
   "src/api/client.ts": {
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "src/components/layout/AppSidebar.tsx": {
-    "mtime": 1795524324.5275419,
-    "ast_hash": "1c49f77385da4a29c2f1b30b3935cae2",
+    "mtime": 1795526363.8935175,
+    "ast_hash": "cca5fc4eb5921207fe600d7fc9e2d32f",
     "semantic_hash": ""
   },
   "src/components/layout/FeatureDisabledCard.tsx": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "src/components/layout/Header.tsx": {
-    "mtime": 1795524860.9779294,
-    "ast_hash": "66c83e9a7484fe1e3ffdd367583f12d8",
+    "mtime": 1795526364.8705342,
+    "ast_hash": "2aacd3d76c3d750e9854d4c39b6f6e8c",
     "semantic_hash": ""
   },
   "src/components/layout/ImpersonationBanner.tsx": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "src/features/users/UsersPage.tsx": {
-    "mtime": 1795524501.9248364,
-    "ast_hash": "f510a8d6df3057e305063c5be4a9f6a1",
+    "mtime": 1795525996.6681106,
+    "ast_hash": "e45f65366ec7b5d2db6b8dd8fc9fc194",
     "semantic_hash": ""
   },
   "src/features/users/schema.ts": {

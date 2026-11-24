@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Link, useMatches, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Menu, Moon, Radio, Search, Settings, Sun } from "lucide-react";
+import {
+  Menu,
+  Moon,
+  PanelLeft,
+  PanelLeftClose,
+  Radio,
+  Search,
+  Settings,
+  Sun,
+} from "lucide-react";
 import { menusConfig } from "@/config/menus";
 import { isExternalBackendConfigured } from "@/api/client";
 import type { ActorRoleGrant } from "@/lib/console-shell";
@@ -81,7 +90,14 @@ export function Header() {
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
 
   const navStyle = useLayoutStore((s) => s.navStyle);
+  const sidebarCollapsed = useLayoutStore((s) => s.sidebarCollapsed);
+  const sidebarType = useLayoutStore((s) => s.sidebarType);
+  const toggleSidebarCollapsed = useLayoutStore(
+    (s) => s.toggleSidebarCollapsed,
+  );
   const setMobileSidebarOpen = useLayoutStore((s) => s.setMobileSidebarOpen);
+  const isSidebarCollapsed =
+    sidebarCollapsed || sidebarType === "popover";
 
   const isExternalApi = isExternalBackendConfigured();
   const homeCrumb = isPlatformShell ? "/platform" : "/dashboard";
@@ -130,6 +146,27 @@ export function Header() {
             >
               <AppLogo showText size="sm" />
             </Link>
+          )}
+
+          {navStyle !== "horizontal" && (
+            <Button
+              type="button"
+              variant="ghost"
+              color="secondary"
+              size="icon"
+              className="hidden h-9 w-9 shrink-0 lg:inline-flex"
+              onClick={toggleSidebarCollapsed}
+              aria-label={
+                isSidebarCollapsed ? "Perluas sidebar" : "Perkecil sidebar"
+              }
+              aria-expanded={!isSidebarCollapsed}
+            >
+              {isSidebarCollapsed ? (
+                <PanelLeft className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </Button>
           )}
 
           <Breadcrumbs size="sm">
