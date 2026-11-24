@@ -2,9 +2,7 @@ import {
   Activity,
   Building2,
   CreditCard,
-  Globe,
   KeyRound,
-  Layers,
   LayoutDashboard,
   type LucideIcon,
   ScrollText,
@@ -23,82 +21,67 @@ export interface MenuItemProps {
   featureId?: BetterAuthFeatureId;
   isHeader?: boolean;
   child?: MenuItemProps[];
+  permission?: { resource: string; action: string };
 }
 
-const applicationItems: MenuItemProps[] = [
+export const platformNav: MenuItemProps[] = [
   {
-    title: "Users",
-    href: "/users",
-    icon: Users,
-    featureId: "admin",
+    title: "Overview",
+    href: "/platform",
+    icon: LayoutDashboard,
   },
   {
-    title: "Roles & RBAC",
-    href: "/roles",
-    icon: ShieldCheck,
-    featureId: "admin",
-  },
-  {
-    title: "Organizations",
-    href: "/organizations",
+    title: "Tenants",
+    href: "/platform/tenants",
     icon: Building2,
-    featureId: "organization",
+    permission: { resource: "organization", action: "read" },
   },
   {
-    title: "Sessions & Devices",
-    href: "/sessions",
+    title: "Feature & Tier Matrix",
+    href: "/platform/tiers",
+    icon: SlidersHorizontal,
+    permission: { resource: "authConfig", action: "configure" },
+  },
+  {
+    title: "Billing Ledger",
+    href: "/platform/billing",
+    icon: CreditCard,
+    permission: { resource: "organization", action: "read" },
+  },
+  {
+    title: "Staf Platform",
+    href: "/platform/staff",
+    icon: Users,
+    permission: { resource: "user", action: "read" },
+  },
+  {
+    title: "Role Platform",
+    href: "/platform/roles",
+    icon: ShieldCheck,
+    permission: { resource: "role", action: "read" },
+  },
+  {
+    title: "Sesi Staf",
+    href: "/platform/sessions",
     icon: Activity,
-    featureId: "sessionManagement",
+    permission: { resource: "session", action: "read" },
   },
   {
-    title: "API Keys & OAuth",
-    href: "/api-keys",
-    icon: KeyRound,
-    featureId: "apiKey",
-  },
-  {
-    title: "Audit Logs",
-    href: "/audit-logs",
+    title: "Audit Platform",
+    href: "/platform/audit",
     icon: ScrollText,
-    featureId: "auditLogs",
+    permission: { resource: "auditLog", action: "read" },
   },
   {
     title: "Auth Features",
-    href: "/auth-features",
+    href: "/platform/auth-features",
     icon: SlidersHorizontal,
     badge: "Service",
   },
   {
-    title: "Account Settings",
-    href: "/account",
+    title: "Akun",
+    href: "/platform/account",
     icon: UserCog,
-  },
-];
-
-const multiTenantItems: MenuItemProps[] = [
-  {
-    title: "Tenants (Operator)",
-    href: "/admin-tenants",
-    icon: Layers,
-    badge: "Operator",
-  },
-  {
-    title: "Feature & Tier Matrix",
-    href: "/admin-tiers",
-    icon: SlidersHorizontal,
-    badge: "Operator",
-  },
-  {
-    title: "Billing Ledger",
-    href: "/admin-billing",
-    icon: CreditCard,
-    badge: "Operator",
-  },
-  {
-    title: "Tenant Portal",
-    href: "/tenants",
-    icon: Globe,
-    badge: "Portal",
   },
 ];
 
@@ -111,77 +94,66 @@ export const menusConfig: {
 } = {
   mainNav: [
     {
-      title: "Dashboard",
+      title: "Platform Console",
       icon: LayoutDashboard,
-      child: [
-        {
-          title: "Overview",
-          href: "/dashboard",
-          icon: LayoutDashboard,
-        },
-      ],
-    },
-    {
-      title: "Application",
-      icon: ShieldCheck,
-      child: applicationItems,
-    },
-    {
-      title: "Multi-Tenant & Billing",
-      icon: Layers,
-      child: multiTenantItems,
+      child: platformNav,
     },
   ],
   sidebarNav: {
-    modern: [
-      {
-        title: "Dashboard",
-        icon: LayoutDashboard,
-        child: [
-          {
-            title: "Overview",
-            href: "/dashboard",
-            icon: LayoutDashboard,
-          },
-        ],
-      },
-      {
-        title: "Application",
-        icon: ShieldCheck,
-        child: applicationItems,
-      },
-      {
-        title: "Multi-Tenant & Billing",
-        icon: Layers,
-        child: multiTenantItems,
-      },
-    ],
-    classic: [
-      {
-        isHeader: true,
-        title: "Dashboard",
-        icon: LayoutDashboard,
-      },
-      {
-        title: "Overview",
-        href: "/dashboard",
-        icon: LayoutDashboard,
-      },
-      {
-        isHeader: true,
-        title: "Application",
-        icon: ShieldCheck,
-      },
-      ...applicationItems,
-      {
-        isHeader: true,
-        title: "Multi-Tenant & Billing",
-        icon: Layers,
-      },
-      ...multiTenantItems,
-    ],
+    modern: platformNav,
+    classic: platformNav,
   },
 };
+
+export function tenantNav(tenantId: string): MenuItemProps[] {
+  return [
+    {
+      title: "Ringkasan",
+      href: `/tenants/${tenantId}`,
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Pengaturan",
+      href: `/tenants/${tenantId}/settings`,
+      icon: SlidersHorizontal,
+    },
+    {
+      title: "IAM Features",
+      href: `/tenants/${tenantId}/features`,
+      icon: SlidersHorizontal,
+    },
+    {
+      title: "OAuth 2.1 / MCP",
+      href: `/tenants/${tenantId}/oauth-clients`,
+      icon: KeyRound,
+    },
+    {
+      title: "API Keys",
+      href: `/tenants/${tenantId}/api-keys`,
+      icon: KeyRound,
+    },
+    {
+      title: "Users",
+      href: `/tenants/${tenantId}/users`,
+      icon: Users,
+    },
+    {
+      title: "Organizations",
+      href: `/tenants/${tenantId}/organizations`,
+      icon: Building2,
+    },
+    {
+      title: "Billing",
+      href: `/tenants/${tenantId}/billing`,
+      icon: CreditCard,
+    },
+    {
+      title: "Akun",
+      href: `/tenants/${tenantId}/account`,
+      icon: UserCog,
+    },
+  ];
+}
 
 export function collectMenuHrefs(items: MenuItemProps[]): string[] {
   const hrefs: string[] = [];

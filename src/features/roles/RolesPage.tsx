@@ -167,12 +167,18 @@ export function RolesPage() {
     });
   };
 
+  const platformMatrixModules = RBAC_RESOURCE_MODULES.filter(
+    (mod) => mod.shownInPlatformMatrix,
+  );
+
   const selectAllPermissions = () => {
-    const next: RolePermissionMatrix = {};
-    for (const mod of RBAC_RESOURCE_MODULES) {
-      next[mod.resource] = mod.permissions.map((p) => p.action);
-    }
-    setDraftPermissions(next);
+    setDraftPermissions((prev) => {
+      const next = { ...prev };
+      for (const mod of platformMatrixModules) {
+        next[mod.resource] = mod.permissions.map((p) => p.action);
+      }
+      return next;
+    });
   };
 
   const clearAllPermissions = () => {
@@ -419,7 +425,7 @@ export function RolesPage() {
                       defaultValue={["user", "role", "authConfig"]}
                       className="space-y-3"
                     >
-                      {RBAC_RESOURCE_MODULES.map((mod) => {
+                      {platformMatrixModules.map((mod) => {
                         const checkedActions =
                           draftPermissions[mod.resource] ?? [];
                         const checkedCount = checkedActions.length;

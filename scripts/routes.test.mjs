@@ -33,97 +33,106 @@ function extractSection(source, startMarker, endMarker) {
   return source.slice(startIdx, endIdx);
 }
 
-function extractItemGroups(menusSource) {
-  const beforeConfig = extractSection(
+function extractPlatformNavHrefs(menusSource) {
+  const slice = extractSection(
     menusSource,
-    "import {",
+    "export const platformNav",
     "export const menusConfig",
   );
-  const groups = {};
-  for (const match of beforeConfig.matchAll(
-    /const\s+(\w+)\s*:\s*MenuItemProps\[\]\s*=\s*\[([\s\S]*?)\n\];/g,
-  )) {
-    const [, name, body] = match;
-    groups[name] = Array.from(body.matchAll(/href:\s*"([^"]+)"/g)).map(
-      (m) => m[1],
-    );
-  }
-  return groups;
+  return Array.from(slice.matchAll(/href:\s*"([^"]+)"/g)).map((m) => m[1]);
 }
 
-function collectHrefsWithShared(slice, itemGroups) {
-  const hrefs = [];
-  const tokenRegex = /href:\s*"([^"]+)"|(?:child:\s*|\.\.\.)(\w+)/g;
-  for (const match of slice.matchAll(tokenRegex)) {
-    if (match[1]) {
-      hrefs.push(match[1]);
-    } else if (match[2] && itemGroups[match[2]]) {
-      hrefs.push(...itemGroups[match[2]]);
-    }
-  }
-  return hrefs;
-}
-
-test("menusConfig.mainNav, sidebarNav.modern, dan sidebarNav.classic sinkron", () => {
+test("platformNav terdaftar dan sinkron dengan menusConfig", () => {
   const menusSource = readUtf8("src/config/menus.ts");
-  const itemGroups = extractItemGroups(menusSource);
+  const platformHrefs = extractPlatformNavHrefs(menusSource);
 
-  const runtimeConfigSlice = extractSection(
+  const configSlice = extractSection(
     menusSource,
-    "} = {",
-    "export function collectMenuHrefs",
+    "export const menusConfig",
+    "export function tenantNav",
   );
 
-  const mainNavHrefs = collectHrefsWithShared(
-    extractSection(runtimeConfigSlice, "mainNav:", "sidebarNav:"),
-    itemGroups,
-  );
-  const modernHrefs = collectHrefsWithShared(
-    extractSection(runtimeConfigSlice, "modern:", "classic:"),
-    itemGroups,
-  );
-  const classicHrefs = collectHrefsWithShared(
-    extractSection(runtimeConfigSlice, "classic:", null),
-    itemGroups,
-  );
-
-  assert.ok(
-    mainNavHrefs.length >= 12,
-    "Minimal 12 route harus terdaftar di menu",
-  );
-  assert.deepEqual(modernHrefs, mainNavHrefs);
-  assert.deepEqual(classicHrefs, mainNavHrefs);
+  assert.ok(platformHrefs.length >= 10, "platformNav harus memuat menu shell");
+  assert.match(configSlice, /child:\s*platformNav/);
+  assert.match(configSlice, /modern:\s*platformNav/);
+  assert.match(configSlice, /classic:\s*platformNav/);
 
   for (const required of [
-    "/dashboard",
-    "/users",
-    "/roles",
-    "/organizations",
-    "/sessions",
-    "/api-keys",
-    "/audit-logs",
-    "/auth-features",
-    "/account",
-    "/admin-tenants",
-    "/admin-tiers",
-    "/admin-billing",
-    "/tenants",
+    "/platform",
+    "/platform/tenants",
+    "/platform/tiers",
+    "/platform/billing",
+    "/platform/staff",
+    "/platform/roles",
+    "/platform/sessions",
+    "/platform/audit",
+    "/platform/auth-features",
+    "/platform/account",
   ]) {
     assert.ok(
-      mainNavHrefs.includes(required),
-      `Menu harus mendaftarkan ${required}`,
+      platformHrefs.includes(required),
+      `Menu platform harus mendaftarkan ${required}`,
+    );
+  }
+
+  for (const removed of [
+    "/users",
+    "/organizations",
+    "/api-keys",
+    "/dashboard",
+    "/admin-tenants",
+  ]) {
+    assert.equal(
+      platformHrefs.includes(removed),
+      false,
+      `Menu platform tidak boleh mendaftarkan ${removed}`,
     );
   }
 });
 
-test("setiap href di menus.ts memiliki file route di src/routes/_authenticated/", () => {
+test("tenantNav memasang sembilan menu di bawah id tenant", () => {
+  const source = readUtf8("src/config/menus.ts");
+  assert.match(source, /export function tenantNav\(tenantId: string\)/);
+  for (const suffix of [
+    "",
+    "/settings",
+    "/features",
+    "/oauth-clients",
+    "/api-keys",
+    "/users",
+    "/organizations",
+    "/billing",
+    "/account",
+  ]) {
+    assert.match(
+      source,
+      new RegExp(
+        "`/tenants/\\$\\{tenantId\\}" + suffix.replace("/", "\\/") + "`",
+      ),
+    );
+  }
+});
+
+test("matriks role platform menyembunyikan apiKey, oauthClient, dan sso", () => {
+  const source = readUtf8("src/lib/rbac.ts");
+  for (const resource of ["apiKey", "oauthClient", "sso"]) {
+    const block = source.slice(source.indexOf(`resource: "${resource}"`));
+    assert.match(block, /shownInPlatformMatrix:\s*false/);
+  }
+  assert.match(source, /title: "Staf platform"/);
+  assert.match(source, /title: "Direktori tenant & billing"/);
+  assert.match(source, /title: "Plugin layanan & matriks tier"/);
+});
+
+test("setiap href non-platform di menus.ts memiliki file route di src/routes/_authenticated/", () => {
   const menusSource = readUtf8("src/config/menus.ts");
   const allHrefs = Array.from(menusSource.matchAll(/href:\s*"([^"]+)"/g)).map(
     (m) => m[1],
   );
-  const uniqueHrefs = Array.from(new Set(allHrefs));
+  const uniqueHrefs = Array.from(new Set(allHrefs)).filter(
+    (href) => !href.startsWith("/platform"),
+  );
 
-  assert.ok(uniqueHrefs.length >= 12);
   for (const href of uniqueHrefs) {
     const slug = href.replace(/^\//, "");
     const flatRouteFile = path.join(

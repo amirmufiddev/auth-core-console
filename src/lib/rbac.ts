@@ -20,13 +20,15 @@ export interface RbacResourceModule {
   title: string;
   description: string;
   permissions: RbacPermissionOption[];
+  shownInPlatformMatrix: boolean;
 }
 
 export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
   {
     resource: "user",
-    title: "Users Management",
+    title: "Staf platform",
     description: "Kontrol akun pengguna, ban/unban, dan impersonation sesi.",
+    shownInPlatformMatrix: true,
     permissions: [
       {
         action: "read",
@@ -62,8 +64,9 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
   },
   {
     resource: "session",
-    title: "Sessions & Devices",
+    title: "Sesi staf",
     description: "Visibilitas dan pencabutan sesi aktif perangkat.",
+    shownInPlatformMatrix: true,
     permissions: [
       {
         action: "read",
@@ -79,8 +82,9 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
   },
   {
     resource: "role",
-    title: "Roles & Access Control",
+    title: "Role platform",
     description: "Pengaturan definisi role dan matriks permission RBAC.",
+    shownInPlatformMatrix: true,
     permissions: [
       {
         action: "read",
@@ -106,8 +110,9 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
   },
   {
     resource: "organization",
-    title: "Organizations & Teams",
+    title: "Direktori tenant & billing",
     description: "Manajemen tenant, anggota, tim, dan undangan.",
+    shownInPlatformMatrix: true,
     permissions: [
       {
         action: "read",
@@ -135,6 +140,7 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
     resource: "apiKey",
     title: "API Keys",
     description: "Penerbitan, pembatasan rate-limit, dan pencabutan API Key.",
+    shownInPlatformMatrix: false,
     permissions: [
       {
         action: "read",
@@ -163,6 +169,7 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
     title: "OAuth 2.1 / OIDC & MCP",
     description:
       "Registrasi aplikasi klien OAuth dan MCP authorization server.",
+    shownInPlatformMatrix: false,
     permissions: [
       {
         action: "read",
@@ -190,6 +197,7 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
     resource: "sso",
     title: "Enterprise SSO & SCIM",
     description: "Konfigurasi SAML 2.0, OIDC IdP, DNS verification & SCIM.",
+    shownInPlatformMatrix: false,
     permissions: [
       {
         action: "read",
@@ -210,9 +218,10 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
   },
   {
     resource: "authConfig",
-    title: "Auth Core Feature Flags",
+    title: "Plugin layanan & matriks tier",
     description:
       "Aktivasi/non-aktivasi plugin dan parameter runtime Auth Core.",
+    shownInPlatformMatrix: true,
     permissions: [
       {
         action: "read",
@@ -228,8 +237,9 @@ export const RBAC_RESOURCE_MODULES: RbacResourceModule[] = [
   },
   {
     resource: "auditLog",
-    title: "Security Audit Logs",
+    title: "Audit platform",
     description: "Akses jejak audit autentikasi dan perubahan konfigurasi.",
+    shownInPlatformMatrix: true,
     permissions: [
       {
         action: "read",
@@ -268,7 +278,7 @@ export function countRolePermissions(
 }
 
 export function getTotalAvailablePermissions(): number {
-  return RBAC_RESOURCE_MODULES.reduce(
+  return RBAC_RESOURCE_MODULES.filter((mod) => mod.shownInPlatformMatrix).reduce(
     (sum, mod) => sum + mod.permissions.length,
     0,
   );
