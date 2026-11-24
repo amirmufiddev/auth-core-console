@@ -155,6 +155,11 @@ test("setiap href di menus.ts memiliki file route di src/routes/_authenticated/"
   for (const authRoute of [
     "src/routes/_auth/consent.tsx",
     "src/routes/_auth/auth/accept-invitation.tsx",
+    "src/routes/t/$tenantSlug/login.tsx",
+    "src/routes/t/$tenantSlug/register.tsx",
+    "src/routes/t/$tenantSlug/verify-2fa.tsx",
+    "src/routes/t/$tenantSlug/consent.tsx",
+    "src/routes/t/$tenantSlug/accept-invitation.tsx",
   ]) {
     const fullPath = path.join(ROOT, authRoute);
     assert.ok(

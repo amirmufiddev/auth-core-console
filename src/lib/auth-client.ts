@@ -20,6 +20,7 @@ import { passkeyClient } from "@better-auth/passkey/client";
 import { apiKeyClient } from "@better-auth/api-key/client";
 import { oauthProviderClient } from "@better-auth/oauth-provider/client";
 import { ssoClient } from "@better-auth/sso/client";
+import type { TenantAccessMode } from "@/lib/tenant-context";
 
 const rawApiUrl = import.meta.env.VITE_API_URL as string | undefined;
 const baseURL =
@@ -32,13 +33,8 @@ const baseURL =
 const basePath =
   (import.meta.env.VITE_AUTH_BASE_PATH as string | undefined) || "/api/auth";
 
-export const authClient = createAuthClient({
-  baseURL,
-  basePath,
-  fetchOptions: {
-    credentials: "include",
-  },
-  plugins: [
+function createAuthPlugins() {
+  return [
     adminClient(),
     organizationClient(),
     twoFactorClient(),
@@ -58,5 +54,34 @@ export const authClient = createAuthClient({
     oauthProviderClient(),
     lastLoginMethodClient(),
     oneTimeTokenClient(),
-  ],
+  ];
+}
+
+export const authClient = createAuthClient({
+  baseURL,
+  basePath,
+  fetchOptions: {
+    credentials: "include",
+  },
+  plugins: createAuthPlugins(),
 });
+
+export function createTenantAuthClient(
+  tenantSlug?: string | null,
+  mode: TenantAccessMode = "path",
+) {
+  const normalizedSlug = tenantSlug?.trim();
+  const tenantBasePath =
+    mode === "path" && normalizedSlug
+      ? `/t/${encodeURIComponent(normalizedSlug)}/api/auth`
+      : basePath;
+
+  return createAuthClient({
+    baseURL,
+    basePath: tenantBasePath,
+    fetchOptions: {
+      credentials: "include",
+    },
+    plugins: createAuthPlugins(),
+  });
+}

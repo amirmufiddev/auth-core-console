@@ -32,6 +32,11 @@ import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/
 import { Route as AuthAuthAcceptInvitationRouteImport } from './routes/_auth/auth/accept-invitation'
 import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants/index'
 import { Route as AuthenticatedTenantsTenantIdRouteImport } from './routes/_authenticated/tenants/$tenantId'
+import { Route as TTenantSlugAcceptInvitationRouteImport } from './routes/t/$tenantSlug/accept-invitation'
+import { Route as TTenantSlugConsentRouteImport } from './routes/t/$tenantSlug/consent'
+import { Route as TTenantSlugLoginRouteImport } from './routes/t/$tenantSlug/login'
+import { Route as TTenantSlugRegisterRouteImport } from './routes/t/$tenantSlug/register'
+import { Route as TTenantSlugVerify2faRouteImport } from './routes/t/$tenantSlug/verify-2fa'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -153,6 +158,32 @@ const AuthenticatedTenantsTenantIdRoute =
     path: '/tenants/$tenantId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const TTenantSlugAcceptInvitationRoute =
+  TTenantSlugAcceptInvitationRouteImport.update({
+    id: '/t/$tenantSlug/accept-invitation',
+    path: '/t/$tenantSlug/accept-invitation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const TTenantSlugConsentRoute = TTenantSlugConsentRouteImport.update({
+  id: '/t/$tenantSlug/consent',
+  path: '/t/$tenantSlug/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TTenantSlugLoginRoute = TTenantSlugLoginRouteImport.update({
+  id: '/t/$tenantSlug/login',
+  path: '/t/$tenantSlug/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TTenantSlugRegisterRoute = TTenantSlugRegisterRouteImport.update({
+  id: '/t/$tenantSlug/register',
+  path: '/t/$tenantSlug/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TTenantSlugVerify2faRoute = TTenantSlugVerify2faRouteImport.update({
+  id: '/t/$tenantSlug/verify-2fa',
+  path: '/t/$tenantSlug/verify-2fa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -175,6 +206,11 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthenticatedUsersRoute
   '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
   '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
+  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRoute
+  '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
+  '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
+  '/t/$tenantSlug/register': typeof TTenantSlugRegisterRoute
+  '/t/$tenantSlug/verify-2fa': typeof TTenantSlugVerify2faRoute
   '/tenants/': typeof AuthenticatedTenantsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -198,6 +234,11 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersRoute
   '/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
   '/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
+  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRoute
+  '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
+  '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
+  '/t/$tenantSlug/register': typeof TTenantSlugRegisterRoute
+  '/t/$tenantSlug/verify-2fa': typeof TTenantSlugVerify2faRoute
   '/tenants': typeof AuthenticatedTenantsIndexRoute
 }
 export interface FileRoutesById {
@@ -224,6 +265,11 @@ export interface FileRoutesById {
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_auth/auth/accept-invitation': typeof AuthAuthAcceptInvitationRoute
   '/_authenticated/tenants/$tenantId': typeof AuthenticatedTenantsTenantIdRoute
+  '/t/$tenantSlug/accept-invitation': typeof TTenantSlugAcceptInvitationRoute
+  '/t/$tenantSlug/consent': typeof TTenantSlugConsentRoute
+  '/t/$tenantSlug/login': typeof TTenantSlugLoginRoute
+  '/t/$tenantSlug/register': typeof TTenantSlugRegisterRoute
+  '/t/$tenantSlug/verify-2fa': typeof TTenantSlugVerify2faRoute
   '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
 }
 export interface FileRouteTypes {
@@ -249,6 +295,11 @@ export interface FileRouteTypes {
     | '/users'
     | '/auth/accept-invitation'
     | '/tenants/$tenantId'
+    | '/t/$tenantSlug/accept-invitation'
+    | '/t/$tenantSlug/consent'
+    | '/t/$tenantSlug/login'
+    | '/t/$tenantSlug/register'
+    | '/t/$tenantSlug/verify-2fa'
     | '/tenants/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -272,6 +323,11 @@ export interface FileRouteTypes {
     | '/users'
     | '/auth/accept-invitation'
     | '/tenants/$tenantId'
+    | '/t/$tenantSlug/accept-invitation'
+    | '/t/$tenantSlug/consent'
+    | '/t/$tenantSlug/login'
+    | '/t/$tenantSlug/register'
+    | '/t/$tenantSlug/verify-2fa'
     | '/tenants'
   id:
     | '__root__'
@@ -297,6 +353,11 @@ export interface FileRouteTypes {
     | '/_authenticated/users'
     | '/_auth/auth/accept-invitation'
     | '/_authenticated/tenants/$tenantId'
+    | '/t/$tenantSlug/accept-invitation'
+    | '/t/$tenantSlug/consent'
+    | '/t/$tenantSlug/login'
+    | '/t/$tenantSlug/register'
+    | '/t/$tenantSlug/verify-2fa'
     | '/_authenticated/tenants/'
   fileRoutesById: FileRoutesById
 }
@@ -304,6 +365,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  TTenantSlugAcceptInvitationRoute: typeof TTenantSlugAcceptInvitationRoute
+  TTenantSlugConsentRoute: typeof TTenantSlugConsentRoute
+  TTenantSlugLoginRoute: typeof TTenantSlugLoginRoute
+  TTenantSlugRegisterRoute: typeof TTenantSlugRegisterRoute
+  TTenantSlugVerify2faRoute: typeof TTenantSlugVerify2faRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -469,6 +535,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTenantsTenantIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/t/$tenantSlug/accept-invitation': {
+      id: '/t/$tenantSlug/accept-invitation'
+      path: '/t/$tenantSlug/accept-invitation'
+      fullPath: '/t/$tenantSlug/accept-invitation'
+      preLoaderRoute: typeof TTenantSlugAcceptInvitationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/t/$tenantSlug/consent': {
+      id: '/t/$tenantSlug/consent'
+      path: '/t/$tenantSlug/consent'
+      fullPath: '/t/$tenantSlug/consent'
+      preLoaderRoute: typeof TTenantSlugConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/t/$tenantSlug/login': {
+      id: '/t/$tenantSlug/login'
+      path: '/t/$tenantSlug/login'
+      fullPath: '/t/$tenantSlug/login'
+      preLoaderRoute: typeof TTenantSlugLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/t/$tenantSlug/register': {
+      id: '/t/$tenantSlug/register'
+      path: '/t/$tenantSlug/register'
+      fullPath: '/t/$tenantSlug/register'
+      preLoaderRoute: typeof TTenantSlugRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/t/$tenantSlug/verify-2fa': {
+      id: '/t/$tenantSlug/verify-2fa'
+      path: '/t/$tenantSlug/verify-2fa'
+      fullPath: '/t/$tenantSlug/verify-2fa'
+      preLoaderRoute: typeof TTenantSlugVerify2faRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -534,6 +635,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  TTenantSlugAcceptInvitationRoute: TTenantSlugAcceptInvitationRoute,
+  TTenantSlugConsentRoute: TTenantSlugConsentRoute,
+  TTenantSlugLoginRoute: TTenantSlugLoginRoute,
+  TTenantSlugRegisterRoute: TTenantSlugRegisterRoute,
+  TTenantSlugVerify2faRoute: TTenantSlugVerify2faRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
