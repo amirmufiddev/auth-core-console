@@ -116,6 +116,14 @@ export function getTenantAuthConfigUrl(context: TenantContextInfo): string {
   return `${base}/api/auth-config`;
 }
 
+export function sanitizeRelativeRedirect(value?: string): string {
+  const trimmed = value?.trim() ?? "";
+  if (/^\/(?!\/)/.test(trimmed) && !trimmed.includes("\\")) {
+    return trimmed;
+  }
+  return "/";
+}
+
 export function getTenantSocialBridgeStartUrl(
   context: TenantContextInfo,
   provider: string,
@@ -130,7 +138,7 @@ export function getTenantSocialBridgeStartUrl(
     `${prefix}/api/social-bridge/start/${encodeURIComponent(provider)}`,
   );
   if (returnTo) {
-    url.searchParams.set("returnTo", returnTo);
+    url.searchParams.set("returnTo", sanitizeRelativeRedirect(returnTo));
   }
   return url.toString();
 }

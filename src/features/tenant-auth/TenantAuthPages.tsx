@@ -23,6 +23,7 @@ import {
   fetchTenantAuthConfig,
   getTenantSocialBridgeStartUrl,
   isTenantFeatureActive,
+  sanitizeRelativeRedirect,
 } from "@/lib/tenant-context";
 import { SOCIAL_PROVIDER_CATALOG } from "@/components/better-auth/auth/ProviderButtons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -140,8 +141,44 @@ function TenantConfigState({
 }
 
 function navigateAfterAuth(redirectTo?: string) {
-  const target = redirectTo && redirectTo.trim().length > 0 ? redirectTo : "/";
-  window.location.assign(target);
+  window.location.assign(sanitizeRelativeRedirect(redirectTo));
+}
+
+function renderTenantShell({
+  embedded,
+  tenantSlug,
+  title,
+  subtitle,
+  children,
+}: {
+  embedded?: boolean;
+  tenantSlug: string;
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
+  if (embedded) {
+    return (
+      <div className="w-full max-w-sm space-y-5">
+        <div className="space-y-1 text-center">
+          <Badge color="secondary" variant="soft" className="font-mono text-xs">
+            {tenantSlug}
+          </Badge>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            {title}
+          </h1>
+          <p className="text-xs text-muted-foreground">{subtitle}</p>
+        </div>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <TenantAuthLayout tenantSlug={tenantSlug} title={title} subtitle={subtitle}>
+      {children}
+    </TenantAuthLayout>
+  );
 }
 
 export function TenantLoginPage({
@@ -267,7 +304,7 @@ export function TenantLoginPage({
     try {
       const callbackURL =
         redirectTo && redirectTo.trim().length > 0
-          ? redirectTo
+          ? sanitizeRelativeRedirect(redirectTo)
           : window.location.origin;
       const res = await tenantClient.signIn.magicLink({
         email: magicEmail.trim(),
@@ -331,15 +368,21 @@ export function TenantLoginPage({
                 (emailOtpEnabled ? 1 : 0) +
                 (magicLinkEnabled ? 1 : 0) >
                 1 && (
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="flex w-full">
                   {emailEnabled && (
-                    <TabsTrigger value="password">Password</TabsTrigger>
+                    <TabsTrigger value="password" className="flex-1">
+                      Password
+                    </TabsTrigger>
                   )}
                   {emailOtpEnabled && (
-                    <TabsTrigger value="otp">Email OTP</TabsTrigger>
+                    <TabsTrigger value="otp" className="flex-1">
+                      Email OTP
+                    </TabsTrigger>
                   )}
                   {magicLinkEnabled && (
-                    <TabsTrigger value="magic">Magic Link</TabsTrigger>
+                    <TabsTrigger value="magic" className="flex-1">
+                      Magic Link
+                    </TabsTrigger>
                   )}
                 </TabsList>
               )}
@@ -614,6 +657,7 @@ export function TenantRegisterPage({
   tenantSlug,
   mode = "path",
   redirectTo,
+  embedded = false,
 }: BaseTenantPageProps) {
   const { context, tenantClient, config, loading, error, reload } =
     useTenantAuthSetup(tenantSlug, mode);
@@ -649,12 +693,13 @@ export function TenantRegisterPage({
     }
   }
 
-  return (
-    <TenantAuthLayout
-      tenantSlug={tenantSlug}
-      title={`Daftar di ${tenantSlug}`}
-      subtitle="Buat akun baru untuk mengakses layanan tenant ini."
-    >
+  return renderTenantShell({
+    embedded,
+    tenantSlug,
+    title: `Daftar di ${tenantSlug}`,
+    subtitle: "Buat akun baru untuk mengakses layanan tenant ini.",
+    children: (
+      <>
       {loading || error ? (
         <TenantConfigState loading={loading} error={error} onRetry={reload} />
       ) : !emailEnabled ? (
@@ -741,14 +786,16 @@ export function TenantRegisterPage({
           </p>
         </div>
       )}
-    </TenantAuthLayout>
-  );
+      </>
+    ),
+  });
 }
 
 export function TenantVerify2FAPage({
   tenantSlug,
   mode = "path",
   redirectTo,
+  embedded = false,
 }: BaseTenantPageProps) {
   const { context, tenantClient, config, loading, error, reload } =
     useTenantAuthSetup(tenantSlug, mode);
@@ -788,12 +835,13 @@ export function TenantVerify2FAPage({
     }
   }
 
-  return (
-    <TenantAuthLayout
-      tenantSlug={tenantSlug}
-      title="Verifikasi Dua Faktor (2FA)"
-      subtitle="Masukkan kode autentikator atau backup code untuk melanjutkan."
-    >
+  return renderTenantShell({
+    embedded,
+    tenantSlug,
+    title: "Verifikasi Dua Faktor (2FA)",
+    subtitle: "Masukkan kode autentikator atau backup code untuk melanjutkan.",
+    children: (
+      <>
       {loading || error ? (
         <TenantConfigState loading={loading} error={error} onRetry={reload} />
       ) : !twoFactorEnabled ? (
@@ -873,13 +921,15 @@ export function TenantVerify2FAPage({
           </Button>
         </form>
       )}
-    </TenantAuthLayout>
-  );
+      </>
+    ),
+  });
 }
 
 export function TenantConsentPage({
   tenantSlug,
   mode = "path",
+  embedded = false,
 }: BaseTenantPageProps) {
   const navigate = useNavigate();
   const { context, tenantClient, loading, error, reload } = useTenantAuthSetup(
@@ -991,14 +1041,15 @@ export function TenantConsentPage({
     queryParams.clientId || queryParams.consentCode || queryParams.rawQuery,
   );
 
-  return (
-    <TenantAuthLayout
-      tenantSlug={tenantSlug}
-      title="Persetujuan Akses OAuth 2.1"
-      subtitle={
-        userEmail ? `Masuk sebagai ${userEmail}` : "Otorisasi aplikasi klien"
-      }
-    >
+  return renderTenantShell({
+    embedded,
+    tenantSlug,
+    title: "Persetujuan Akses OAuth 2.1",
+    subtitle: userEmail
+      ? `Masuk sebagai ${userEmail}`
+      : "Otorisasi aplikasi klien",
+    children: (
+      <>
       {loading || error ? (
         <TenantConfigState loading={loading} error={error} onRetry={reload} />
       ) : checkingSession ? (
@@ -1103,13 +1154,15 @@ export function TenantConsentPage({
           )}
         </div>
       )}
-    </TenantAuthLayout>
-  );
+      </>
+    ),
+  });
 }
 
 export function TenantAcceptInvitationPage({
   tenantSlug,
   mode = "path",
+  embedded = false,
 }: BaseTenantPageProps) {
   const navigate = useNavigate();
   const { context, tenantClient, loading, error, reload } = useTenantAuthSetup(
@@ -1200,16 +1253,15 @@ export function TenantAcceptInvitationPage({
     }
   }
 
-  return (
-    <TenantAuthLayout
-      tenantSlug={tenantSlug}
-      title="Undangan Organisasi"
-      subtitle={
-        userEmail
-          ? `Masuk sebagai ${userEmail}`
-          : "Konfirmasi keanggotaan organisasi"
-      }
-    >
+  return renderTenantShell({
+    embedded,
+    tenantSlug,
+    title: "Undangan Organisasi",
+    subtitle: userEmail
+      ? `Masuk sebagai ${userEmail}`
+      : "Konfirmasi keanggotaan organisasi",
+    children: (
+      <>
       {loading || error ? (
         <TenantConfigState loading={loading} error={error} onRetry={reload} />
       ) : checkingSession ? (
@@ -1282,6 +1334,7 @@ export function TenantAcceptInvitationPage({
           )}
         </div>
       )}
-    </TenantAuthLayout>
-  );
+      </>
+    ),
+  });
 }
